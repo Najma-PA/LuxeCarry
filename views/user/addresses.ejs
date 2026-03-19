@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Saved Addresses | LuxeCarry</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="/css/address.css">
+
+</head>
+
+<body>
+    
+<!-- Navbar -->
+<%- include("../partials/navbar") %>
+
+<div class="container account-container mt-5">
+
+<div class="mb-4">
+<h3 class="page-title">Saved Addresses</h3>
+<p class="page-sub">Manage your delivery locations for faster checkout.</p>
+</div>
+<div class="row g-4">
+
+  <% addresses.forEach(address => { %>
+
+  <div class="col-md-6">
+
+    <div class="address-card <%= address.isDefault ? 'default-card' : '' %>">
+
+      <% if(address.isDefault){ %>
+        <i class="fa-solid fa-house home-icon"></i>
+      <% } %>
+
+      <h6 class="fw-semibold"><%= address.name %></h6>
+
+      <p><%= address.street %></p>
+      <p><%= address.city %>, <%= address.state %> - <%= address.pincode %></p>
+      <p><%= address.country %></p>
+
+      <p class="mt-2">
+        <i class="fa-solid fa-phone"></i> <%= address.phone %>
+      </p>
+
+      <hr>
+
+      <div class="address-actions">
+        <a href="/user/editAddress/<%= address._id %>" class="edit-btn">
+          <i class="fa-solid fa-pen"></i> EDIT
+        </a>
+
+        <a href="/user/deleteAddress/<%= address._id %>" class="delete-btn">
+          <i class="fa-solid fa-trash"></i> DELETE
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+  <% }) %>
+
+  <!-- Add Address Card -->
+  <div class="col-md-6">
+
+    <a href="/user/addAddress" style="text-decoration:none">
+
+      <div class="add-address">
+
+        <i class="fa-solid fa-circle-plus"></i>
+        <p>Add another delivery address</p>
+
+      </div>
+
+    </a>
+
+  </div>
+
+</div>
+
+<footer class="profile-footer mt-auto border-top py-3">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap"> 
+        <div class="d-flex align-items-center gap-2"> 
+            <i class="fa-solid fa-bag-shopping" style="color:#c26a00"></i> 
+            <span class="fw-bold">LuxeCarry</span> 
+        </div> 
+        <div class="small text-muted"> © 2026 LuxeCarry. All rights reserved. 
+        </div> 
+        <div class="small"> 
+            <a href="#" class="text-decoration-none text-muted me-3"> Privacy Policy </a> 
+            <a href="#" class="text-decoration-none text-muted"> Terms of Service </a> 
+        </div> 
+    </div> 
+</footer>
+
+</body>
+</html>

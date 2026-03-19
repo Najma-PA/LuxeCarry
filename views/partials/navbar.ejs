@@ -1,0 +1,96 @@
+<!-- NAVBAR -->
+
+<nav class="navbar navbar-expand-lg bg-light border-bottom">
+<div class="container">
+
+<!-- Logo -->
+<a class="navbar-brand fw-bold d-flex align-items-center" href="/">
+<i class="fa-solid fa-bag-shopping me-2" style="color:#c26a00"></i>
+LuxeCarry
+</a>
+
+<button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+<span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="navMenu">
+
+<!-- Center Links -->
+<ul class="navbar-nav mx-auto">
+
+<li class="nav-item">
+<a class="nav-link" href="/">Home</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link " href="/shop">Shop</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/new-arrivals">New Arrivals</a>
+</li>
+
+<li class="nav-item">
+<a class="nav-link" href="/contact">Contact</a>
+</li>
+
+</ul>
+
+<!-- Right Side -->
+<div class="d-flex align-items-center gap-3">
+
+<!-- Search -->
+<div class="search-box position-relative">
+<input type="text"
+class="form-control rounded-pill ps-4"
+placeholder="  Search collection...">
+<i class="fa fa-search position-absolute"
+style="left:12px; top:10px; color:#999;"></i>
+</div>
+
+<!-- Wishlist -->
+<a href="#" class="nav-icon">
+<i class="fa-regular fa-heart"></i>
+</a>
+
+<!-- Cart -->
+<a href="/cart" class="nav-icon position-relative">
+<i class="fa-solid fa-cart-arrow-down"></i>
+
+</a>
+
+<!-- Login / Profile -->
+
+<% if(!user){ %>
+
+<a href="/user/login" class="btn btn-outline-dark rounded-pill px-3">
+Sign In
+</a>
+
+<% } else { %>
+
+<a href="/user/profile" style="text-decoration: none;">
+
+<% if(user.profileImage){ %>
+
+<img src="/images/<%= user.profileImage %>"
+class="profile-avatar">
+
+<% } else { %>
+
+<div class="avatar-letter">
+<%= user.name.charAt(0).toUpperCase() %>
+</div>
+
+<% } %>
+
+</a>
+
+<% } %>
+
+</div>
+
+</div>
+
+</div>
+</nav>

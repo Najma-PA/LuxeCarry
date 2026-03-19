@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style> 
+     html, body{ 
+        height:100%; 
+    } 
+    body{ 
+        display:flex; 
+        flex-direction:column; 
+        min-height:100vh; 
+    } 
+    .account-container{ 
+        flex:1; 
+    }
+
+    /* profile sidebar */ 
+    .nav-icon{ 
+        font-size:18px; 
+        color:#333; 
+        position:relative; 
+    } 
+    .cart-badge{ 
+        position:absolute; 
+        top:-6px; 
+        right:-8px; 
+        background:#c26a00; 
+        color:white; 
+        font-size:11px; 
+        padding:2px 6px; 
+        border-radius:50%; 
+    } 
+    .profile-avatar{ 
+        width:36px; 
+        height:36px; 
+        border-radius:50%; 
+        object-fit:cover; 
+    } 
+    .avatar-letter{ 
+        width:36px; height:36px; 
+        border-radius:50%; 
+        background:#c26a00; 
+        color:white; display:flex; 
+        align-items:center; 
+        justify-content:center; 
+        font-weight:600; } 
+    .profile-menu li{ 
+        padding:12px; 
+        border-radius:8px; 
+        cursor:pointer; } 
+    .profile-menu li:hover{ 
+        background:#f5f3f0; } 
+    .profile-menu .active{ 
+        background:#f5f3f0; font-weight:500; 
+    } 
+    /* avatar */ 
+    .avatar-letter{ 
+        width:40px; height:40px; border-radius:50%; 
+        background:#c26a00; color:white; display:flex; 
+        align-items:center; justify-content:center; font-weight:600; } 
+        /* profile card */ 
+        .profile-card{ background:white; border-radius:15px; 
+        box-shadow:0 4px 10px rgba(0,0,0,0.05); } 
+    .profile-input{ 
+        border-radius:20px; padding:12px; 
+        border:1px solid #e6c7a8; } 
+    .edit-btn{ background:#c26a00; 
+        color:white; border:none; 
+        padding:10px 25px; border-radius:20px; } 
+    .edit-btn:hover{ 
+        background:#a85700; }
+    .edit-btn a{
+        text-decoration: none;
+        color: #fafafa;
+    } 
+    .profile-footer{ 
+        background:#fafafa; font-size:14px; } 
+    .profile-footer a:hover{ 
+        color:#c26a00; } 
+        </style>
+</head>
+<body>
+    
+
+
+<%- include("../partials/navbar") %>
+
+
+
+<div class="container account-container">
+
+<div class="row">
+
+<div class="col-md-3">
+    
+<div class="p-3">
+
+<div class="d-flex align-items-center mb-4">
+
+<div class="avatar-letter me-2">
+<%= user.name.charAt(0).toUpperCase() %>
+</div>
+
+<h6 class="mb-0"><%= user.name %></h6>
+
+</div>
+
+<ul class="list-unstyled profile-menu">
+
+<li class="active">
+<a href="/user/profile" class="text-decoration-none text-dark">
+<i class="fa fa-user me-2"></i> Profile Settings
+</a>
+</li>
+
+<li>
+<a href="/user/orders" class="text-decoration-none text-dark">
+<i class="fa fa-box me-2"></i> My Orders
+</a>
+</li>
+
+<li>
+<a href="/user/wishlist" class="text-decoration-none text-dark">
+<i class="fa fa-heart me-2"></i> Wishlist
+</a>
+</li>
+
+<li>
+<a href="/user/addresses" class="text-decoration-none text-dark">
+<i class="fa fa-location-dot me-2"></i> Addresses
+</a>
+</li>
+
+<li><i class="fa fa-ticket me-2"></i> Coupons</li>
+
+<li><i class="fa fa-wallet me-2"></i> My Wallet</li>
+
+<li><i class="fa fa-gift me-2"></i> Refer & Earn</li>
+
+</ul>
+
+<hr>
+
+<a href="/user/logout" class="text-danger text-decoration-none">
+<i class="fa fa-sign-out me-2"></i> Logout
+</a>
+
+</div>
+</div>
+
+<div class="col-md-9 d-flex align-items-start pt-5">
+
+<div class="account-card p-4 w-75">
+
+<h4>Edit Profile</h4>
+<form action="/user/editProfile" method="POST">
+
+<!-- ERROR MESSAGE -->
+<% if (typeof error !== "undefined") { %>
+  <div class="alert alert-danger"><%= error %></div>
+<% } %>
+
+<div class="mb-3 mt-4">
+  <label>Full Name</label>
+  <input 
+    class="form-control profile-input mt-2" 
+    name="name" 
+    value="<%= user.name %>" 
+    required
+  >
+</div>
+
+<div class="mb-3">
+  <label>Email</label>
+
+  <input 
+    type="email"
+    id="emailField"
+    class="form-control profile-input mt-2" 
+    name="email" 
+    value="<%= user.email %>" 
+    required
+  >
+
+  <small class="text-muted">
+    Changing email will require OTP verification
+  </small>
+</div>
+
+<div class="d-flex justify-content-end mt-4">
+  <button type="submit" class="btn edit-btn">
+    Save Changes
+  </button>
+</div>
+
+</form>
+<!--
+<form action="/user/editProfile" method="POST">
+
+<div class="mb-3 mt-4">
+
+<label>Full Name</label>
+
+<input class="form-control profile-input mt-2" name="name" value="<%= user.name %>">
+
+</div>
+
+<div class="mb-3">
+
+<label>Email</label>
+
+<input class="form-control profile-input mt-2" name="email" value="<%= user.email %>">
+
+</div>
+
+<div class="d-flex justify-content-end mt-4">
+    <button class="btn edit-btn">
+    Save Changes
+    </button>
+</div>
+
+</form>
+-->
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer class="profile-footer border-top mt-5 py-3"> 
+    <div class="container d-flex justify-content-between align-items-center flex-wrap"> 
+        <div class="d-flex align-items-center gap-2"> 
+            <i class="fa-solid fa-bag-shopping" style="color:#c26a00"></i> 
+            <span class="fw-bold">LuxeCarry</span> 
+        </div> 
+        <div class="small text-muted"> © 2026 LuxeCarry. All rights reserved. 
+
+        </div> 
+        <div class="small"> 
+            <a href="#" class="text-decoration-none text-muted me-3"> Privacy Policy 
+                
+            </a> <a href="#" class="text-decoration-none text-muted"> Terms of Service 
+
+            </a> 
+        </div> 
+    </div> 
+</footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const form = document.querySelector("form");
+const emailField = document.getElementById("emailField");
+const originalEmail = "<%= user.email %>";
+
+form.addEventListener("submit", function(e) {
+
+  if (emailField.value !== originalEmail) {
+    const confirmChange = confirm(
+      "You changed your email. OTP will be sent. Continue?"
+    );
+
+    if (!confirmChange) {
+      e.preventDefault();
+    }
+  }
+});
+</script>
+</body>
+</html>

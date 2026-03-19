@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Add Address | LuxeCarry</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="/css/address.css">
+
+
+</head>
+
+<body>
+
+<!-- Navbar -->
+<%- include("../partials/navbar") %>
+
+<div class="container account-container my-5">
+
+<div class="address-card">
+
+<h3 class="page-title">Add New Address</h3>
+<p class="page-sub">Enter your shipping details for exclusive luxury delivery.</p>
+
+<form action="/user/addAddress" method="POST">
+
+<div class="row mb-3">
+
+<div class="col-md-6">
+<label class="form-label">Full Name</label>
+<input type="text" class="form-control" name="name" required>
+</div>
+
+<div class="col-md-6">
+<label class="form-label">Phone Number</label>
+<input type="text" class="form-control" name="phone" required>
+</div>
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">Street Address</label>
+<input type="text" class="form-control" name="street" required>
+</div>
+
+<div class="row mb-3">
+
+<div class="col-md-4">
+<label class="form-label">City</label>
+<input type="text" class="form-control" name="city" required>
+</div>
+
+<div class="col-md-4">
+<label class="form-label">State</label>
+<input type="text" class="form-control" name="state" required>
+</div>
+
+<div class="col-md-4">
+<label class="form-label">Pincode</label>
+<input type="text" class="form-control" name="pincode" required>
+</div>
+
+</div>
+
+<div class="mb-3">
+<label class="form-label">Country</label>
+
+<select class="form-select" name="country">
+
+<option value="India">India</option>
+<option value="United States">United States</option>
+<option value="United Kingdom">United Kingdom</option>
+<option value="UAE">UAE</option>
+
+</select>
+
+</div>
+
+<div class="form-check mb-4">
+
+<input class="form-check-input" type="checkbox" name="defaultAddress">
+<label class="form-check-label">
+Set as default address
+</label>
+
+</div>
+<div class="address-actions">
+<button type="submit" class="edit-btn">Save Address</button>
+<a href="/user/addresses" class="cancel-btn">Cancel</a>
+
+</div>
+
+</form>
+
+</div>
+
+</div>
+
+<footer class="profile-footer mt-auto border-top py-3">
+    <div class="container d-flex justify-content-between align-items-center flex-wrap"> 
+        <div class="d-flex align-items-center gap-2"> 
+            <i class="fa-solid fa-bag-shopping" style="color:#c26a00"></i> 
+            <span class="fw-bold">LuxeCarry</span> 
+        </div> 
+        <div class="small text-muted"> © 2026 LuxeCarry. All rights reserved. 
+
+        </div> 
+        <div class="small"> 
+            <a href="#" class="text-decoration-none text-muted me-3"> Privacy Policy 
+                
+            </a> <a href="#" class="text-decoration-none text-muted"> Terms of Service 
+
+            </a> 
+        </div> 
+    </div> 
+</footer>
+
+</body>
+</html>
