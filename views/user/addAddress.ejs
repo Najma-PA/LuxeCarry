@@ -116,5 +116,15 @@ Set as default address
     </div> 
 </footer>
 
+<script>
+  window.addEventListener("pageshow", function (event) {
+    const navEntries = performance.getEntriesByType("navigation");
+    const isBackForward = navEntries.length > 0 && navEntries[0].type === "back_forward";
+    
+    if (event.persisted || window.performance.navigation.type === 2 || isBackForward) {
+      window.location.replace('/user/addresses');
+    }
+  });
+</script>
 </body>
 </html>

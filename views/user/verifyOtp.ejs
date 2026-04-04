@@ -45,26 +45,39 @@ Enter the verification code sent to your email
 
 <div class="d-flex justify-content-center mb-3">
   <input type="hidden" name="otp" id="fullOtp">
-  <input class="form-control text-center me-1 otp-input" maxlength="1" oninput="moveToNext(this, 0)">
-  <input class="form-control text-center me-1 otp-input" maxlength="1" oninput="moveToNext(this, 1)">
-  <input class="form-control text-center me-1 otp-input" maxlength="1" oninput="moveToNext(this, 2)">
-  <input class="form-control text-center me-1 otp-input" maxlength="1" oninput="moveToNext(this, 3)">
-  <input class="form-control text-center me-1 otp-input" maxlength="1" oninput="moveToNext(this, 4)">
-  <input class="form-control text-center otp-input" maxlength="1" oninput="moveToNext(this, 5)">
+  <input class="form-control text-center me-1 otp-input" maxlength="1">
+  <input class="form-control text-center me-1 otp-input" maxlength="1">
+  <input class="form-control text-center me-1 otp-input" maxlength="1">
+  <input class="form-control text-center me-1 otp-input" maxlength="1">
+  <input class="form-control text-center me-1 otp-input" maxlength="1">
+  <input class="form-control text-center otp-input" maxlength="1">
 </div>
 
 <button type="submit" class="btn-theme">Verify</button>
 
 </form>
-
+ <p id="timer">05:00</p>
+ <p id="expiredMsg" class="text-danger small" style="display:none;">
+  OTP expired. Please resend.
+</p>
 <form action="/user/resendOtp" method="POST" class="mt-2 text-center" id="resendForm">
+ 
   <p class="small mb-0">
   Didn't receive code?
-  <button type="submit" class="btn btn-link p-0 m-0 align-baseline">Resend</button>
+  <button 
+  type="submit" 
+  id="resendBtn"
+  class="btn btn-link p-0 m-0 align-baseline"
+  disabled
+>
+  Resend
+</button>
   </p>
 </form>
 
 <script>
+/*document.addEventListener("DOMContentLoaded", function () {
+
   function moveToNext(current, index) {
     if (current.value.length === 1) {
       const inputs = document.querySelectorAll('.otp-input');
@@ -73,15 +86,83 @@ Enter the verification code sent to your email
       }
     }
   }
+*/
+document.addEventListener("DOMContentLoaded", function () {
 
-  document.getElementById('otpForm').addEventListener('submit', function(e) {
-    const inputs = document.querySelectorAll('.otp-input');
-    let otpValue = '';
-    inputs.forEach(input => {
-      otpValue += input.value;
+  const inputs = document.querySelectorAll('.otp-input');
+
+  // Move forward
+  inputs.forEach((input, index) => {
+    input.addEventListener('input', () => {
+      if (input.value.length === 1 && index < inputs.length - 1) {
+        inputs[index + 1].focus();
+      }
     });
-    document.getElementById('fullOtp').value = otpValue;
   });
+
+  // Move backward (backspace)
+  inputs.forEach((input, index) => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === "Backspace" && input.value === "" && index > 0) {
+        inputs[index - 1].focus();
+      }
+    });
+  });
+
+  const otpForm = document.getElementById('otpForm');
+  if (otpForm) {
+    otpForm.addEventListener('submit', function (e) {
+      const fullOtpInput = document.getElementById('fullOtp');
+      let otpValue = '';
+      inputs.forEach(input => {
+        otpValue += input.value;
+      });
+      fullOtpInput.value = otpValue;
+    });
+  }
+
+ const expireTime = Number("<%= typeof otpExpire !== 'undefined' ? otpExpire : 0 %>");
+  const timerElement = document.getElementById("timer");
+  const resendBtn = document.getElementById("resendBtn");
+
+  function updateTimer() {
+    const now = Date.now();
+    const distance = expireTime - now;
+
+    if (distance <= 0) {
+      document.querySelectorAll('.otp-input').forEach(input => {
+        input.disabled = true;
+      });
+
+      timerElement.innerHTML = "00:00";
+
+      if (resendBtn) {
+        resendBtn.disabled = false;
+        resendBtn.style.opacity = "1";
+        resendBtn.style.cursor = "pointer";
+      }
+
+      document.getElementById("expiredMsg").style.display = "block";
+
+      return;
+    }
+
+    const minutes = Math.floor(distance / 60000);
+    const seconds = Math.floor((distance % 60000) / 1000);
+
+    timerElement.innerHTML =
+      String(minutes).padStart(2, '0') + ":" +
+      String(seconds).padStart(2, '0');
+  }
+
+  updateTimer();
+
+  const interval = setInterval(() => {
+    updateTimer();
+    if (Date.now() >= expireTime) clearInterval(interval);
+  }, 1000);
+
+});
 </script>
 
 </div>

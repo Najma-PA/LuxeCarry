@@ -1,0 +1,91 @@
+<div class="admin-sidebar d-flex flex-column justify-content-between">
+
+  <!-- TOP -->
+  <div>
+    <div class="logo p-3">
+      <a href="/admin/dashboard" class="text-dark text-decoration-none fw-bold d-flex align-items-center fs-5">
+        <i class="fa-solid fa-bag-shopping me-2" style="color:#c26a00"></i>
+        LuxeCarry
+      </a>
+      <small class="text-muted ms-4 ps-1">Admin</small>
+    </div>
+
+    <ul class="nav flex-column mt-4">
+
+      <li class="nav-item">
+        <a href="/admin/dashboard" class="nav-link <%= active === 'dashboard' ? 'active' : '' %>">
+          <i class="fa fa-home"></i> Dashboard
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/users" class="nav-link <%= active === 'users' ? 'active' : '' %>">
+          <i class="fa fa-users"></i> Users
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/products" class="nav-link">
+          <i class="fa fa-box"></i> Inventory
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/categories" class="nav-link">
+          <i class="fa fa-tags"></i> Categories
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/banners" class="nav-link">
+          <i class="fa fa-image"></i> Add Banners
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/coupons" class="nav-link">
+          <i class="fa fa-ticket"></i> Coupons
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/orders" class="nav-link">
+          <i class="fa fa-shopping-cart"></i> Orders
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a href="/admin/analytics" class="nav-link">
+          <i class="fa fa-chart-bar"></i> Analytics
+        </a>
+      </li>
+
+    </ul>
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="p-3">
+
+    <form action="/admin/logout" method="POST">
+      <button class="btn btn-outline-danger w-100 mb-3">
+        <i class="fa fa-sign-out-alt"></i> Logout
+      </button>
+    </form>
+
+    <div class="admin-info d-flex align-items-center">
+      <div class="avatar me-2"></div>
+      <div>
+        <small><%= admin?.email || "Admin" %></small>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<script>
+  window.addEventListener('pageshow', function (event) {
+    if (event.persisted) {
+      window.location.reload();
+    }
+  });
+</script>
