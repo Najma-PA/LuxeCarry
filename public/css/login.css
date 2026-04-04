@@ -1,0 +1,84 @@
+body{
+background:#e7ddd3;
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family:'Segoe UI', sans-serif;
+padding:20px;
+}
+
+.logo{
+text-align:center;
+margin-bottom:25px;
+}
+
+.logo i{
+color:#c26a00;
+font-size:26px;
+}
+
+.logo h4{
+margin-top:5px;
+font-weight:600;
+}
+
+.login-card{
+background:white;
+padding:35px;
+border-radius:12px;
+width:100%;
+max-width:420px;
+box-shadow:0px 4px 10px rgba(0,0,0,0.05);
+}
+
+.login-btn{
+background:#c26a00;
+border:none;
+width:100%;
+padding:12px;
+color:white;
+border-radius:8px;
+font-weight:500;
+}
+
+.login-btn:hover{
+background:#a85700;
+}
+
+.google-btn{
+border:1px solid #ddd;
+padding:10px;
+border-radius:8px;
+width:100%;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:8px;
+}
+
+.signup-text{
+text-align:center;
+margin-top:20px;
+}
+
+.signup-text a{
+color:#c26a00;
+text-decoration:none;
+font-weight:500;
+}
+
+/* Mobile adjustments */
+
+@media (max-width:576px){
+
+.login-card{
+padding:25px;
+}
+
+.logo h4{
+font-size:20px;
+}
+
+}

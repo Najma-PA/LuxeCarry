@@ -1,0 +1,72 @@
+body{
+background:#f7f7f7;
+font-family: 'Segoe UI', sans-serif;
+}
+
+/* account layout */
+
+.account-container{
+margin-top:40px;
+}
+
+.account-card{
+background:white;
+padding:30px;
+border-radius:12px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* sidebar */
+
+.account-sidebar{
+background:white;
+padding:20px;
+border-radius:12px;
+}
+
+.account-sidebar a{
+display:block;
+padding:10px;
+color:#333;
+text-decoration:none;
+border-radius:6px;
+margin-bottom:5px;
+}
+
+.account-sidebar a:hover{
+background:#f2f2f2;
+}
+
+/* buttons */
+
+.primary-btn{
+background:#c26a00;
+border:none;
+color:white;
+padding:10px 22px;
+border-radius:25px;
+}
+
+.primary-btn:hover{
+background:#a85c00;
+}
+
+/* address card */
+
+.address-card{
+background:white;
+border-radius:12px;
+padding:20px;
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.add-address-box{
+border:2px dashed #e6b17e;
+height:170px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+border-radius:10px;
+cursor:pointer;
+}

@@ -1,0 +1,360 @@
+body{
+background:#f5f3f0;
+font-family:'Segoe UI',sans-serif;
+}
+.search-box input{
+width:220px;
+border:none;
+background:#f1f1f1;
+height:38px;
+}
+
+.nav-icon{
+font-size:18px;
+color:#333;
+position:relative;
+}
+
+.cart-badge{
+position:absolute;
+top:-6px;
+right:-8px;
+background:#c26a00;
+color:white;
+font-size:11px;
+padding:2px 6px;
+border-radius:50%;
+}
+
+.profile-avatar{
+width:36px;
+height:36px;
+border-radius:50%;
+object-fit:cover;
+}
+
+.avatar-letter{
+width:36px;
+height:36px;
+border-radius:50%;
+background:#c26a00;
+color:white;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:600;
+}
+/* hero */
+.hero{
+border-radius:15px;
+overflow:hidden;
+position:relative;
+height:520px;
+}
+
+.hero img{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* Fade overlay */
+
+.hero::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(255, 255, 255, 0.218); /* fade level */
+z-index: 2;
+}
+
+.hero-text{
+position:absolute;
+top:50%;
+left:60px;
+transform:translateY(-50%);
+z-index:3;
+color:#060000;
+}
+
+.shop-btn{
+background:#c26a00;
+color:white;
+border:none;
+padding:10px 20px;
+border-radius:8px;
+}
+
+.shop-btn:hover{
+background:#a85700;
+}
+.category-section{
+margin-top:-120px;
+position:relative;
+z-index:2;
+}
+
+/* category */
+.category-card{
+border-radius:12px;
+overflow:hidden;
+position: relative;
+background:#f8e6d7;
+border: 2px solid;
+border-color: #c26a00;
+}
+
+.category-card img{
+width: 100%;
+object-fit:cover;
+transition:transform .3s ease;
+}
+
+.category-card:hover img{
+transform:scale(1.05);
+}
+
+.category-title{
+position:absolute;
+bottom:20px;
+left:20px;
+color:rgb(147, 79, 11);
+font-weight:600;
+font-size:20px;
+}
+
+/* product */
+
+.product-card{
+background:white;
+border-radius:10px;
+padding:15px;
+text-align:center;
+}
+
+.product-card img{
+height:160px;
+object-fit:contain;
+}
+
+.price{
+font-weight:600;
+}
+
+.add-btn{
+background:#000;
+color:white;
+border:none;
+padding:6px 15px;
+border-radius:20px;
+font-size:13px;
+}
+
+.buy-btn{
+background:white;
+color:black;
+border-color: #a85700;
+padding:6px 15px;
+border-radius:20px;
+font-size:13px;
+}
+
+/* offer */
+
+.offer{
+background:#ead7cd;
+border-radius:12px;
+padding:40px;
+}
+
+.offer img{
+max-width:100%;
+}
+
+/* footer */
+
+footer{
+margin-top:50px;
+background:white;
+padding:40px 0;
+}
+
+footer h6{
+font-weight:600;
+}
+
+
+/*login*/
+.logo{
+text-align:center;
+margin-bottom:25px;
+}
+
+.logo i{
+color:#c26a00;
+font-size:26px;
+}
+
+.logo h4{
+margin-top:5px;
+font-weight:600;
+}
+
+.login-card{
+background:white;
+padding:35px;
+border-radius:12px;
+width:100%;
+max-width:420px;
+box-shadow:0px 4px 10px rgba(0,0,0,0.05);
+}
+
+.login-btn{
+background:#c26a00;
+border:none;
+width:100%;
+padding:12px;
+color:white;
+border-radius:8px;
+font-weight:500;
+}
+
+.login-btn:hover{
+background:#a85700;
+}
+
+.google-btn{
+border:1px solid #ddd;
+padding:10px;
+border-radius:8px;
+width:100%;
+background:white;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:8px;
+}
+
+.signup-text{
+text-align:center;
+margin-top:20px;
+}
+
+.signup-text a{
+color:#c26a00;
+text-decoration:none;
+font-weight:500;
+}
+
+/* Mobile adjustments */
+
+@media (max-width:576px){
+
+.login-card{
+padding:25px;
+}
+
+.logo h4{
+font-size:20px;
+}
+
+}
+
+/* footer */
+.footer-section{
+ margin-top:25px;   
+background:#e7ddd3;
+padding:60px 0 30px;
+font-family:'Segoe UI',sans-serif;
+}
+
+.brand{
+font-weight:600;
+}
+
+.footer-text{
+color:#555;
+margin-top:15px;
+max-width:280px;
+}
+
+.footer-title{
+font-weight:600;
+margin-bottom:15px;
+}
+
+.footer-links{
+list-style:none;
+padding:0;
+}
+
+.footer-links li{
+margin-bottom:8px;
+}
+
+.footer-links a{
+text-decoration:none;
+color:#555;
+}
+
+.footer-links a:hover{
+color:#c26a00;
+}
+
+.footer-contact{
+list-style:none;
+padding:0;
+}
+
+.footer-contact li{
+margin-bottom:10px;
+color:#555;
+}
+
+.footer-contact i{
+color:#c26a00;
+margin-right:8px;
+}
+
+.social-icons a{
+width:35px;
+height:35px;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+background:white;
+border-radius:50%;
+margin-right:8px;
+color:#333;
+}
+
+.footer-bottom{
+display:flex;
+justify-content:space-between;
+align-items:center;
+font-size:13px;
+color:#666;
+}
+
+.footer-bottom a{
+margin-left:15px;
+text-decoration:none;
+color:#666;
+}
+
+.footer-bottom a:hover{
+color:#c26a00;
+}
+
+@media(max-width:768px){
+
+.footer-bottom{
+flex-direction:column;
+gap:10px;
+text-align:center;
+}
+
+}
