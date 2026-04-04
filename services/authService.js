@@ -8,6 +8,14 @@ exports.findOrCreateGoogleUser = async (profile) => {
     return user;
   }
 
+  user = await User.findOne({ email: profile.emails[0].value });
+
+  if (user) {
+    user.googleId = profile.id;
+    await user.save();
+    return user;
+  }
+
   user = new User({
     name: profile.displayName,
     email: profile.emails[0].value,

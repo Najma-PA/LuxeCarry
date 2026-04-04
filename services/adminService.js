@@ -1,6 +1,6 @@
 const Admin = require('../models/adminModel');
 const User = require('../models/userModel');
-exports.getUsers = async ({ page, limit, search }) => {
+exports.getUsers = async ({ page, limit, search, status }) => {
 
   const query = {
     $or: [
@@ -8,6 +8,12 @@ exports.getUsers = async ({ page, limit, search }) => {
       { email: { $regex: search, $options: "i" } }
     ]
   };
+
+  if (status === 'Active') {
+    query.isBlocked = false;
+  } else if (status === 'Blocked') {
+    query.isBlocked = true;
+  }
 
   const totalUsers = await User.countDocuments(query);
 
