@@ -68,12 +68,6 @@ exports.adminLogout = (req, res) => {
 
 exports.adminDashboard = async (req, res) => {
   try {
-    res.set({
-      'Cache-Control': 'no-store',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-
     res.render('admin/dashboard', {
       title: 'Admin Dashboard',
       admin: req.session.admin
@@ -93,11 +87,13 @@ exports.loadUsers = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 5;
     const search = req.query.search || "";
+    const status = req.query.status || "All Statuses";
 
     const { users, totalPages } = await adminService.getUsers({
       page,
       limit,
-      search
+      search,
+      status
     });
 
     res.render("admin/users", {
@@ -105,13 +101,20 @@ exports.loadUsers = async (req, res) => {
       users,
       currentPage: page,
       totalPages,
-      search
+      search,
+      status
     });
 
-  } catch (err) {
+  } catch (error){
     console.error(err);
     res.status(500).send("Server Error");
   }
+};
+//load add user
+exports.loadAddUser = (req, res) => {
+  res.render('admin/addUser', {
+    title: "Add User"
+  });
 };
 
 //block/unblock user
