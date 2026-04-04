@@ -2,7 +2,7 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-const passport=require("./config/passport")
+const passport = require("./config/passport");
 
 const adminSession = require('./config/adminSession');
 const userSession = require('./config/userSession');
@@ -15,54 +15,56 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-/*  VIEW ENGINE*/
+/* VIEW ENGINE */
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-/*  FILES*/
+/* STATIC FILES */
 app.use(express.static(path.join(__dirname, 'public')));
 
-/*BODY PARSER*/
+/* BODY PARSER */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-/* CACHE*/
-app.use(noCache);
+/* CACHE */
 
-/* SESSION (IMPORTANT) */
-app.use('/user', userSession, userRoutes);
-app.use('/admin', adminSession, adminRoutes);
+// app.use(noCache);
 
+/* USER SESSION (GLOBAL for passport) */
+app.use(userSession);
+
+/* PASSPORT */
 app.use(passport.initialize());
 app.use(passport.session());
-
-//global user for ejs
+/* GLOBAL LOCALS */
 app.use((req, res, next) => {
-  res.locals.user = req.session.user || null;
+  res.locals.user = req.user || null;
+  res.locals.admin = req.session.admin || null;
   next();
 });
 
-/*ROOT ROUTE*/
-app.get('/', (req, res) => {
+/* ADMIN SESSION (separate) */
+app.use('/admin', adminSession, adminRoutes);
+
+/* USER ROUTES */
+app.use('/user', noCache, userRoutes);
+
+
+
+/* ROOT */
+const { redirectIfUserLoggedIn } = require('./middleware/userAuth');
+app.get('/', redirectIfUserLoggedIn, (req, res) => {
   res.render('user/home', {
-    user: req.session?.user || null
+    user: req.user || null
   });
 });
 
-/* ROUTES + SESSION
-app.use('/user',userRoutes);
-
-/*ADMIN ROUTES + SESSION
-app.use(
-  '/admin',adminRoutes);
-  */
-const PORT = process.env.PORT || 3000;
-
-//error handler
+/* ERROR HANDLER */
 app.use(errorHandler);
 
-/*DB + SERVER*/
+const PORT = process.env.PORT || 3000;
 
+/* DB + SERVER */
 connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
