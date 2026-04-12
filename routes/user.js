@@ -4,7 +4,7 @@ const router = express.Router();
 const passport = require("passport");
 
 const userController = require('../controllers/userController');
-
+const userProductController = require('../controllers/userProductController');
 const {
   isUserAuth,
   redirectIfUserLoggedIn
@@ -31,7 +31,6 @@ router.get("/auth/google/callback",
 );
 
 const protectedRoutes = [
-  '/home',
   '/profile',
   '/editProfile',
   '/changePassword',
@@ -46,6 +45,9 @@ protectedRoutes.forEach(route => {
 
 // HOME
 router.get('/home', userController.userHome);
+
+//shop
+router.get('/shop', userProductController.loadShop);
 
 // OTP
 router.get('/verifyOtp', noCache, userController.showVerifyOTP);
