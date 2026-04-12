@@ -53,11 +53,15 @@ app.use('/user', noCache, userRoutes);
 
 /* ROOT */
 const { redirectIfUserLoggedIn } = require('./middleware/userAuth');
-app.get('/', redirectIfUserLoggedIn, (req, res) => {
+/*app.get('/', redirectIfUserLoggedIn, (req, res) => {
   res.render('user/home', {
     user: req.user || null
   });
+  */
+ app.get('/', redirectIfUserLoggedIn, (req, res) => {
+  res.redirect('/user/home');
 });
+
 
 /* ERROR HANDLER */
 app.use(errorHandler);
