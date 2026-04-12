@@ -6,7 +6,8 @@ const bcrypt = require('bcryptjs');
 exports.showAdminLogin = (req, res) => {
   res.render('admin/login', {
     title: 'Admin Login',
-    error: null
+    error: null,
+    formData: {}
   });
 };
 
@@ -18,7 +19,8 @@ exports.adminLogin = async (req, res) => {
     if (!email || !password) {
       return res.render('admin/login', {
         title: 'Admin Login',
-        error: 'Please enter admin credentials'
+        error: 'Please enter admin credentials',
+        formData: req.body
       });
     }
 
@@ -27,7 +29,8 @@ exports.adminLogin = async (req, res) => {
     if (!admin) {
       return res.render('admin/login', {
         title: 'Admin Login',
-        error: 'Invalid credentials'
+        error: 'Invalid credentials',
+        formData: req.body
       });
     }
 
@@ -36,7 +39,8 @@ exports.adminLogin = async (req, res) => {
     if (!isMatch) {
       return res.render('admin/login', {
         title: 'Admin Login',
-        error: 'Invalid credentials'
+        error: 'Invalid credentials',
+        formData: req.body
       });
     }
 
@@ -51,7 +55,8 @@ exports.adminLogin = async (req, res) => {
     console.error(err);
     res.render('admin/login', {
       title: 'Admin Login',
-      error: 'Login failed'
+      error: 'Login failed',
+      formData: req.body
     });
   }
 };

@@ -3,6 +3,9 @@ const emailService = require('../services/emailService');
 const Address = require("../models/addressModel");
 const bcrypt = require("bcryptjs");
 
+const Category = require('../models/categoryModel');
+const Product = require('../models/productModel');
+
 // OTP generator
 function generateOtp() {
   const digits = "1234567890";
@@ -41,7 +44,7 @@ exports.showLogin = (req, res) => {
   if (req.session.user?.role === 'user') return res.redirect('/user/home');
   if (req.session.user?.role === 'admin') return res.redirect('/admin/dashboard');
 
-  res.render('user/login', { error: null });
+  res.render('user/login', { error: null, formData: {} });
 };
 
 exports.loginUser = async (req, res) => {
@@ -49,20 +52,20 @@ exports.loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.render('user/login', { error: 'Email and password are required' });
+      return res.render('user/login', { error: 'Email and password are required', formData: req.body });
     }
 
     const user = await userService.findUserByEmail(email);
 
-    if (!user) return res.render('user/login', { error: 'Invalid credentials' });
+    if (!user) return res.render('user/login', { error: 'Invalid credentials', formData: req.body });
 
     if (user.isBlocked) {
-      return res.render('user/login', { error: 'Account blocked' });
+      return res.render('user/login', { error: 'Account blocked', formData: req.body });
     }
 
     const isMatch = await userService.validatePassword(password, user.password);
 
-    if (!isMatch) return res.render('user/login', { error: 'Invalid credentials' });
+    if (!isMatch) return res.render('user/login', { error: 'Invalid credentials', formData: req.body });
 
     req.session.user = {
       id: user._id,
@@ -74,7 +77,7 @@ exports.loginUser = async (req, res) => {
     res.redirect('/user/home');
 
   } catch (err) {
-    res.render('user/login', { error: 'Login failed' });
+    res.render('user/login', { error: 'Login failed', formData: req.body });
   }
 };
 
@@ -212,14 +215,14 @@ if (req.session.newEmail) {
 /* RESET PASSWORD */
 exports.showResetPassword = (req, res) => {
   if (!req.session.resetEmail) return res.redirect('/user/login');
-  res.render('user/resetPassword', { error: null });
+  res.render('user/resetPassword', { error: null, formData: {} });
 };
 
 exports.resetPassword = async (req, res) => {
   const { password, confirmPassword } = req.body;
 
   if (password !== confirmPassword) {
-    return res.render('user/resetPassword', { error: "Passwords do not match" });
+    return res.render('user/resetPassword', { error: "Passwords do not match", formData: req.body });
   }
 
   await userService.updatePassword(req.session.resetEmail, password);
@@ -232,11 +235,17 @@ exports.resetPassword = async (req, res) => {
 
 /*REGISTER */
 exports.showRegister = (req, res) => {
-  res.render('user/signup', { error: null, errors: {} });
+  res.render('user/signup', { error: null, errors: {}, formData: {} });
 };
 
 exports.registerUser = async (req, res) => {
   const { name, email, password, confirmPassword } = req.body;
+  
+  if (!name || !email || !password || !confirmPassword) {
+    return res.render('user/signup', {
+      error: "Please fill all required fields", errors: {}, formData: req.body
+    });
+  }
   
    // Regex patterns
   const nameRegex = /^[A-Za-z\s]+$/;
@@ -246,31 +255,31 @@ exports.registerUser = async (req, res) => {
   // Name validation
   if (!nameRegex.test(name)) {
     return res.render('user/signup', {
-      error: "Name should contain only letters and spaces", errors: {}
+      error: "Name should contain only letters and spaces", errors: {}, formData: req.body
     });
   }
 
   // Email validation
   if (!emailRegex.test(email)) {
     return res.render('user/signup', {
-      error: "Invalid email format", errors: {}
+      error: "Invalid email format", errors: {}, formData: req.body
     });
   }
 
   // Password validation
   if (!passwordRegex.test(password)) {
     return res.render('user/signup', {
-      error: "Password must be at least 6 characters and include uppercase, lowercase, and a special character", errors: {}
+      error: "Password must be at least 6 characters and include uppercase, lowercase, and a special character", errors: {}, formData: req.body
     });
   }
   if (password !== confirmPassword) {
-    return res.render('user/signup', { error: "Passwords do not match", errors: {} });
+    return res.render('user/signup', { error: "Passwords do not match", errors: {}, formData: req.body });
   }
 
   const existingUser = await userService.findUserByEmail(email);
 
   if (existingUser) {
-    return res.render('user/signup', { error: "Email exists", errors: {} });
+    return res.render('user/signup', { error: "Email exists", errors: {}, formData: req.body });
   }
 
   const otp = generateOtp();
@@ -285,10 +294,34 @@ exports.registerUser = async (req, res) => {
 };
 
 /* HOME */
+exports.userHome = async (req, res) => {
+  try {
+
+    // ✅ Get active categories
+    const categories = await Category.find({ isActive: true });
+
+    // ✅ Get latest products (limit for "New Arrivals")
+    const products = await Product.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(8);
+
+    res.render('user/home', {
+      title: 'Home',
+      user: req.session.user,
+      categories,
+      products
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+};
+/*
 exports.userHome = (req, res) => {
   res.render('user/home', { title: 'Home', user: req.session.user });
 };
-
+*/
 /* PROFILE*/
 exports.profilePage = async (req, res) => {
   const user = await userService.findUserById(req.session.user.id);
@@ -316,6 +349,8 @@ exports.updateProfile = async (req, res) => {
     const existingUser = await userService.findUserByEmail(email);
 
     if (existingUser) {
+      user.name = name;
+      user.email = email;
       return res.render("user/editProfile", {
         user,
         error: "Email already exists"
@@ -339,8 +374,12 @@ exports.updateProfile = async (req, res) => {
 };
 
 /*CHANGE PASSWORD */
-exports.loadChangePassword = (req, res) => {
-  res.render("user/changePassword", { error: null });
+exports.loadChangePassword = async (req, res) => {
+  const user = await userService.findUserById(req.session.user.id);
+  if (user.googleId) {
+    return res.redirect('/user/profile');
+  }
+  res.render("user/changePassword", { error: null, formData: {}, user });
 };
 
 exports.changePassword = async (req, res) => {
@@ -349,13 +388,17 @@ exports.changePassword = async (req, res) => {
     const { currentPassword, newPassword, confirmPassword } = req.body;
     const user = await userService.findUserById(userId);
 
+    if (user.googleId) {
+      return res.redirect("/user/profile");
+    }
+
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
-      return res.render("user/changePassword", { error: "Current password is incorrect" });
+      return res.render("user/changePassword", { error: "Current password is incorrect", formData: req.body, user });
     }
 
     if (newPassword !== confirmPassword) {
-      return res.render("user/changePassword", { error: "Passwords do not match" });
+      return res.render("user/changePassword", { error: "Passwords do not match", formData: req.body, user });
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10);
@@ -363,7 +406,7 @@ exports.changePassword = async (req, res) => {
     res.redirect("/user/profile");
   } catch (error) {
     console.log(error);
-    res.render("user/changePassword", { error: "Something went wrong" });
+    res.render("user/changePassword", { error: "Something went wrong", formData: req.body, user });
   }
 };
 
@@ -371,10 +414,12 @@ exports.changePassword = async (req, res) => {
 exports.loadAddresses = async (req, res) => {
   const addresses = await Address.find({ userId: req.session.user.id })
     .sort({ isDefault: -1, createdAt: -1 });
-  res.render("user/addresses", { addresses });
+  const user = req.session.user;
+  res.render("user/addresses", { addresses, user });
 };
 exports.loadAddAddress = (req, res) => {
-  res.render("user/addAddress");
+  const user = req.session.user;
+  res.render("user/addAddress", { user });
 };
 
 exports.addAddress = async (req, res) => {
@@ -424,7 +469,8 @@ exports.loadEditAddress = async (req, res) => {
       return res.redirect("/user/addresses");
     }
 
-    res.render("user/editAddress", { address });
+    const user = req.session.user;
+    res.render("user/editAddress", { address, user });
 
   } catch (error) {
     console.error(error);
