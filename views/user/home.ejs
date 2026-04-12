@@ -37,9 +37,10 @@
 <p class="text-muted">
 Explore our premium collection of bags and accessories
 </p>
-
+<a href="/shop" class="shop-btn">Shop Now</a>
+<!--
 <button class="shop-btn">Shop Now</button>
-
+-->
 </div>
 
 </div>
@@ -54,21 +55,24 @@ Explore our premium collection of bags and accessories
 <h5 class="text-center mb-4">Shop by Category</h5>
 
 <div class="row g-4">
+  <% categories.forEach(cat => { %>
 
 <div class="col-md-6">
 
 <div class="category-card">
+<img src="<%= cat.image || '/images/tote.png' %>">
 
-<img src="/images/tote.png">
 
 <div class="category-title">
-<h5>Tote Bags</h5>
+<h5><%= cat.name %></h5>
+</div>
+
+<a href="/shop?category=<%= cat._id %>" class="stretched-link"></a>
 </div>
 
 </div>
-
-</div>
-
+<% }) %>
+<!--
 <div class="col-md-6">
 
 <div class="category-card">
@@ -82,13 +86,63 @@ Explore our premium collection of bags and accessories
 </div>
 
 </div>
+-->
+
+</div>
+
+</div>
+<!--Dynamic Products-->
+<div class="container mt-5">
+
+<div class="d-flex justify-content-between mb-3">
+
+<h5>New Arrivals</h5>
+
+<a href="/user/shop">View All</a>
+
+</div>
+
+<div class="row g-4">
+
+<% products.forEach(p => { %>
+
+<div class="col-md-3">
+
+<div class="product-card">
+
+<img src="<%= p.images[0] %>">
+
+<p class="mt-2"><%= p.name %></p>
+
+<p class="price">
+₹<%= p.finalPrice %>
+<small class="text-muted text-decoration-line-through">
+₹<%= p.price %>
+</small>
+</p>
+
+<div class="d-flex justify-content-center gap-2 mt-2">
+
+<button class="add-btn" onclick="addToCart('<%= p._id %>')">
+Add to Cart
+</button>
+
+<a href="/product/<%= p._id %>" class="buy-btn text-decoration-none">
+View
+</a>
 
 </div>
 
 </div>
 
+</div>
 
-<!-- PRODUCTS -->
+<% }) %>
+
+</div>
+
+</div>
+<!-- PRODUCTS 
 
 <div class="container mt-5">
 
@@ -210,7 +264,7 @@ Buy Now
 
 </div>
 
-
+-->
 <!-- OFFER -->
 
 <div class="container mt-5">
@@ -253,6 +307,25 @@ Upgrade your wardrobe with our best sellers
   window.addEventListener('popstate', function () {
     window.location.href = '/user/home';  // stay inside app
   });
+</script>
+
+<script>
+async function addToCart(productId) {
+  try {
+    const res = await fetch('/cart/add/' + productId);
+
+    const data = await res.json();
+
+    if (data.success) {
+      alert('Added to cart');
+    } else {
+      alert(data.message);
+    }
+
+  } catch (err) {
+    alert('Error adding to cart');
+  }
+}
 </script>
 
 </body>

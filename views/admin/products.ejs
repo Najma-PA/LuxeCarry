@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<link rel="stylesheet" href="/css/admin.css">
+
+</head>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<body>
+   <div class="d-flex">
+  <%- include('../partials/admin/sidebar', { active: 'inventory' }) %>
+
+  <div class="main-content p-4 w-100">
+
+  <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h4 class="fw-bold">Products</h4>
+        <small class="text-muted">Manage your handbag inventory and stock levels.</small>
+      </div>
+
+       <!-- Search -->
+        <form method="GET" class="d-flex gap-2">
+          <input type="text" name="search" value="<%= search || '' %>"
+            class="form-control" placeholder="Search products...">
+
+          <% if (search) { %>
+            <a href="/admin/products" class="btn btn-outline-secondary">
+              <i class="fa-solid fa-xmark"></i>
+            </a>
+          <% } else { %>
+            <button type="submit" class="btn btn-outline-primary">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+          <% } %>
+        </form>
+
+        <!-- Add Button -->
+        <a href="/admin/products/add" class="btn btn-warning text-white">
+          + Add Products
+        </a>
+
+    </div> 
+
+    <!-- Tabs -->
+    <div class="card p-3">
+
+      <div class="d-flex gap-3 mb-3">
+        <a href="?status=all" class="<%= status==='all'?'fw-bold text-warning':'' %>">All Products</a>
+        <a href="?status=active">Active</a>
+        <a href="?status=low">Low Stock</a>
+      
+      </div>
+
+      <!-- Table -->
+      <table class="table align-middle">
+        <thead>
+          <tr>
+            <th>Products</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Offer</th>
+            <th>Stock Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% products.forEach(p => { %>
+          <tr>
+
+            <td>
+              <strong><%= p.name %></strong><br>
+              <small class="text-muted"><%= p.description?.slice(0,40) %></small>
+            </td>
+
+            <td><%= p.category?.name %></td>
+
+            <td>₹<%= p.price %></td>
+
+            <td><%= p.offer || 0 %>%</td>
+
+            <!-- STOCK -->
+            <td>
+              <% if(p.stock === 0){ %>
+                <span class="badge bg-danger">Out of stock</span>
+              <% } else if(p.stock < 10){ %>
+                <span class="badge bg-warning text-dark"><%= p.stock %> in stock</span>
+              <% } else { %>
+                <span class="badge bg-success"><%= p.stock %> in stock</span>
+              <% } %>
+            </td>
+
+            <td class="d-flex gap-2">
+              <a href="/admin/products/edit/<%= p._id %>" class="btn btn-sm btn-outline-primary">
+                <i class="fa fa-pen"></i>
+              </a>
+
+              <button onclick="deleteProduct('<%= p._id %>')"
+                class="btn btn-sm btn-outline-danger">
+                <i class="fa fa-trash"></i>
+              </button>
+            </td>
+
+          </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="text-center">
+        <% for(let i=1;i<=totalPages;i++){ %>
+          <a href="?page=<%= i %>" class="page-btn <%= currentPage===i?'active':'' %>"><%= i %></a>
+        <% } %>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+function deleteProduct(id) {
+  Swal.fire({
+    title: 'Delete product?',
+    icon: 'warning',
+    showCancelButton: true
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      await fetch(`/admin/products/delete/${id}`);
+      location.reload();
+    }
+  });
+}
+</script>
+
+</body>
+</html>

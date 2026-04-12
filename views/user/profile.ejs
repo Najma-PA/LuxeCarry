@@ -195,9 +195,11 @@ Update your account details and contact information
 Edit Profile
 </a>
 
+<% if (!user.googleId) { %>
 <a href="/user/changePassword" class="btn edit-btn">
 Change Password
 </a>
+<% } %>
 </div>
 </div>
 
