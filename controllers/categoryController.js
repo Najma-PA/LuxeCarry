@@ -15,7 +15,10 @@ exports.loadAddPage = (req, res) => {
 
 exports.addCategory = async (req, res) => {
   try {
-    await categoryService.addCategory(req.body);
+    console.log('--- ADD CATEGORY DEBUG ---');
+    console.log('req.body:', req.body);
+    console.log('req.file:', req.file);
+    await categoryService.addCategory(req.body, req.file);
     res.redirect('/admin/categories');
   } catch (err) {
     res.send(err.message);
@@ -28,8 +31,13 @@ exports.loadEditPage = async (req, res) => {
 };
 
 exports.updateCategory = async (req, res) => {
-  await categoryService.updateCategory(req.params.id, req.body);
-  res.redirect('/admin/categories');
+  try {
+    await categoryService.updateCategory(req.params.id, req.body, req.file);
+    res.redirect('/admin/categories');
+  } catch (error) {
+    console.error("Error updating category:", error);
+    res.status(500).send("There was an error updating the category: " + error.message);
+  }
 };
 
 exports.deleteCategory = async (req, res) => {

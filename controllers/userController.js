@@ -302,6 +302,7 @@ exports.userHome = async (req, res) => {
 
     // ✅ Get latest products (limit for "New Arrivals")
     const products = await Product.find({ isActive: true })
+      .populate('category')
       .sort({ createdAt: -1 })
       .limit(8);
 

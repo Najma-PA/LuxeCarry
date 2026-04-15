@@ -2,7 +2,7 @@ const productService = require('../services/productService');
 const categoryService = require('../services/categoryService');
 
 
-// 🟢 GET PRODUCTS LIST
+// GET PRODUCTS LIST
 exports.getProducts = async (req, res) => {
   try {
     const data = await productService.getProducts(req.query);
@@ -17,7 +17,7 @@ exports.getProducts = async (req, res) => {
 
 
 
-// 🟢 LOAD ADD PRODUCT PAGE
+// LOAD ADD PRODUCT PAGE
 exports.loadAddPage = async (req, res) => {
   try {
     const categories = await categoryService.getCategories({});
@@ -33,11 +33,11 @@ exports.loadAddPage = async (req, res) => {
 
 
 
-// 🟢 ADD PRODUCT
+// ADD PRODUCT
 exports.addProduct = async (req, res) => {
   try {
 
-    // 🔥 HANDLE VARIANTS
+    // HANDLE VARIANTS
     let variants = [];
 
     if (req.body.variantType) {
@@ -60,7 +60,7 @@ exports.addProduct = async (req, res) => {
 
 
 
-// 🟢 LOAD EDIT PAGE
+// LOAD EDIT PAGE
 exports.loadEditPage = async (req, res) => {
   try {
 
@@ -83,11 +83,11 @@ exports.loadEditPage = async (req, res) => {
 
 
 
-// 🟢 UPDATE PRODUCT
+// UPDATE PRODUCT
 exports.updateProduct = async (req, res) => {
   try {
 
-    // 🔥 HANDLE VARIANTS
+    // HANDLE VARIANTS
     let variants = [];
 
     if (req.body.variantType) {
@@ -115,7 +115,7 @@ exports.updateProduct = async (req, res) => {
 
 
 
-// 🟢 DELETE (SOFT DELETE)
+// DELETE (SOFT DELETE)
 exports.deleteProduct = async (req, res) => {
   try {
 
