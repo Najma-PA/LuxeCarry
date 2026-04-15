@@ -6,66 +6,215 @@
 <title><%= product.name %> - LuxeCarry</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<!-- Modern Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
+
 <style>
+  body {
+    background-color: #fbf9f6; /* Warm elegant off-white from mockup */
+    font-family: 'Inter', sans-serif;
+    color: #272727;
+  }
+  
+  /* Shared utility classes */
+  .heading-serif {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+  }
+  
+  /* Zoom Image Container */
   .img-zoom-container {
     position: relative;
     overflow: hidden;
     cursor: crosshair;
-    border-radius: 12px;
-    background: #f8f9fa;
+    border-radius: 16px;
+    background: #f1f0ec;
+    height: 520px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 500px;
   }
   .img-zoom-container img {
-    /* Set dimensions for contained viewing but allow large native resolution for zooming */
-    max-width: 100%;
-    max-height: 100%;
+    max-width: 90%;
+    max-height: 90%;
+    object-fit: contain;
     transition: transform 0.1s ease;
   }
   .img-zoom-container:hover img {
-    transform: scale(2.5); /* 2.5x Zoom */
+    transform: scale(2.0);
   }
+  
+  /* Thumbnails */
   .thumbnail {
     cursor: pointer;
     border: 2px solid transparent;
-    border-radius: 8px;
+    border-radius: 12px;
     transition: 0.2s;
-    background: #f8f9fa;
-    width: 80px; 
-    height: 80px;
+    background: #f1f0ec;
+    width: 100%; 
+    height: 90px;
     object-fit: contain;
-    padding: 5px;
+    padding: 10px;
   }
   .thumbnail.active {
-    border-color: #c98a2c;
+    border-color: #b78846; /* Gold outline */
+    background: #fbf9f6;
   }
-  .add-cart-lg {
-    background-color: #111;
-    color: #fff;
-    border: none;
-    padding: 14px 0;
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 1px;
-    border-radius: 30px;
-    transition: 0.3s;
-  }
-  .add-cart-lg:hover {
-    background-color: #333;
-  }
+  
+  /* Typography */
   .product-title {
-    font-family: 'Playfair Display', "Times New Roman", serif;
-    font-size: 28px;
-    font-weight: bold;
-    color: #111;
+    font-size: 38px;
+    line-height: 1.1;
+    color: #2b2b2b;
   }
   .product-price {
-    font-size: 22px;
-    font-weight: bold;
-    color: #111;
+    font-size: 26px;
+    font-weight: 700;
+    color: #c98a2c;
+  }
+  .old-price {
+    font-size: 16px;
+    color: #a3a3a3;
+    text-decoration: line-through;
+    font-weight: 400;
+  }
+  .save-badge {
+    color: #c98a2c;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Buttons */
+  .qty-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid #e1ded8;
+    border-radius: 30px;
+    padding: 6px 15px;
+    width: 100px;
+    background: #fff;
+  }
+  .qty-box span { font-weight: 600; font-size: 14px; }
+  .qty-box i { cursor: pointer; font-size: 10px; color: #888; transition: 0.2s;}
+  .qty-box i:hover { color: #333; }
+  
+  .btn-buy {
+    background-color: #b78846;
+    color: #fff;
+    border: none;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-radius: 30px;
+    padding: 12px 30px;
+    transition: 0.3s;
+  }
+  .btn-buy:hover {
+    background-color: #9f743a;
+    color: #fff;
+  }
+  .btn-add {
+    background-color: transparent;
+    color: #b78846;
+    border: 1.5px solid #b78846;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 1px;
+    border-radius: 30px;
+    padding: 12px 30px;
+    transition: 0.3s;
+  }
+  .btn-add:hover {
+    background-color: #b78846;
+    color: #fff;
+  }
+  .btn-wishlist {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid #e1ded8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    background: #fff;
+    transition: 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .btn-wishlist:hover {
+    border-color: #e53e3e;
+    color: #e53e3e;
+  }
+  
+  /* Sections */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    color: #7a7a7a;
+    text-transform: uppercase;
+    border-bottom: 2px solid #2b2b2b;
+    display: inline-block;
+    padding-bottom: 5px;
+    margin-bottom: 25px;
+  }
+  .content-text {
+    line-height: 1.8;
+    font-size: 14px;
+    color: #555;
+  }
+  
+  /* Reviews */
+  .review-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+  }
+  .star-gold { color: #E5A853; font-size: 10px; }
+  .star-gray { color: #e4e4e4; font-size: 10px; }
+  
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+  }
+  .progress-bar-custom {
+    flex-grow: 1;
+    height: 4px;
+    background: #eee;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #b78846;
+  }
+  .review-number { font-size: 12px; font-weight: 600; width: 10px;}
+  .review-percent { font-size: 12px; color: #888; width: 25px; text-align: right;}
+  
+  /* Related products card */
+  .related-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 20px;
+    height: 100%;
+    transition: 0.3s;
+  }
+  .related-img {
+    height: 180px;
+    object-fit: contain;
+    width: 100%;
+    margin-bottom: 15px;
+    background: #fbf9f6;
+    border-radius: 12px;
+    padding: 15px;
   }
 </style>
 </head>
@@ -73,111 +222,296 @@
 
 <%- include('../partials/navbar') %>
 
-<div class="container mt-5 mb-5 pb-5">
+<div class="container mt-4 mb-5 pb-5">
   
   <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb" style="font-size: 13px;">
+    <ol class="breadcrumb" style="font-size: 12px; font-weight: 500;">
       <li class="breadcrumb-item"><a href="/user/home" class="text-muted text-decoration-none">Home</a></li>
       <li class="breadcrumb-item"><a href="/user/shop" class="text-muted text-decoration-none">Shop</a></li>
-      <li class="breadcrumb-item active"><%= product.name %></li>
+      <% if (product.category) { %>
+        <li class="breadcrumb-item"><a href="/user/shop?category=<%= product.category._id %>" class="text-muted text-decoration-none"><%= product.category.name %></a></li>
+      <% } %>
+      <li class="breadcrumb-item active" style="color: #111;"><%= product.name %></li>
     </ol>
   </nav>
 
-  <div class="row g-5">
+  <!-- TOP SECTION -->
+  <div class="row g-5 mb-5 pb-4">
     
     <!-- LEFT: IMAGES -->
     <div class="col-md-6">
-      <div class="row g-3">
-        
-        <!-- THUMBNAILS -->
-        <div class="col-2 d-flex flex-column gap-2">
-          <% product.images.forEach((img, idx) => { %>
+      
+      <!-- MAIN IMAGE -->
+      <div class="img-zoom-container mb-3" id="zoomContainer">
+        <img src="<%= product.images[0] %>" id="mainImg" alt="Product Image">
+      </div>
+      
+      <!-- THUMBNAILS -->
+      <div class="row g-2">
+        <% product.images.forEach((img, idx) => { %>
+          <div class="col-3">
             <img src="<%= img %>" 
                  class="thumbnail <%= idx === 0 ? 'active' : '' %>" 
                  onclick="changeMainImage(this, '<%= img %>')">
-          <% }) %>
-        </div>
-
-        <!-- MAIN IMAGE -->
-        <div class="col-10">
-          <div class="img-zoom-container" id="zoomContainer">
-            <img src="<%= product.images[0] %>" id="mainImg" alt="Product Image">
           </div>
-          <div class="text-center mt-2 text-muted" style="font-size: 12px;">
-            <i class="fa-solid fa-search-plus me-1"></i> Hover over image to zoom
-          </div>
-        </div>
-
+        <% }) %>
       </div>
     </div>
 
     <!-- RIGHT: PRODUCT INFO -->
-    <div class="col-md-6">
-      <% if (product.offer > 0 || (product.category && product.category.offer > 0)) { 
-        let bestOffer = Math.max(product.offer || 0, product.category ? product.category.offer : 0);
-      %>
-        <span class="badge bg-danger rounded-pill px-2 py-1 mb-3" style="font-size: 11px; letter-spacing: 0.5px;"><%= bestOffer %>% OFF</span>
-      <% } %>
-
-      <h1 class="product-title mb-2"><%= product.name %></h1>
+    <div class="col-md-6 ps-md-4">
       
-      <div class="mb-3">
-        <span style="color: #c98a2c; font-size: 13px;">
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star"></i>
-          <i class="fa-solid fa-star-half-stroke"></i>
-        </span>
-        <span class="text-muted ms-2" style="font-size: 13px;">(128 Reviews)</span>
-      </div>
-
-      <div class="mb-4">
+      <h1 class="product-title heading-serif mb-3"><%= product.name %></h1>
+      
+      <div class="d-flex align-items-baseline mb-4">
         <% if (product.price > product.finalPrice) { %>
-          <span class="product-price">₹<%= product.finalPrice.toLocaleString() %></span>
-          <span class="text-muted text-decoration-line-through ms-2" style="font-size: 16px;">₹<%= product.price.toLocaleString() %></span>
+          <span class="product-price me-3">₹<%= product.finalPrice.toLocaleString() %></span>
+          <span class="old-price me-3">₹<%= product.price.toLocaleString() %></span>
+          <span class="save-badge">You save ₹<%= (product.price - product.finalPrice).toLocaleString() %></span>
         <% } else { %>
           <span class="product-price">₹<%= product.price.toLocaleString() %></span>
         <% } %>
       </div>
 
-      <p class="text-muted mb-4" style="line-height: 1.6; font-size: 15px;">
-        <%= product.description || 'Experience the pinnacle of luxury with this elegantly crafted piece from LuxeCarry. Designed for both functionality and timeless appeal.' %>
+      <p class="content-text mb-4">
+        <%= product.description || 'Inspired by the timeless elegance of the 17th arrondissement, this handcrafted satchel combines premium Italian calfskin with a modern architectural silhouette.' %>
       </p>
 
       <% if (product.stock > 0) { %>
-        <p class="text-success mb-4 fw-bold" style="font-size: 13px;"><i class="fa-solid fa-check-circle me-1"></i> In Stock (<%= product.stock %> available)</p>
-        
-        <button class="btn btn-dark w-100 add-cart-lg" onclick="addToCart('<%= product._id %>')">
-          ADD TO CART
-        </button>
+        <div class="d-flex gap-3 align-items-center mt-5">
+          <!-- Quantity -->
+          <!-- Simplified visual quantity box (functional tie-in left for actual cart feature) -->
+          <div class="qty-box">
+            <i class="fa-solid fa-minus"></i>
+            <span>1</span>
+            <i class="fa-solid fa-plus"></i>
+          </div>
+          
+          <a href="/user/cart" class="btn-buy text-decoration-none d-flex align-items-center">BUY NOW</a>
+          
+          <button class="btn-add" onclick="addToCart('<%= product._id %>')">
+            ADD TO CART
+          </button>
+          
+          <a href="#" class="btn-wishlist">
+            <i class="fa-regular fa-heart"></i>
+          </a>
+        </div>
       <% } else { %>
         <p class="text-danger mb-4 fw-bold" style="font-size: 13px;"><i class="fa-solid fa-times-circle me-1"></i> Out of Stock</p>
-        <button class="btn btn-secondary w-100 add-cart-lg" disabled>
+        <button class="btn btn-secondary px-5 py-3 rounded-pill fw-bold" disabled style="font-size: 12px; letter-spacing: 1px;">
           OUT OF STOCK
         </button>
       <% } %>
 
-      <hr class="mt-5 mb-4" style="opacity: 0.1;">
-      
-      <div class="row text-center text-muted g-3" style="font-size: 12px;">
-        <div class="col-4">
-          <i class="fa-solid fa-truck-fast mb-2 fs-5" style="color: #c98a2c;"></i><br>
-          Fast Delivery
-        </div>
-        <div class="col-4">
-          <i class="fa-solid fa-shield-halved mb-2 fs-5" style="color: #c98a2c;"></i><br>
-          1 Year Warranty
-        </div>
-        <div class="col-4">
-          <i class="fa-solid fa-rotate-left mb-2 fs-5" style="color: #c98a2c;"></i><br>
-          Easy Returns
-        </div>
-      </div>
-
     </div>
 
   </div>
+
+  <hr style="opacity: 0.1; border-color: #111;" class="mb-5">
+
+  <!-- DESCRIPTION SECTION 
+  <div class="mb-5 pb-4">
+    <div class="section-title">Description</div>
+    
+    <div class="row">
+      <div class="col-md-9">
+        <h3 class="heading-serif mb-4" style="color: #2b2b2b;">The Art of Craftsmanship</h3>
+        <p class="content-text">
+          Every LuxeCarry bag is meticulously constructed by master artisans in our Tuscany atelier. Using only the finest full-grain Italian leather, which is vegetable-tanned to achieve a rich, enduring patina, this piece is designed to be a companion for a lifetime of journeys. The interior is lined with our signature micro-suede and features thoughtfully placed pockets for your daily essentials.
+        </p>
+      </div>
+    </div>
+  </div>
+-->
+  <!-- REVIEWS SECTION (Dummy UI) -->
+  <div class="mb-5 pb-5">
+    <h2 class="heading-serif text-center mb-5" style="font-size: 32px;">Customer Reviews</h2>
+    
+    <div class="row g-5 flex-row-reverse">
+      
+      <!-- Right side: Rating Summary -->
+      <div class="col-md-4">
+        <div class="review-card text-center py-4" style="position: sticky; top: 20px;">
+          <div class="d-flex justify-content-center align-items-end mb-1">
+            <span class="heading-serif me-3" style="font-size: 48px; line-height: 1;">4.8</span>
+            <div class="text-start mb-1">
+              <div>
+                <i class="fa-solid fa-star star-gold"></i>
+                <i class="fa-solid fa-star star-gold"></i>
+                <i class="fa-solid fa-star star-gold"></i>
+                <i class="fa-solid fa-star star-gold"></i>
+                <i class="fa-solid fa-star star-gold"></i>
+              </div>
+              <div style="font-size: 11px; color: #888;">Based on 128 reviews</div>
+            </div>
+          </div>
+          
+          <div class="mt-4 text-start">
+            <!-- 5 stars -->
+            <div class="progress-wrap">
+              <span class="review-number">5</span>
+              <div class="progress-bar-custom"><div class="progress-fill" style="width: 75%;"></div></div>
+              <span class="review-percent">75%</span>
+            </div>
+            <!-- 4 stars -->
+            <div class="progress-wrap">
+              <span class="review-number">4</span>
+              <div class="progress-bar-custom"><div class="progress-fill" style="width: 15%;"></div></div>
+              <span class="review-percent">15%</span>
+            </div>
+            <!-- 3 stars -->
+            <div class="progress-wrap">
+              <span class="review-number">3</span>
+              <div class="progress-bar-custom"><div class="progress-fill" style="width: 5%;"></div></div>
+              <span class="review-percent">5%</span>
+            </div>
+            <!-- 2 stars -->
+            <div class="progress-wrap">
+              <span class="review-number">2</span>
+              <div class="progress-bar-custom"><div class="progress-fill" style="width: 3%;"></div></div>
+              <span class="review-percent">3%</span>
+            </div>
+            <!-- 1 star -->
+            <div class="progress-wrap">
+              <span class="review-number">1</span>
+              <div class="progress-bar-custom"><div class="progress-fill" style="width: 2%;"></div></div>
+              <span class="review-percent">2%</span>
+            </div>
+          </div>
+          
+          <button class="btn btn-dark w-100 rounded-pill mt-4 fw-bold" style="font-size: 12px; letter-spacing: 1px; padding: 12px 0;">Write a Review</button>
+        </div>
+      </div>
+
+      <!-- Left side: Review List -->
+      <div class="col-md-8">
+        
+        <div class="review-card">
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+            </div>
+            <span style="font-size: 11px; color: #a3a3a3;">Oct 12, 2023</span>
+          </div>
+          <div class="mb-3">
+            <span class="fw-bold" style="font-size: 14px;">Eleanor P.</span>
+            <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size: 9px; font-weight: 600;">VERIFIED PURCHASE</span>
+          </div>
+          <h6 class="fw-bold fs-6">Absolutely Breathless</h6>
+          <p class="content-text mb-0" style="font-size: 13px;">The quality of this leather is even better than expected. It has that rich, earthy smell that only real high-end Italian leather possesses. The Desert Grain texture is subtle yet sophisticated. It's truly a statement piece that I'll cherish for years.</p>
+        </div>
+        
+        <div class="review-card">
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+            </div>
+            <span style="font-size: 11px; color: #a3a3a3;">Sep 28, 2023</span>
+          </div>
+          <div class="mb-3">
+            <span class="fw-bold" style="font-size: 14px;">Julian M.</span>
+            <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size: 9px; font-weight: 600;">VERIFIED PURCHASE</span>
+          </div>
+          <h6 class="fw-bold fs-6">The Perfect Work Companion</h6>
+          <p class="content-text mb-0" style="font-size: 13px;">I use this for work daily and it fits everything I need while keeping its structural integrity. The hardware is solid and has a very luxurious weight to it. Customer service was also excellent throughout the shipping process.</p>
+        </div>
+        
+        <div class="review-card">
+          <div class="d-flex justify-content-between mb-2">
+            <div>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gold"></i>
+              <i class="fa-solid fa-star star-gray"></i>
+            </div>
+            <span style="font-size: 11px; color: #a3a3a3;">Aug 15, 2023</span>
+          </div>
+          <div class="mb-3">
+            <span class="fw-bold" style="font-size: 14px;">Sophia L.</span>
+            <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size: 9px; font-weight: 600;">VERIFIED PURCHASE</span>
+          </div>
+          <h6 class="fw-bold fs-6">Timeless Design</h6>
+          <p class="content-text mb-0" style="font-size: 13px;">Exactly as pictured. The color is a perfect neutral tan that goes with everything. My only small note is that it was slightly heavier than I expected, but that's a testament to the quality materials. Highly recommend if you want something that doesn't go out of style.</p>
+        </div>
+
+        <div class="text-center mt-4">
+          <a href="#" class="text-decoration-none fw-bold" style="color: #c98a2c; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">VIEW ALL 128 REVIEWS</a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATED PRODUCTS -->
+  <% if (typeof relatedProducts !== 'undefined' && relatedProducts.length > 0) { %>
+    <div class="mt-5 pt-4 border-top border-light">
+      <h2 class="heading-serif text-center mb-5" style="font-size: 28px;">You May Also Like This</h2>
+      
+      <div class="row g-4">
+        <% relatedProducts.forEach(rel => { %>
+          <div class="col-md-3">
+            <div class="related-card d-flex flex-column position-relative">
+              
+              <!-- Offer badge -->
+              <div class="position-absolute" style="top: 20px; left: 20px; z-index: 2;">
+                <% if(rel.offer > 0) { %>
+                  <span class="badge" style="background-color: #b78846; font-size: 9px; letter-spacing: 0.5px; padding: 4px 6px;">SAVE <%= rel.offer %>%</span>
+                <% } %>
+              </div>
+              
+              <!-- Wishlist heart -->
+              <div class="position-absolute" style="top: 20px; right: 20px; z-index: 2;">
+                <a href="#" class="text-decoration-none" style="color: #ccc;"><i class="fa-regular fa-heart bg-white rounded-circle p-2 shadow-sm"></i></a>
+              </div>
+
+              <!-- Image -->
+              <div class="text-center">
+                <img src="<%= rel.images[0] %>" class="related-img">
+              </div>
+
+              <div class="mt-auto">
+                <div class="text-uppercase" style="color: #c98a2c; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px;">LUXECARRY</div>
+                
+                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 14px; color: #2b2b2b;"><%= rel.name %></h6>
+                
+                <!-- Rating dummy -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div class="fw-bold" style="font-size: 14px; color: #111;">₹<%= rel.finalPrice || rel.price %>
+                    <% if (rel.price > (rel.finalPrice || rel.price)) { %>
+                      <span class="text-muted fw-normal text-decoration-line-through ms-1" style="font-size: 11px;">₹<%= rel.price %></span>
+                    <% } %>
+                  </div>
+                  <div style="font-size: 11px; color: #c98a2c;">
+                    <i class="fa-solid fa-star"></i> 4.8
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <button class="btn btn-outline-dark w-50 py-2 rounded-pill fw-bold" style="font-size: 10px; border-color: #e1ded8; color: #b78846;" onclick="addToCart('<%= rel._id %>')">
+                    Add to Cart
+                  </button>
+                  <a href="/user/product/<%= rel._id %>" class="btn w-50 py-2 rounded-pill fw-bold d-flex justify-content-center align-items-center text-white" style="font-size: 10px; background-color: #b78846; text-decoration: none;">
+                    Buy Now
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  <% } %>
+
 </div>
 
 <%- include('../partials/footer') %>
@@ -192,7 +526,6 @@
     const x = e.clientX - rect.left; 
     const y = e.clientY - rect.top;  
     
-    // Calculate percentage position
     const xPercent = (x / rect.width) * 100;
     const yPercent = (y / rect.height) * 100;
     
@@ -207,25 +540,24 @@
   function changeMainImage(element, src) {
     document.getElementById('mainImg').src = src;
     
-    // Update active class
     document.querySelectorAll('.thumbnail').forEach(thumb => {
       thumb.classList.remove('active');
     });
     element.classList.add('active');
   }
 
-  // Add to cart dummy function
+  // Add to cart function
   async function addToCart(id){
     try{
-      const res = await fetch('/cart/add/' + id);
+      const res = await fetch('/user/cart/add/' + id);
       const data = await res.json();
       if(data.success){
-        alert("Added to cart successfully!");
+        window.location.href = '/user/cart';
       }else{
         alert(data.message || "Could not add to cart");
       }
     }catch(err){
-      alert("Added to cart successfully (Simulation)");
+      alert("Error adding to cart");
     }
   }
 </script>

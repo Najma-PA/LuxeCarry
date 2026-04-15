@@ -199,12 +199,12 @@ Upgrade your wardrobe with our best sellers
 <script>
 async function addToCart(productId) {
   try {
-    const res = await fetch('/cart/add/' + productId);
+    const res = await fetch('/user/cart/add/' + productId);
 
     const data = await res.json();
 
     if (data.success) {
-      alert('Added to cart');
+      window.location.href = '/user/cart';
     } else {
       alert(data.message);
     }

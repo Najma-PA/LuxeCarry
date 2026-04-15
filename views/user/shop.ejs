@@ -26,7 +26,7 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 <div class="row mt-4">
 
 <!-- FILTERS -->
-<div class="col-md-3">
+<div class="col-md-3 filters">
 
 <form method="GET" id="filterForm">
   <!-- Top header -->
@@ -210,7 +210,7 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
             ADD TO CART
           </button>
 
-          <a href="/product/<%= p._id %>"
+          <a href="/user/product/<%= p._id %>"
             class="btn btn-sm w-50 fw-bold d-flex justify-content-center align-items-center"
             style="background-color: #b76e10; color: #000000; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px;text-decoration: none; border: none; padding: 8px 0; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#a35f0b'" onmouseout="this.style.backgroundColor='#b76e10'">
             BUY NOW
@@ -254,11 +254,11 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 <script>
 async function addToCart(id){
   try{
-    const res = await fetch('/cart/add/' + id);
+    const res = await fetch('/user/cart/add/' + id);
     const data = await res.json();
 
     if(data.success){
-      alert("Added to cart");
+      window.location.href = '/user/cart';
     }else{
       alert(data.message);
     }
