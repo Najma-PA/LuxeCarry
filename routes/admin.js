@@ -40,10 +40,10 @@ router.post('/users/toggle/:id', noCache, isAdminAuth, adminController.toggleUse
 router.get('/categories', noCache, isAdminAuth,controller.getCategories);
 
 router.get('/categories/add', noCache, isAdminAuth,controller.loadAddPage);
-router.post('/categories/add', noCache, isAdminAuth,controller.addCategory);
+router.post('/categories/add', noCache, isAdminAuth, upload.single('image'), controller.addCategory);
 
 router.get('/categories/edit/:id', noCache, isAdminAuth,controller.loadEditPage);
-router.post('/categories/edit/:id', noCache, isAdminAuth,controller.updateCategory);
+router.post('/categories/edit/:id', noCache, isAdminAuth, upload.single('image'), controller.updateCategory);
 
 router.get('/categories/delete/:id',noCache, isAdminAuth, controller.deleteCategory);
 

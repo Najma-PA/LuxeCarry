@@ -49,6 +49,9 @@ router.get('/home', userController.userHome);
 //shop
 router.get('/shop', userProductController.loadShop);
 
+// Product Details
+router.get('/product/:id', userProductController.loadProductDetails);
+
 // OTP
 router.get('/verifyOtp', noCache, userController.showVerifyOTP);
 router.post('/verifyOtp', noCache, userController.verifyOTP);
