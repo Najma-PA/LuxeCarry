@@ -101,29 +101,34 @@ exports.updateProduct = async (id, data, files, variants) => {
 
   if (!product) throw new Error("Product not found");
 
-  let updatedImages = product.images;
-  // If new images uploaded
+  let updatedImages = [];
+
+  // 1. Handle Existing Images (passed as array/string in data.existingImages)
+  if (data.existingImages) {
+    updatedImages = Array.isArray(data.existingImages) 
+      ? data.existingImages 
+      : [data.existingImages];
+  }
+
+  // 2. Handle New Uploads
   if (files && files.length > 0) {
-    if (files.length < 3) {
-      throw new Error("Minimum 3 images required");
-    }
-
-    const newImages = [];
-
     for (let file of files) {
-
       const filename = `product-${Date.now()}-${file.originalname}`;
       const outputPath = path.join('public/uploads', filename);
 
       fs.copyFileSync(file.path, outputPath);
+      updatedImages.push(`/uploads/${filename}`);
 
-      newImages.push(`/uploads/${filename}`);
-
+      // delete temp file
       fs.unlinkSync(file.path);
     }
-
-    updatedImages = newImages;
   }
+
+  // 3. Validation
+  if (updatedImages.length < 3) {
+    throw new Error("Minimum 3 images required");
+  }
+
   return Product.findByIdAndUpdate(id, {
     name: data.name,
     category: data.category,
