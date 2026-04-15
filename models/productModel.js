@@ -19,7 +19,7 @@ const variantSchema = new mongoose.Schema({
 }, { _id: false });
 
 
-// 🔹 PRODUCT SCHEMA
+// PRODUCT SCHEMA
 const productSchema = new mongoose.Schema({
 
   name: {
@@ -45,7 +45,7 @@ const productSchema = new mongoose.Schema({
   },
 
   offer: {
-    type: Number, // percentage (e.g., 20%)
+    type: Number, 
     default: 0
   },
 
@@ -58,7 +58,7 @@ const productSchema = new mongoose.Schema({
 
   images: [
     {
-      type: String // image path
+      type: String 
     }
   ],
 
@@ -72,13 +72,13 @@ const productSchema = new mongoose.Schema({
 });
 
 
-// 🔥 VIRTUAL FIELD (DISCOUNTED PRICE)
+// VIRTUAL FIELD 
 productSchema.virtual('finalPrice').get(function () {
   return this.price - (this.price * this.offer / 100);
 });
 
 
-// 🔥 OPTIONAL: Ensure virtuals show in JSON
+// Ensure virtuals show in JSON
 productSchema.set('toJSON', { virtuals: true });
 productSchema.set('toObject', { virtuals: true });
 
