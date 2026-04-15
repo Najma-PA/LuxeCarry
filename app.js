@@ -38,8 +38,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 /* GLOBAL LOCALS */
 app.use((req, res, next) => {
-  res.locals.user = req.user || null;
-  res.locals.admin = req.session.admin || null;
+  res.locals.user = req.user || (req.session && req.session.user ? req.session.user : null);
+  res.locals.admin = req.session && req.session.admin ? req.session.admin : null;
   next();
 });
 
