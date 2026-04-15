@@ -210,7 +210,7 @@ async function addToCart(productId) {
     }
 
   } catch (err) {
-    alert('Error adding to cart');
+    alert('Error adding to cart: ' + err.message);
   }
 }
 </script>
