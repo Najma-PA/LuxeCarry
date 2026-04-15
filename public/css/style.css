@@ -369,3 +369,58 @@ text-align:center;
 .custom-navbar {
   background-color: #f8e8d8; /* change to any color you like */
 }
+
+.filters{
+  background-color: #faf1e6;
+}
+
+
+/* Cart Card */
+.cart-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+/* Image */
+.cart-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Quantity Buttons */
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.qty-btn:hover {
+  background: #f3f3f3;
+}
+
+/* Remove Button */
+.remove-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: #999;
+}
+
+.remove-btn:hover {
+  color: red;
+}
+
+/* Summary */
+.summary-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
