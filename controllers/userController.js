@@ -297,10 +297,10 @@ exports.registerUser = async (req, res) => {
 exports.userHome = async (req, res) => {
   try {
 
-    // ✅ Get active categories
+    //Get active categories
     const categories = await Category.find({ isActive: true });
 
-    // ✅ Get latest products (limit for "New Arrivals")
+    //Get latest products (limit for "New Arrivals")
     const products = await Product.find({ isActive: true })
       .populate('category')
       .sort({ createdAt: -1 })

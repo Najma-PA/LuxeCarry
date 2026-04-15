@@ -50,8 +50,15 @@ exports.loadProductDetails = async (req, res) => {
       return res.redirect('/user/shop');
     }
 
+    const relatedProducts = await Product.find({
+      category: product.category._id,
+      _id: { $ne: product._id },
+      isActive: true
+    }).limit(4).lean();
+
     res.render('user/product', {
-      product
+      product,
+      relatedProducts
     });
 
   } catch (err) {
