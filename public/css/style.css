@@ -83,6 +83,7 @@ color:#060000;
 .shop-btn{
 background:#c26a00;
 color:white;
+text-decoration: none;
 border:none;
 padding:10px 20px;
 border-radius:8px;
@@ -152,15 +153,22 @@ padding:6px 15px;
 border-radius:20px;
 font-size:13px;
 }
-
-.buy-btn{
-background:white;
-color:black;
-border-color: #a85700;
-padding:6px 15px;
-border-radius:20px;
-font-size:13px;
+.buy-btn {
+  background: white;
+  color: #a85700;
+  border: 1px solid #a85700;
+  padding: 6px 15px;
+  border-radius: 20px;
+  font-size: 13px;
+  display: inline-block;
+  transition: 0.3s;
 }
+
+.buy-btn:hover {
+  background: #a85700;
+  color: white;
+}
+
 
 /* offer */
 
@@ -357,4 +365,7 @@ gap:10px;
 text-align:center;
 }
 
+}
+.custom-navbar {
+  background-color: #f8e8d8; /* change to any color you like */
 }

@@ -124,7 +124,7 @@ table td {
 
 .admin-sidebar .nav-link.active {
   background: #dbeafe;
-  color: #2563eb;
+  color:#a16207;
   font-weight: 500;
 }
 
@@ -138,3 +138,72 @@ table td {
   background: #ccc;
   border-radius: 50%;
 }
+
+.main-content { background-color: #f8fafc; min-height: 100vh; }
+.card-shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); border: 1px solid #f1f5f9; border-radius: 12px; background: white; }
+.pill-badge { font-weight: 600; font-size: 12px; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px; }
+.badge-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+.status-in-stock { background-color: #ecfdf5; color: #059669; }
+.status-in-stock .badge-dot { background-color: #10b981; }
+
+.status-low-stock { background-color: #fef3c7; color: #d97706; }
+.status-low-stock .badge-dot { background-color: #f59e0b; }
+
+.status-out-stock { background-color: #fef2f2; color: #dc2626; }
+.status-out-stock .badge-dot { background-color: #ef4444; }
+
+.tab-nav a { text-decoration: none; font-weight: 600; font-size: 14px; color: #64748b; padding-bottom: 12px; border-bottom: 2px solid transparent; transition: 0.2s; }
+.tab-nav a:hover { color: #334155; }
+.tab-nav a.active { color: #ca8a04; border-bottom: 2px solid #ca8a04; }
+.low-dot { display: inline-block; width: 6px; height: 6px; background-color: #ef4444; border-radius: 50%; position: relative; top: -6px; right: -2px; }
+
+.search-bar-wrapper { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 4px 12px; display:flex; align-items: center; }
+.search-bar-wrapper input { border: none; outline: none; font-size: 14px; width: 250px; background: transparent; }
+
+.table th { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.8px; font-weight: 700; padding: 16px 24px; border-bottom: 1px solid #f1f5f9; background-color: #ffffff; }
+.table td { padding: 18px 24px; font-size: 14px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.table tr:last-child td { border-bottom: none; }
+.table-hover tbody tr:hover { background-color: #f8fafc; }
+
+.btn-action { color: #94a3b8; background: transparent; border: none; font-size: 16px; transition: color 0.2s; text-decoration: none; display: inline-block; margin-right: 8px;}
+.btn-action:hover { color: #475569; }
+.btn-gold { background-color: #ca8a04; color: white; font-weight: 600; border-radius: 6px; padding: 8px 20px; transition: 0.2s; text-decoration: none; }
+.btn-gold:hover { background-color: #a16207; color: white; }
+
+.summary-card { background: white; border-radius: 12px; padding: 24px; display: flex; align-items: center; gap: 20px; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1); border: 1px solid #f1f5f9; }
+.icon-container { width: 56px; height: 56px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 24px; }
+.ic-blue { background-color: #eff6ff; color: #3b82f6; }
+.ic-orange { background-color: #fff7ed; color: #ea580c; }
+.ic-purple { background-color: #faf5ff; color: #a855f7; }
+
+.pagination-wrapper { padding: 16px 24px; border-top: 1px solid #f1f5f9; }
+.page-btn { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; font-weight: 500; font-size: 14px; transition: 0.2s; margin-right: 6px;}
+.page-btn:hover { background: #f8fafc; }
+.page-btn.active { background: #ca8a04; color: white; border-color: #ca8a04; }
+
+
+.main-content { background-color: #f8fafc; min-height: 100vh; font-family: 'Inter', system-ui, sans-serif; }
+.card-shadow { box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); border: 1px solid #f1f5f9; border-radius: 12px; background: white; overflow: hidden; }
+.pill-badge { font-weight: 600; font-size: 12px; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; justify-content: center; }
+
+.status-active { background-color: #ecfdf5; color: #059669; }
+.status-inactive { background-color: #f1f5f9; color: #64748b; }
+
+.search-bar-wrapper { background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 16px; display:flex; align-items: center; width: 300px; }
+.search-bar-wrapper input { border: none; outline: none; font-size: 14px; width: 100%; background: transparent; }
+
+.table th { font-size: 11px; text-transform: uppercase; color: #64748b; letter-spacing: 0.8px; font-weight: 700; padding: 20px 24px; border-bottom: 1px solid #f1f5f9; background-color: #ffffff; }
+.table td { padding: 20px 24px; font-size: 14px; vertical-align: middle; border-bottom: 1px solid #f1f5f9; color: #334155; }
+.table tr:last-child td { border-bottom: none; }
+.table-hover tbody tr:hover { background-color: #f8fafc; }
+
+.btn-action { color: #94a3b8; background: transparent; border: none; font-size: 16px; transition: color 0.2s; text-decoration: none; display: inline-block; margin-right: 12px;}
+.btn-action:hover { color: #475569; }
+.btn-gold { background-color: #ca8a04; color: white; font-weight: 600; border-radius: 6px; padding: 10px 24px; transition: 0.2s; text-decoration: none; border: none; }
+.btn-gold:hover { background-color: #a16207; color: white; }
+
+.pagination-wrapper { padding: 16px 24px; border-top: 1px solid #f1f5f9; display: flex; justify-content: flex-end; }
+.page-btn { padding: 6px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #475569; font-weight: 500; font-size: 14px; transition: 0.2s; margin-left: 8px;}
+.page-btn:hover { background: #f8fafc; }
+.page-btn.active { background: #ca8a04; color: white; border-color: #ca8a04; }
