@@ -4,7 +4,7 @@ const path = require('path');
 const fs = require('fs');
 
 
-// 🟢 GET PRODUCTS (Search + Pagination + Tabs)
+//GET PRODUCTS (Search + Pagination + Tabs)
 exports.getProducts = async (query) => {
 
   let {
@@ -24,7 +24,7 @@ exports.getProducts = async (query) => {
     filter.name = { $regex: search, $options: 'i' };
   }
 
-  // 📊 Status Tabs
+  //Status Tabs
   if (status === 'active') {
     filter.isActive = true;
   }
@@ -60,8 +60,7 @@ exports.getProducts = async (query) => {
 };
 
 exports.addProduct = async (data, files, variants) => {
-
-  // 🔥 VALIDATION
+  // VALIDATION
   if (!files || files.length < 3) {
     throw new Error("Minimum 3 images required");
   }
@@ -73,10 +72,8 @@ exports.addProduct = async (data, files, variants) => {
     const filename = `product-${Date.now()}-${file.originalname}`;
     const outputPath = path.join('public/uploads', filename);
 
-    // 🖼️ Resize Image
-    await sharp(file.path)
-      .resize(500, 500)
-      .toFile(outputPath);
+    // Copy file
+    fs.copyFileSync(file.path, outputPath);
 
     imagePaths.push(`/uploads/${filename}`);
 
@@ -84,7 +81,7 @@ exports.addProduct = async (data, files, variants) => {
     fs.unlinkSync(file.path);
   }
 
-  // 🧠 Create Product
+  // Create Product
   return Product.create({
     name: data.name,
     category: data.category,
@@ -105,9 +102,11 @@ exports.updateProduct = async (id, data, files, variants) => {
   if (!product) throw new Error("Product not found");
 
   let updatedImages = product.images;
-
-  // 🔥 If new images uploaded
+  // If new images uploaded
   if (files && files.length > 0) {
+    if (files.length < 3) {
+      throw new Error("Minimum 3 images required");
+    }
 
     const newImages = [];
 
@@ -116,9 +115,7 @@ exports.updateProduct = async (id, data, files, variants) => {
       const filename = `product-${Date.now()}-${file.originalname}`;
       const outputPath = path.join('public/uploads', filename);
 
-      await sharp(file.path)
-        .resize(500, 500)
-        .toFile(outputPath);
+      fs.copyFileSync(file.path, outputPath);
 
       newImages.push(`/uploads/${filename}`);
 
@@ -127,7 +124,6 @@ exports.updateProduct = async (id, data, files, variants) => {
 
     updatedImages = newImages;
   }
-
   return Product.findByIdAndUpdate(id, {
     name: data.name,
     category: data.category,

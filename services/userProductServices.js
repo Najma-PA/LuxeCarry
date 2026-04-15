@@ -8,7 +8,8 @@ exports.getShopProducts = async (query) => {
     minPrice,
     maxPrice,
     sort,
-    page = 1
+    page = 1,
+    color
   } = query;
 
   page = parseInt(page);
@@ -16,7 +17,7 @@ exports.getShopProducts = async (query) => {
   const skip = (page - 1) * limit;
 
   let filter = {
-    isActive: true // 🔥 hide blocked products
+    isActive: true //hide blocked products
   };
 
   // 🔍 SEARCH
@@ -30,12 +31,20 @@ exports.getShopProducts = async (query) => {
   }
 
   //PRICE
-  if (minPrice && maxPrice) {
-    filter.price = {
-      $gte: Number(minPrice),
-      $lte: Number(maxPrice)
-    };
+  if(minPrice || maxPrice){
+    filter.price={};
+
+    if(minPrice)filter.price.$gte= Number(minPrice);
+    if(maxPrice)filter.price.$lte= Number(maxPrice);
   }
+  
+//COLOR FILTER 
+if (color) {
+  filter.$and = [
+    { "variants.type": { $regex: /^color$/i } },
+    { "variants.value": color }
+  ];
+}
 
   // SORTING
   let sortOption = {};
