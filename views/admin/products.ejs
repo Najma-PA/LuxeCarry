@@ -3,122 +3,161 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users</title>
+    <title>Products Inventory</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
 <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
 <link rel="stylesheet" href="/css/admin.css">
 
 </head>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <body>
-   <div class="d-flex">
+<div class="d-flex">
   <%- include('../partials/admin/sidebar', { active: 'inventory' }) %>
 
-  <div class="main-content p-4 w-100">
+  <div class="main-content p-5 w-100">
 
-  <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-end mb-4">
       <div>
-        <h4 class="fw-bold">Products</h4>
-        <small class="text-muted">Manage your handbag inventory and stock levels.</small>
+        <h2 class="fw-bold mb-1" style="color: #0f172a;">Products</h2>
+        <p class="text-muted mb-0" style="font-size: 15px;">Manage your handbag inventory and stock levels.</p>
       </div>
 
-       <!-- Search -->
-        <form method="GET" class="d-flex gap-2">
-          <input type="text" name="search" value="<%= search || '' %>"
-            class="form-control" placeholder="Search products...">
-
+      <div class="d-flex gap-3">
+        <!-- Search -->
+        <form method="GET" class="search-bar-wrapper position-relative" style="min-width: 260px;">
+          <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 14px;"></i>
+          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search products..." class="ms-2 w-100 pe-4" onchange="this.form.submit()">
           <% if (search) { %>
-            <a href="/admin/products" class="btn btn-outline-secondary">
-              <i class="fa-solid fa-xmark"></i>
+            <a href="/admin/products" class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #dc2626; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;" title="Clear Search">
+              <i class="fa-solid fa-circle-xmark fs-6"></i>
             </a>
-          <% } else { %>
-            <button type="submit" class="btn btn-outline-primary">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
           <% } %>
         </form>
 
-        <!-- Add Button -->
-        <a href="/admin/products/add" class="btn btn-warning text-white">
-          + Add Products
+        <a href="/admin/products/add" class="btn-gold d-flex align-items-center gap-2">
+          <i class="fa-solid fa-plus text-white" style="font-size: 12px;"></i> Add Product
         </a>
-
+      </div>
     </div> 
 
-    <!-- Tabs -->
-    <div class="card p-3">
+    <!-- Main Card -->
+    <div class="card-shadow mb-4">
 
-      <div class="d-flex gap-3 mb-3">
-        <a href="?status=all" class="<%= status==='all'?'fw-bold text-warning':'' %>">All Products</a>
-        <a href="?status=active">Active</a>
-        <a href="?status=low">Low Stock</a>
+      <!-- Tabs & Toolbar -->
+      <div class="d-flex justify-content-between align-items-center px-4 pt-3 pb-0 border-bottom" style="border-color: #f1f5f9 !important;">
+        <div class="tab-nav d-flex gap-4">
+          <a href="?status=all" class="<%= status==='all'?'active':'' %>">All Products</a>
+          <a href="?status=active" class="<%= status==='active'?'active':'' %>">Active</a>
+          <a href="?status=low" class="<%= status==='low'?'active':'' %>">Low Stock <span class="low-dot"></span></a>
+        </div>
       
       </div>
 
       <!-- Table -->
-      <table class="table align-middle">
+      <table class="table table-hover mb-0">
         <thead>
           <tr>
-            <th>Products</th>
-            <th>Category</th>
-            <th>Price</th>
-            <th>Offer</th>
-            <th>Stock Status</th>
-            <th>Actions</th>
+            <th>PRODUCTS</th>
+            <th>CATEGORY</th>
+            <th>PRICE</th>
+            <th>OFFER</th>
+            <th>STOCK STATUS</th>
+            <th>ACTIONS</th>
           </tr>
         </thead>
-
         <tbody>
-          <% products.forEach(p => { %>
-          <tr>
-
-            <td>
-              <strong><%= p.name %></strong><br>
-              <small class="text-muted"><%= p.description?.slice(0,40) %></small>
-            </td>
-
-            <td><%= p.category?.name %></td>
-
-            <td>₹<%= p.price %></td>
-
-            <td><%= p.offer || 0 %>%</td>
-
-            <!-- STOCK -->
-            <td>
-              <% if(p.stock === 0){ %>
-                <span class="badge bg-danger">Out of stock</span>
-              <% } else if(p.stock < 10){ %>
-                <span class="badge bg-warning text-dark"><%= p.stock %> in stock</span>
-              <% } else { %>
-                <span class="badge bg-success"><%= p.stock %> in stock</span>
-              <% } %>
-            </td>
-
-            <td class="d-flex gap-2">
-              <a href="/admin/products/edit/<%= p._id %>" class="btn btn-sm btn-outline-primary">
-                <i class="fa fa-pen"></i>
-              </a>
-
-              <button onclick="deleteProduct('<%= p._id %>')"
-                class="btn btn-sm btn-outline-danger">
-                <i class="fa fa-trash"></i>
-              </button>
-            </td>
-
-          </tr>
-          <% }) %>
+          <% if(products && products.length > 0) { %>
+            <% products.forEach(p => { %>
+            <tr>
+              <td>
+                <div class="fw-bold" style="color: #1e293b; font-size: 14px;"><%= p.name %></div>
+                <div class="text-muted mt-1" style="font-size: 12px;"><%= p.description?.slice(0,40) || 'Premium Collection' %></div>
+              </td>
+              <td><span style="color: #64748b;"><%= p.category?.name || 'Uncategorized' %></span></td>
+              <td><span class="fw-bold" style="color: #1e293b;">₹<%= p.price %></span></td>
+              <td><span style="color: #64748b;"><%= p.offer || 0 %>%</span></td>
+              <td>
+                <% if(p.stock === 0){ %>
+                  <span class="pill-badge status-out-stock"><span class="badge-dot"></span> Out of stock</span>
+                <% } else if(p.stock < 10){ %>
+                  <span class="pill-badge status-low-stock"><span class="badge-dot"></span> <%= p.stock %> in stock</span>
+                <% } else { %>
+                  <span class="pill-badge status-in-stock"><span class="badge-dot"></span> <%= p.stock %> in stock</span>
+                <% } %>
+              </td>
+              <td>
+                <a href="/admin/products/edit/<%= p._id %>" class="btn-action" title="Edit">
+                  <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
+                </a>
+                <button onclick="deleteProduct('<%= p._id %>')" class="btn-action" title="Delete">
+                  <i class="fa-regular fa-trash-can" style="font-size: 14px;"></i>
+                </button>
+              </td>
+            </tr>
+            <% }) %>
+          <% } else { %>
+            <tr><td colspan="6" class="text-center py-4 text-muted">No products found.</td></tr>
+          <% } %>
         </tbody>
       </table>
 
       <!-- Pagination -->
-      <div class="text-center">
-        <% for(let i=1;i<=totalPages;i++){ %>
-          <a href="?page=<%= i %>" class="page-btn <%= currentPage===i?'active':'' %>"><%= i %></a>
+      <div class="pagination-wrapper d-flex gap-1 align-items-center">
+        <% if(currentPage > 1) { %>
+          <a href="?page=<%= currentPage - 1 %>&status=<%= status %>&search=<%= search %>" class="page-btn"><i class="fa-solid fa-chevron-left"></i></a>
+        <% } else { %>
+          <span class="page-btn text-muted" style="background:#f8fafc;"><i class="fa-solid fa-chevron-left"></i></span>
         <% } %>
+        
+        <% for(let i=1; i<=totalPages; i++){ %>
+          <a href="?page=<%= i %>&status=<%= status %>&search=<%= search %>" class="page-btn <%= currentPage===i?'active':'' %>"><%= i %></a>
+        <% } %>
+
+        <% if(currentPage < totalPages) { %>
+          <a href="?page=<%= currentPage + 1 %>&status=<%= status %>&search=<%= search %>" class="page-btn"><i class="fa-solid fa-chevron-right"></i></a>
+        <% } else { %>
+          <span class="page-btn text-muted" style="background:#f8fafc;"><i class="fa-solid fa-chevron-right"></i></span>
+        <% } %>
+      </div>
+
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row g-4 mb-3">
+      
+      <div class="col-md-4">
+        <div class="summary-card">
+          <div class="icon-container ic-blue"><i class="fa-solid fa-box"></i></div>
+          <div>
+            <div class="text-muted" style="font-size: 13px; font-weight: 500;">Total SKUs</div>
+            <div class="fw-bold" style="font-size: 24px; color: #0f172a;"><%= typeof totalSKUs !== 'undefined' ? totalSKUs : 0 %></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="summary-card">
+          <div class="icon-container ic-orange"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <div>
+            <div class="text-muted" style="font-size: 13px; font-weight: 500;">Low Stock Alerts</div>
+            <div class="fw-bold" style="font-size: 24px; color: #0f172a;"><%= typeof lowStockCount !== 'undefined' ? lowStockCount : 0 %></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="summary-card">
+          <div class="icon-container ic-purple"><i class="fa-solid fa-money-bill-wave"></i></div>
+          <div>
+            <div class="text-muted" style="font-size: 13px; font-weight: 500;">Inventory Value</div>
+            <% let displayVal = '₹0';
+               if(typeof inventoryValue !== 'undefined' && inventoryValue > 0) {
+                 displayVal = inventoryValue >= 1000 ? '₹' + (inventoryValue/1000).toFixed(1) + 'K' : '₹' + inventoryValue;
+               }
+            %>
+            <div class="fw-bold" style="font-size: 24px; color: #0f172a;"><%= displayVal %></div>
+          </div>
+        </div>
       </div>
 
     </div>
@@ -133,8 +172,12 @@
 function deleteProduct(id) {
   Swal.fire({
     title: 'Delete product?',
+    text: "Are you sure you want to permanently remove this product?",
     icon: 'warning',
-    showCancelButton: true
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Yes, delete it!'
   }).then(async (result) => {
     if (result.isConfirmed) {
       await fetch(`/admin/products/delete/${id}`);

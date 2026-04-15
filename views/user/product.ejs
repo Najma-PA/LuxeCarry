@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= product.name %> - LuxeCarry</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  .img-zoom-container {
+    position: relative;
+    overflow: hidden;
+    cursor: crosshair;
+    border-radius: 12px;
+    background: #f8f9fa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 500px;
+  }
+  .img-zoom-container img {
+    /* Set dimensions for contained viewing but allow large native resolution for zooming */
+    max-width: 100%;
+    max-height: 100%;
+    transition: transform 0.1s ease;
+  }
+  .img-zoom-container:hover img {
+    transform: scale(2.5); /* 2.5x Zoom */
+  }
+  .thumbnail {
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    transition: 0.2s;
+    background: #f8f9fa;
+    width: 80px; 
+    height: 80px;
+    object-fit: contain;
+    padding: 5px;
+  }
+  .thumbnail.active {
+    border-color: #c98a2c;
+  }
+  .add-cart-lg {
+    background-color: #111;
+    color: #fff;
+    border: none;
+    padding: 14px 0;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    border-radius: 30px;
+    transition: 0.3s;
+  }
+  .add-cart-lg:hover {
+    background-color: #333;
+  }
+  .product-title {
+    font-family: 'Playfair Display', "Times New Roman", serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #111;
+  }
+  .product-price {
+    font-size: 22px;
+    font-weight: bold;
+    color: #111;
+  }
+</style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container mt-5 mb-5 pb-5">
+  
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb" style="font-size: 13px;">
+      <li class="breadcrumb-item"><a href="/user/home" class="text-muted text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="/user/shop" class="text-muted text-decoration-none">Shop</a></li>
+      <li class="breadcrumb-item active"><%= product.name %></li>
+    </ol>
+  </nav>
+
+  <div class="row g-5">
+    
+    <!-- LEFT: IMAGES -->
+    <div class="col-md-6">
+      <div class="row g-3">
+        
+        <!-- THUMBNAILS -->
+        <div class="col-2 d-flex flex-column gap-2">
+          <% product.images.forEach((img, idx) => { %>
+            <img src="<%= img %>" 
+                 class="thumbnail <%= idx === 0 ? 'active' : '' %>" 
+                 onclick="changeMainImage(this, '<%= img %>')">
+          <% }) %>
+        </div>
+
+        <!-- MAIN IMAGE -->
+        <div class="col-10">
+          <div class="img-zoom-container" id="zoomContainer">
+            <img src="<%= product.images[0] %>" id="mainImg" alt="Product Image">
+          </div>
+          <div class="text-center mt-2 text-muted" style="font-size: 12px;">
+            <i class="fa-solid fa-search-plus me-1"></i> Hover over image to zoom
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT: PRODUCT INFO -->
+    <div class="col-md-6">
+      <% if (product.offer > 0 || (product.category && product.category.offer > 0)) { 
+        let bestOffer = Math.max(product.offer || 0, product.category ? product.category.offer : 0);
+      %>
+        <span class="badge bg-danger rounded-pill px-2 py-1 mb-3" style="font-size: 11px; letter-spacing: 0.5px;"><%= bestOffer %>% OFF</span>
+      <% } %>
+
+      <h1 class="product-title mb-2"><%= product.name %></h1>
+      
+      <div class="mb-3">
+        <span style="color: #c98a2c; font-size: 13px;">
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star"></i>
+          <i class="fa-solid fa-star-half-stroke"></i>
+        </span>
+        <span class="text-muted ms-2" style="font-size: 13px;">(128 Reviews)</span>
+      </div>
+
+      <div class="mb-4">
+        <% if (product.price > product.finalPrice) { %>
+          <span class="product-price">₹<%= product.finalPrice.toLocaleString() %></span>
+          <span class="text-muted text-decoration-line-through ms-2" style="font-size: 16px;">₹<%= product.price.toLocaleString() %></span>
+        <% } else { %>
+          <span class="product-price">₹<%= product.price.toLocaleString() %></span>
+        <% } %>
+      </div>
+
+      <p class="text-muted mb-4" style="line-height: 1.6; font-size: 15px;">
+        <%= product.description || 'Experience the pinnacle of luxury with this elegantly crafted piece from LuxeCarry. Designed for both functionality and timeless appeal.' %>
+      </p>
+
+      <% if (product.stock > 0) { %>
+        <p class="text-success mb-4 fw-bold" style="font-size: 13px;"><i class="fa-solid fa-check-circle me-1"></i> In Stock (<%= product.stock %> available)</p>
+        
+        <button class="btn btn-dark w-100 add-cart-lg" onclick="addToCart('<%= product._id %>')">
+          ADD TO CART
+        </button>
+      <% } else { %>
+        <p class="text-danger mb-4 fw-bold" style="font-size: 13px;"><i class="fa-solid fa-times-circle me-1"></i> Out of Stock</p>
+        <button class="btn btn-secondary w-100 add-cart-lg" disabled>
+          OUT OF STOCK
+        </button>
+      <% } %>
+
+      <hr class="mt-5 mb-4" style="opacity: 0.1;">
+      
+      <div class="row text-center text-muted g-3" style="font-size: 12px;">
+        <div class="col-4">
+          <i class="fa-solid fa-truck-fast mb-2 fs-5" style="color: #c98a2c;"></i><br>
+          Fast Delivery
+        </div>
+        <div class="col-4">
+          <i class="fa-solid fa-shield-halved mb-2 fs-5" style="color: #c98a2c;"></i><br>
+          1 Year Warranty
+        </div>
+        <div class="col-4">
+          <i class="fa-solid fa-rotate-left mb-2 fs-5" style="color: #c98a2c;"></i><br>
+          Easy Returns
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+  // Image Zoom Logic
+  const container = document.getElementById('zoomContainer');
+  const img = document.getElementById('mainImg');
+
+  container.addEventListener('mousemove', e => {
+    const rect = container.getBoundingClientRect();
+    const x = e.clientX - rect.left; 
+    const y = e.clientY - rect.top;  
+    
+    // Calculate percentage position
+    const xPercent = (x / rect.width) * 100;
+    const yPercent = (y / rect.height) * 100;
+    
+    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+  });
+
+  container.addEventListener('mouseleave', () => {
+    img.style.transformOrigin = `center center`;
+  });
+
+  // Thumbnail click logic
+  function changeMainImage(element, src) {
+    document.getElementById('mainImg').src = src;
+    
+    // Update active class
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+      thumb.classList.remove('active');
+    });
+    element.classList.add('active');
+  }
+
+  // Add to cart dummy function
+  async function addToCart(id){
+    try{
+      const res = await fetch('/cart/add/' + id);
+      const data = await res.json();
+      if(data.success){
+        alert("Added to cart successfully!");
+      }else{
+        alert(data.message || "Could not add to cart");
+      }
+    }catch(err){
+      alert("Added to cart successfully (Simulation)");
+    }
+  }
+</script>
+
+</body>
+</html>

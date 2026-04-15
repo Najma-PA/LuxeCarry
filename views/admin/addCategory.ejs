@@ -20,7 +20,7 @@
 
   <div class="card p-4">
 
-    <form method="POST" action="/admin/categories/add">
+    <form method="POST" action="/admin/categories/add" enctype="multipart/form-data">
 
       <div class="mb-3">
         <label class="form-label">Category Name</label>
@@ -35,6 +35,11 @@
       <div class="mb-3">
         <label class="form-label">Offer (%)</label>
         <input type="number" name="offer" class="form-control">
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Category Image</label>
+        <input type="file" name="image" class="form-control" accept="image/*">
       </div>
 
       <button class="btn btn-warning text-white">Save Category</button>

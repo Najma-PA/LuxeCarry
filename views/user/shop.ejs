@@ -7,6 +7,7 @@
 <title>Shop - LuxeCarry</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link rel="stylesheet" href="/css/style.css">
 </head>
 
@@ -27,53 +28,115 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 <!-- FILTERS -->
 <div class="col-md-3">
 
-<form method="GET">
+<form method="GET" id="filterForm">
+  <!-- Top header -->
+  <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+    <h5 class="mb-0 fw-bold" style="color: #111827; font-size: 18px;">Filters</h5>
+    <a href="/user/shop" class="text-decoration-none fw-bold" style="color: #c98a2c; font-size: 11px; letter-spacing: 0.5px;">CLEAR ALL</a>
+  </div>
+  <hr style="border-color: #e5e7eb; margin-bottom: 24px; opacity: 1;">
 
-<!-- SEARCH -->
-<div class="mb-3">
-<input type="text" name="search" value="<%= query.search || '' %>"
-  class="form-control" placeholder="Search products...">
+  <!-- SEARCH PRODUCTS -->
+  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Search Products</h6>
+  <div class="position-relative mb-4">
+    <i class="fa-solid fa-search position-absolute" style="left: 15px; top: 50%; transform: translateY(-50%); color: #9ca3af; font-size: 14px;"></i>
+    <input type="text" name="search" value="<%= query.search || '' %>"
+      class="form-control" placeholder="Search our collection..." 
+      style="border-radius: 25px; padding: 10px 15px 10px 40px; border: 1px solid #e5e7eb; box-shadow: 0 2px 5px rgba(0,0,0,0.02); font-size: 14px;">
+  </div>
 
-<% if(query.search){ %>
-  <a href="/user/shop" class="small text-danger">Clear</a>
-<% } %>
-</div>
+  <!-- CATEGORY -->
+  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Category</h6>
+  <div class="mb-4">
+    <% if(typeof categories !== 'undefined' && categories && categories.length){ %>
+      <% categories.forEach(cat => { %>
+        <div class="form-check mb-2 d-flex align-items-center">
+          <input class="form-check-input mt-0"
+            type="radio"
+            name="category"
+            id="cat_<%= cat._id %>"
+            value="<%= cat._id %>"
+            <%= query.category == cat._id ? 'checked' : '' %>
+            style="width: 18px; height: 18px; border: 1px solid #d1d5db; box-shadow: none; cursor: pointer; accent-color: #c98a2c; margin-right: 8px;">
+          <label class="form-check-label" for="cat_<%= cat._id %>" style="color: #111827; font-size: 14px; cursor: pointer;"><%= cat.name %></label>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
 
-<!-- CATEGORY -->
-<h6>Category</h6>
-<% if(categories && categories.length){ %>
-  <% categories.forEach(cat => { %>
-    <div class="form-check">
-      <input class="form-check-input"
-        type="radio"
-        name="category"
-        value="<%= cat._id %>"
-        <%= query.category == cat._id ? 'checked' : '' %>>
-
-      <label class="form-check-label"><%= cat.name %></label>
+  <!-- PRICE RANGE -->
+  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Price Range</h6>
+  <div class="mb-4">
+    <input type="range" class="form-range" name="maxPrice" min="0" max="50000" step="500" value="<%= query.maxPrice || 50000 %>" id="priceRange" style="accent-color: #ebd5b3; height: 6px; cursor: pointer;">
+    <div class="d-flex justify-content-between mt-1">
+      <span class="fw-bold" style="font-size: 12px;">0₹</span>
+      <span class="fw-bold" style="font-size: 12px;" id="priceLabel"><%= query.maxPrice ? query.maxPrice + '₹' : '50,000₹' %></span>
     </div>
-  <% }) %>
-<% } %>
+    
+    <script>
+      document.getElementById('priceRange').addEventListener('input', function(e) {
+        document.getElementById('priceLabel').innerText = Number(e.target.value).toLocaleString() + '₹';
+      });
+    </script>
+  </div>
 
-<!-- PRICE -->
-<h6 class="mt-3">Price Range</h6>
-<input type="number" name="minPrice" value="<%= query.minPrice || '' %>"
-  class="form-control mb-2" placeholder="Min">
+  <!-- COLOR -->
+  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Color</h6>
+  <div class="d-flex gap-2 flex-wrap align-items-center mb-4">
+    <% if(typeof colors !== 'undefined' && colors && colors.length){ %>
+      <% colors.forEach(c => { %>
+        <label style="cursor:pointer; display: flex; align-items: center; justify-content: center;" class="m-1">
+          <input type="radio"
+                 name="color"
+                 value="<%= c %>"
+                 hidden
+                 <%= query.color === c ? 'checked' : '' %>>
+          <span style="
+            display:inline-block;
+            width:26px;
+            height:26px;
+            border-radius:50%;
+            background-color:<%= c %>;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08); /* slight border */
+            <%= query.color === c ? 'outline: 2px solid #CFA360; outline-offset: 3px;' : '' %>
+          ">
+          </span>
+        </label>
+      <% }) %>
+    <% } %>
+  </div>
 
-<input type="number" name="maxPrice" value="<%= query.maxPrice || '' %>"
-  class="form-control mb-2" placeholder="Max">
+  <!-- RATING -->
+  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Rating</h6>
+  <div class="mb-4">
+    <div class="form-check mb-2 d-flex align-items-center">
+      <input class="form-check-input mt-0"
+        type="radio"
+        name="rating"
+        id="rating4"
+        value="4"
+        <%= query.rating == '4' ? 'checked' : '' %>
+        style="width: 18px; height: 18px; border: 1px solid #d1d5db; box-shadow: none; cursor: pointer; accent-color: #c98a2c; margin-right: 8px;">
+      <label class="form-check-label pt-1" for="rating4" style="color: #798b9e; font-size: 14px; cursor: pointer;">
+         <span style="color: #c98a2c; font-size: 14px;"><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></span> & Up
+      </label>
+    </div>
+  </div>
 
-<!-- SORT -->
-<h6 class="mt-3">Sort</h6>
-<select name="sort" class="form-select mb-3">
-  <option value="">Default</option>
-  <option value="low-high" <%= query.sort==='low-high'?'selected':'' %>>Price Low → High</option>
-  <option value="high-low" <%= query.sort==='high-low'?'selected':'' %>>Price High → Low</option>
-  <option value="a-z" <%= query.sort==='a-z'?'selected':'' %>>A-Z</option>
-  <option value="z-a" <%= query.sort==='z-a'?'selected':'' %>>Z-A</option>
-</select>
+  <!-- SORT -->
+  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Sort</h6>
+  <select name="sort" class="form-select mb-4" style="border-radius: 8px; border: 1px solid #e5e7eb; padding: 10px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); color: #374151;">
+    <option value="">Default</option>
+    <option value="low-high" <%= query.sort==='low-high'?'selected':'' %>>Price Low → High</option>
+    <option value="high-low" <%= query.sort==='high-low'?'selected':'' %>>Price High → Low</option>
+    <option value="a-z" <%= query.sort==='a-z'?'selected':'' %>>A-Z</option>
+    <option value="z-a" <%= query.sort==='z-a'?'selected':'' %>>Z-A</option>
+  </select>
 
-<button class="btn btn-warning w-100">Apply Filters</button>
+  <!-- APPLY BUTTON -->
+  <button type="submit" class="btn w-100 fw-bold pb-2 pt-2 mb-3 mt-2 d-flex justify-content-center align-items-center" style="background-color: #b36b00; color: white; border-radius: 12px; font-size: 13px; letter-spacing: 1px; transition: background 0.2s; border: none;" onmouseover="this.style.backgroundColor='#995c00'" onmouseout="this.style.backgroundColor='#b36b00'">
+    APPLY FILTERS
+  </button>
 
 </form>
 
@@ -84,45 +147,78 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 
 <div class="row">
 
-<% if(products && products.length > 0){ %>
+<% if(typeof products !== 'undefined' && products && products.length > 0){ %>
 
   <% products.forEach(p => { %>
 
   <div class="col-md-4 mb-4">
-
-    <div class="card p-2 product-card">
-
-      <img src="<%= p.images[0] %>" class="img-fluid">
-
-      <h6 class="mt-2"><%= p.name %></h6>
-
-      <p>
-        ₹<%= p.finalPrice %>
-        <small class="text-muted text-decoration-line-through">
-          ₹<%= p.price %>
-        </small>
-      </p>
-
-      <% if(p.stock === 0){ %>
-        <span class="text-danger">Out of Stock</span>
-      <% } %>
-
-      <div class="d-flex gap-2">
-
-        <button class="btn btn-sm btn-outline-dark w-50"
-          onclick="addToCart('<%= p._id %>')">
-          Add to Cart
-        </button>
-
-        <a href="/product/<%= p._id %>"
-          class="btn btn-warning btn-sm w-50">
-          View
+    <div class="card border-0 shadow-sm product-card h-100" style="border-radius: 16px; overflow: hidden; background-color: #ffffff;">
+      
+      <!-- Image Wrapper -->
+      <div class="position-relative bg-light" style="padding: 20px; border-radius: 16px 16px 0 0; text-align: center; min-height: 220px; display: flex; align-items: center; justify-content: center;">
+        
+        <!-- Wishlist Heart -->
+        <a href="javascript:void(0)" class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm" style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; text-decoration: none; color: #6b7280; transition: color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#6b7280'">
+          <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
         </a>
 
+        <img src="<%= p.images[0] %>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
       </div>
 
-    </div>
+      <div class="card-body p-4 d-flex flex-column">
 
+        <!-- Offer Pill & Brand (Optional alignment) -->
+        <div class="d-flex align-items-center mb-2">
+          <% if(p.offer && p.offer > 0) { %>
+            <span class="badge text-white pb-1" style="background-color: #e53e3e; font-size: 9px; letter-spacing: 1px; border-radius: 4px;"><%= p.offer %>% OFF</span>
+          <% } %>
+        </div>
+
+        <!-- Product Name -->
+        <h6 class="fw-bold mb-2" style="font-size: 15px; color: #111827; font-family: 'Times New Roman', Times, serif;"><%= p.name %></h6>
+
+        <!-- Price -->
+        <div class="mb-1">
+          <span class="fw-bold" style="font-size: 16px; color: #1f2937;">₹<%= p.finalPrice ? p.finalPrice.toLocaleString() : p.price.toLocaleString() %></span>
+          <% if(p.offer && p.offer > 0) { %>
+            <small class="text-muted text-decoration-line-through ms-1" style="font-size: 13px;">
+              ₹<%= p.price.toLocaleString() %>
+            </small>
+          <% } %>
+        </div>
+
+        <!-- Rating -->
+        <div class="mb-3">
+          <span style="color: #c98a2c; font-size: 10px;">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-regular fa-star"></i>
+          </span>
+        </div>
+
+        <% if(p.stock === 0){ %>
+          <span class="text-danger fw-bold mb-3 d-block" style="font-size: 12px;">Out of Stock</span>
+        <% } %>
+
+        <!-- Buttons -->
+        <div class="d-flex gap-2 mt-auto">
+          <button class="btn btn-sm w-50 fw-bold"
+            onclick="addToCart('<%= p._id %>')"
+            style="border: 1px solid #c98a2c; color: #b76e10; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px; padding: 8px 0; background: transparent; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#fffbf2'" onmouseout="this.style.backgroundColor='transparent'">
+            ADD TO CART
+          </button>
+
+          <a href="/product/<%= p._id %>"
+            class="btn btn-sm w-50 fw-bold d-flex justify-content-center align-items-center"
+            style="background-color: #b76e10; color: #000000; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px;text-decoration: none; border: none; padding: 8px 0; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#a35f0b'" onmouseout="this.style.backgroundColor='#b76e10'">
+            BUY NOW
+          </a>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <% }) %>
