@@ -5,6 +5,7 @@ const passport = require("passport");
 
 const userController = require('../controllers/userController');
 const userProductController = require('../controllers/userProductController');
+const cartController = require('../controllers/cartController');
 const {
   isUserAuth,
   redirectIfUserLoggedIn
@@ -51,6 +52,17 @@ router.get('/shop', userProductController.loadShop);
 
 // Product Details
 router.get('/product/:id', userProductController.loadProductDetails);
+
+// Add to cart
+router.get('/cart/add/:id', isUserAuth, cartController.addToCart);
+
+// Get cart page
+router.get('/cart', isUserAuth, cartController.getCart);
+// Update quantity
+router.get('/cart/update/:id', isUserAuth, cartController.updateQuantity);
+
+// Remove item
+router.get('/cart/remove/:id', isUserAuth, cartController.removeItem);
 
 // OTP
 router.get('/verifyOtp', noCache, userController.showVerifyOTP);
