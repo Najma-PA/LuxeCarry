@@ -6,6 +6,7 @@ const passport = require("passport");
 const userController = require('../controllers/userController');
 const userProductController = require('../controllers/userProductController');
 const cartController = require('../controllers/cartController');
+const upload = require('../middleware/multer');
 const {
   isUserAuth,
   redirectIfUserLoggedIn
@@ -79,6 +80,7 @@ router.post('/resetPassword', userController.resetPassword);
 router.get("/profile", isUserAuth, userController.profilePage);
 router.get("/editProfile", isUserAuth, userController.loadEditProfile);
 router.post("/editProfile", isUserAuth, userController.updateProfile);
+router.post("/profile/update-picture", isUserAuth, upload.single('profilePic'), userController.updateProfilePic);
 
 // PASSWORD
 router.get("/changePassword", isUserAuth, userController.loadChangePassword);
