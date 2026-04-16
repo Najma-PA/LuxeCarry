@@ -169,6 +169,252 @@ font-size:13px;
   color: white;
 }
 
+/* --- NAVBAR BADGE --- */
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: #c26a00;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 50%;
+    border: 2px solid white;
+    min-width: 18px;
+    text-align: center;
+}
+
+/* --- PREMIUM CART UI --- */
+
+/* Typography */
+.text-serif {
+    font-family: 'Playfair Display', serif;
+}
+
+.cart-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 2rem;
+}
+
+.cart-title-container .item-count {
+    font-size: 1.1rem;
+    color: #798b9e;
+    font-weight: 500;
+}
+
+/* Cart Item Card */
+.premium-cart-card {
+    background: #fff;
+    border: 1px solid #f0f2f5;
+    border-radius: 20px;
+    padding: 1.5rem;
+    position: relative;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+}
+
+.premium-cart-card:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.cart-item-img {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    background-color: #f9fafb;
+    border-radius: 16px;
+    padding: 15px;
+}
+
+.cart-item-info {
+    flex-grow: 1;
+    padding-left: 2rem;
+}
+
+.item-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #161b22;
+    margin-bottom: 0.5rem;
+}
+
+.item-attr {
+    font-size: 13px;
+    color: #4b5563;
+    margin-bottom: 0.2rem;
+}
+
+.item-attr .label {
+    color: #9ca3af;
+}
+
+/* Qty pill */
+.qty-pill {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 50px;
+    padding: 6px 15px;
+    gap: 1.2rem;
+}
+
+.qty-pill button {
+    border: none;
+    background: transparent;
+    color: #111;
+    font-size: 18px;
+    font-weight: 400;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.qty-pill span {
+    font-weight: 500;
+    font-size: 15px;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* Remove Icon */
+.btn-remove-item {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    color: #9ca3af;
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+
+.btn-remove-item:hover {
+    color: #ef4444;
+}
+
+/* Pricing block */
+.pricing-block {
+    text-align: right;
+}
+
+.original-price {
+    font-size: 13px;
+    color: #9ca3af;
+    text-decoration: line-through;
+    margin-right: 10px;
+}
+
+.discount-tag {
+    background: #fff5f5;
+    color: #c26a00;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid #ffebeb;
+}
+
+.final-price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #c26a00;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+/* Order Summary */
+.summary-card-premium {
+    background: #fff;
+    border: 1px solid #f0f2f5;
+    border-radius: 20px;
+    padding: 2rem;
+    position: sticky;
+    top: 2rem;
+}
+
+.summary-card-premium h5 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1a1a1a;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 15px;
+    color: #4b5563;
+}
+
+.summary-row.savings {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.summary-row.total {
+    border-top: 1px solid #f1f1f1;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    color: #1a1a1a;
+}
+
+.summary-row.total .price {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.btn-checkout-premium {
+    background:#c26a00;
+    color: #fff;
+    width: 100%;
+    border: none;
+    border-radius: 50px;
+    padding: 1.1rem;
+    font-weight: 700;
+    font-size: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 1rem;
+    transition: all 0.3s;
+}
+
+.btn-checkout-premium:hover {
+    background: #c26a00;
+    transform: translateY(-2px);
+}
+
+.btn-checkout-premium:disabled {
+    background: #eee;
+    color: #999;
+    transform: none;
+}
+
+.btn-checkout {
+  background: #c26a00;
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.btn-checkout:hover {
+  background: #a85700;
+  color: white;
+}
+
+.btn-checkout:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+
 
 /* offer */
 
