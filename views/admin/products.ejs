@@ -24,14 +24,20 @@
 
       <div class="d-flex gap-3">
         <!-- Search -->
-        <form method="GET" class="search-bar-wrapper position-relative" style="min-width: 260px;">
+        <form method="GET" class="search-bar-wrapper position-relative" style="min-width: 320px;">
           <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 14px;"></i>
-          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search products..." class="ms-2 w-100 pe-4" onchange="this.form.submit()">
-          <% if (search) { %>
-            <a href="/admin/products" class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #dc2626; padding: 4px; border-radius: 50%; display: flex; align-items: center; justify-content: center; text-decoration: none;" title="Clear Search">
-              <i class="fa-solid fa-circle-xmark fs-6"></i>
-            </a>
-          <% } %>
+          <input type="hidden" name="status" value="<%= status %>">
+          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search products..." class="ms-2 w-100 pe-5" style="border: none; outline: none;">
+          <div class="position-absolute d-flex gap-2" style="right: 12px; top: 50%; transform: translateY(-50%);">
+            <% if (search) { %>
+              <a href="/admin/products?status=<%= status %>" class="text-decoration-none" style="color: #94a3b8;" title="Clear Search">
+                <i class="fa-solid fa-circle-xmark fs-6"></i>
+              </a>
+            <% } %>
+            <button type="submit" class="border-0 bg-transparent p-0" style="color: #c26a00;">
+              <i class="fa-solid fa-arrow-right-long fs-6"></i>
+            </button>
+          </div>
         </form>
 
         <a href="/admin/products/add" class="btn-gold d-flex align-items-center gap-2">
@@ -46,9 +52,9 @@
       <!-- Tabs & Toolbar -->
       <div class="d-flex justify-content-between align-items-center px-4 pt-3 pb-0 border-bottom" style="border-color: #f1f5f9 !important;">
         <div class="tab-nav d-flex gap-4">
-          <a href="?status=all" class="<%= status==='all'?'active':'' %>">All Products</a>
-          <a href="?status=active" class="<%= status==='active'?'active':'' %>">Active</a>
-          <a href="?status=low" class="<%= status==='low'?'active':'' %>">Low Stock <span class="low-dot"></span></a>
+          <a href="?status=all&search=<%= search %>" class="<%= status==='all'?'active':'' %>">All Products</a>
+          <a href="?status=active&search=<%= search %>" class="<%= status==='active'?'active':'' %>">Active</a>
+          <a href="?status=low&search=<%= search %>" class="<%= status==='low'?'active':'' %>">Low Stock <span class="low-dot"></span></a>
         </div>
       
       </div>
