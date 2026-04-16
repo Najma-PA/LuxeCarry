@@ -21,25 +21,26 @@ exports.getProducts = async (query) => {
 
   // 🔍 Search
   if (search) {
-    filter.name = { $regex: search, $options: 'i' };
+    const searchRegex = { $regex: search.trim(), $options: 'i' };
+    
+    // 1. Find categories that match search
+    const Category = require('../models/categoryModel');
+    const matchedCategories = await Category.find({ name: searchRegex }).select('_id');
+    const categoryIds = matchedCategories.map(c => c._id);
+
+    filter.$or = [
+      { name: searchRegex },
+      { category: { $in: categoryIds } }
+    ];
   }
 
-  //Status Tabs
+  // Status Tabs
   if (status === 'active') {
     filter.isActive = true;
-  }
-
-  if (status === 'archived') {
+  } else if (status === 'archived') {
     filter.isActive = false;
-  }
-
-  if (status === 'low') {
+  } else if (status === 'low') {
     filter.stock = { $lt: 10 };
-  }
-
-  // Default
-  if (status === 'all') {
-    filter = {};
   }
 
   const products = await Product.find(filter)
