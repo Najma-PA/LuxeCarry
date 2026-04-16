@@ -373,7 +373,7 @@
           <button type="button" onclick="handleBuyNow()" class="btn-buy-now">BUY NOW</button>
           <button type="button" onclick="handleAddToCart()" class="btn-add-cart">ADD TO CART</button>
           
-          <a href="javascript:void(0)" class="btn-heart text-decoration-none">
+          <a href="javascript:void(0)" onclick="toggleWishlist('<%= product._id %>')" class="btn-heart text-decoration-none">
             <i class="fa-regular fa-heart"></i>
           </a>
         </div>
@@ -548,6 +548,35 @@
     // document.querySelector('.product-title').innerText = `${baseName} ( ${selectedColor}${selectedSize ? ', ' + selectedSize : ''} )`;
   }
 
+  async function toggleWishlist(productId) {
+    try {
+      const res = await fetch('/user/wishlist/toggle', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId })
+      });
+      const data = await res.json();
+      if (data.success) {
+        Swal.fire({
+          toast: true,
+          position: 'top-end',
+          icon: 'success',
+          title: data.message,
+          showConfirmButton: false,
+          timer: 3000
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: data.message || 'Login required'
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   function updateQty(delta) {
     quantity += delta;
     if(quantity < 1) quantity = 1;
@@ -570,7 +599,7 @@
         if (vMat) variantId = vMat._id;
       }
 
-      const url = `/user/cart/add/${product._id}${variantId ? '?variantId=' + variantId : ''}`;
+      const url = `/user/cart/add/${product._id}?qty=${quantity}${variantId ? '&variantId=' + variantId : ''}`;
       const res = await fetch(url);
       const data = await res.json();
       if(data.success) {

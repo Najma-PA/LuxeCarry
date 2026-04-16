@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wishlist - LuxeCarry</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        :root {
+            --primary-orange: #c26a00;
+            --primary-orange-hover: #a35f0b;
+            --bg-neutral: #f9f7f5;
+            --text-dark: #1a1a1a;
+            --text-muted: #718096;
+        }
+
+        body {
+            background-color: var(--bg-neutral);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-dark);
+        }
+
+        .heading-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .wishlist-container {
+            padding-top: 60px;
+            padding-bottom: 80px;
+        }
+
+        .wishlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 50px;
+        }
+
+        .wishlist-header h1 {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .wishlist-header p {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .share-link {
+            color: var(--primary-orange);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Card Styling to match mockup */
+        .wishlist-card {
+            background: transparent;
+            border: none;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .wishlist-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .img-wrapper {
+            background-color: #f0f2f4;
+            border-radius: 4px;
+            position: relative;
+            padding: 40px;
+            height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            mix-blend-mode: multiply;
+        }
+
+        .remove-icon {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: var(--primary-orange);
+            font-size: 18px;
+            cursor: pointer;
+            z-index: 2;
+        }
+
+        .sale-tag {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: #ffffff;
+            color: var(--primary-orange);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .brand-label {
+            color: var(--primary-orange);
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2d3748;
+            line-height: 1.4;
+            margin-bottom: 12px;
+            font-family: 'Playfair Display', serif;
+        }
+
+        .price-section {
+            margin-bottom: 20px;
+        }
+
+        .current-price {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1a202c;
+            margin-right: 10px;
+        }
+
+        .original-price {
+            color: #a0aec0;
+            text-decoration: line-through;
+            font-size: 13px;
+        }
+
+        .card-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-add-cart {
+            background: transparent;
+            border: 1px solid #dcdde1;
+            border-radius: 4px;
+            color: #4a5568;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-add-cart:hover {
+            border-color: var(--primary-orange);
+            color: var(--primary-orange);
+        }
+
+        .btn-buy-now {
+            background: #b36b00;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .btn-buy-now:hover {
+            background: #995c00;
+        }
+
+        /* Empty State */
+        .empty-wishlist {
+            text-align: center;
+            padding: 100px 0;
+        }
+
+        .empty-wishlist i {
+            font-size: 64px;
+            color: #e2e8f0;
+            margin-bottom: 30px;
+        }
+
+        .empty-wishlist h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .btn-explore {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 40px;
+            background: var(--primary-orange);
+            color: #fff;
+            border-radius: 30px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<%- include('../partials/navbar') %>
+
+<div class="container wishlist-container">
+    
+    <div class="wishlist-header">
+        <div>
+            <h1 class="heading-serif">My Wishlist</h1>
+            <p><%= wishlist.items.length %> items curated in your collection</p>
+        </div>
+        <a href="javascript:void(0)" class="share-link">
+            <i class="fa-solid fa-share-nodes"></i> Share Wishlist
+        </a>
+    </div>
+
+    <% if(wishlist.items.length === 0) { %>
+        <div class="empty-wishlist">
+            <i class="fa-regular fa-heart"></i>
+            <h2 class="heading-serif">Your wishlist is empty</h2>
+            <p class="text-muted">Save your favorite items to keep track of them.</p>
+            <a href="/user/shop" class="btn-explore">Explore Collection</a>
+        </div>
+    <% } else { %>
+        <div class="row g-4">
+            <% wishlist.items.forEach(item => { %>
+                <% if(item.product) { %>
+                    <div class="col-md-6 col-lg-4" id="item-<%= item.product._id %>">
+                        <div class="wishlist-card">
+                            <div class="img-wrapper">
+                                <a href="/user/product/<%= item.product._id %>">
+                                    <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>">
+                                </a>
+                                <div class="remove-icon" onclick="removeItem('<%= item.product._id %>')">
+                                    <i class="fa-solid fa-heart"></i>
+                                </div>
+                                <% if(item.product.offer > 0) { %>
+                                    <div class="sale-tag">Sale</div>
+                                <% } %>
+                            </div>
+                            
+                            <div class="card-body p-0">
+                                <span class="brand-label"><%= (item.product.category && typeof item.product.category === 'object' && item.product.category.name) ? item.product.category.name : 'LuxeCarry' %></span>
+                                <h3 class="product-name"><%= item.product.name %></h3>
+                                
+                                <div class="price-section">
+                                    <% 
+                                        const finalPrice = Math.round(item.product.price - (item.product.price * (item.product.offer || 0) / 100));
+                                    %>
+                                    <span class="current-price">₹<%= finalPrice.toLocaleString() %></span>
+                                    <% if(item.product.offer > 0) { %>
+                                        <span class="original-price">₹<%= item.product.price.toLocaleString() %></span>
+                                    <% } %>
+                                </div>
+
+                                <div class="card-actions">
+                                    <button class="btn-add-cart" onclick="addToCart('<%= item.product._id %>')">Add to Cart</button>
+                                    <a href="/user/product/<%= item.product._id %>" class="btn btn-buy-now text-center text-white text-decoration-none">Buy Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% } %>
+            <% }) %>
+        </div>
+    <% } %>
+
+</div>
+
+<%- include('../partials/footer') %>
+
+<script>
+    async function removeItem(productId) {
+        try {
+            const res = await fetch(`/user/wishlist/remove/${productId}`, {
+                method: 'POST'
+            });
+            const data = await res.json();
+            if(data.success) {
+                const el = document.getElementById(`item-${productId}`);
+                el.style.opacity = '0';
+                setTimeout(() => {
+                    el.remove();
+                    // If no items left, reload to show empty state
+                    if(document.querySelectorAll('.col-md-6').length === 0) {
+                        window.location.reload();
+                    }
+                }, 300);
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    }
+
+    async function addToCart(id) {
+        try {
+            const res = await fetch('/user/cart/add/' + id);
+            const data = await res.json();
+            if(data.success) {
+                Swal.fire({
+                    title: 'Added to Cart!',
+                    text: 'Item moved from wishlist to your shopping cart.',
+                    icon: 'success',
+                    showCancelButton: true,
+                    confirmButtonColor: '#c26a00',
+                    cancelButtonColor: '#1a1a1a',
+                    confirmButtonText: 'Go to Cart',
+                    cancelButtonText: 'Continue Shopping'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/user/cart';
+                    } else {
+                        // Reload to reflect removal from wishlist
+                        window.location.reload();
+                    }
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.message || 'Could not add product to cart',
+                    icon: 'error'
+                });
+            }
+        } catch(err) {
+            console.error(err);
+        }
+    }
+</script>
+
+</body>
+</html>

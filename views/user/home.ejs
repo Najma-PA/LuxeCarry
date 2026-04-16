@@ -96,7 +96,7 @@ Explore our premium collection of bags and accessories
 <div class="new-product-card text-start border-0 bg-transparent">
 
 <a href="/user/product/<%= p._id %>" class="product-img-container position-relative mb-3" style="background-color: #f4f6f8; border-radius: 16px; padding: 25px; height: 260px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-    <div class="position-absolute" style="top: 15px; right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;">
+    <div onclick="toggleWishlist('<%= p._id %>')" class="position-absolute" style="top: 15px; right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;">
         <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
     </div>
     <img src="<%= p.images[0] %>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
@@ -197,6 +197,35 @@ Upgrade your wardrobe with our best sellers
 </script>
 
 <script>
+async function toggleWishlist(productId) {
+  try {
+    const res = await fetch('/user/wishlist/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ productId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: data.message,
+        showConfirmButton: false,
+        timer: 3000
+      });
+    } else {
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: data.message || 'Login required'
+      });
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 async function addToCart(productId) {
   try {
     const res = await fetch('/user/cart/add/' + productId);
