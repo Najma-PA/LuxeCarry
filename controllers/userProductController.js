@@ -28,15 +28,11 @@ exports.loadShop = async (req, res) => {
 
     console.log("Found colors:", colors);
 
-    // 3. get recommended products for bottom section
-    const recommendedProducts = await Product.find({ isActive: true }).limit(4);
-
     //render AFTER everything is ready
     res.render('user/shop', {
       ...data,
       categories,
-      colors,
-      recommendedProducts
+      colors
     });
 
   } catch (err) {
