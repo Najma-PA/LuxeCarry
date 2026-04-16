@@ -8,14 +8,22 @@ const MAX_QTY = 5;
 const getCart = async (userId) => {
 
   let cart = await Cart.findOne({ user: userId })
-    .populate('items.product');
+    .populate({
+      path: 'items.product',
+      populate: { path: 'category' }
+    });
 
   if (!cart) {
     return { items: [], total: 0, subtotal: 0, totalDiscount: 0 };
   }
 
-  // Remove inactive products automatically
-  cart.items = cart.items.filter(i => i.product && i.product.isActive);
+  // Remove inactive products or blocked categories automatically
+  cart.items = cart.items.filter(i => 
+    i.product && 
+    i.product.isActive && 
+    i.product.category && 
+    i.product.category.isActive
+  );
 
   let subtotal = 0;
   let totalDiscount = 0;
@@ -58,17 +66,36 @@ const getCartCount = async (userId) => {
 
 //Add to Cart
 
-const addToCart = async (userId, productId, variantId) => {
+const addToCart = async (userId, productId, variantId, qty = 1) => {
 
-  const product = await Product.findById(productId);
+  const product = await Product.findById(productId).populate('category');
 
   if (!product || !product.isActive) {
-    throw new Error('Product unavailable');
+    throw new Error('Product is currently unlisted or unavailable');
   }
+
+  if (!product.category || !product.category.isActive) {
+    throw new Error('Product category is currently blocked or unavailable');
+  }
+
+  qty = parseInt(qty);
+  if (isNaN(qty) || qty < 1) qty = 1;
 
   // If no variantId, try to pick first available as default
   if (!variantId && product.variants && product.variants.length > 0) {
     variantId = product.variants[0]._id;
+  }
+
+  // Find variant for stock check if applicable
+  let selectedVariant = null;
+  if (variantId && product.variants) {
+    selectedVariant = product.variants.id(variantId);
+  }
+
+  const availableStock = selectedVariant ? selectedVariant.stock : product.stock;
+
+  if (availableStock <= 0) {
+    throw new Error('Product is currently out of stock');
   }
 
   let cart = await Cart.findOne({ user: userId });
@@ -84,18 +111,50 @@ const addToCart = async (userId, productId, variantId) => {
   );
 
   if (existing) {
+    const newQty = existing.quantity + qty;
 
-    if (existing.quantity < product.stock && existing.quantity < MAX_QTY) {
-      existing.quantity++;
+    if (existing.quantity >= MAX_QTY) {
+      throw new Error(`You can only add up to ${MAX_QTY} units of this item in total.`);
     }
 
+    if (newQty > availableStock) {
+      throw new Error(`Only ${availableStock} units available in stock. You already have ${existing.quantity} in cart.`);
+    }
+
+    if (newQty > MAX_QTY) {
+      existing.quantity = MAX_QTY;
+      await cart.save();
+      return { 
+        success: true, 
+        message: `Quantity capped at ${MAX_QTY} units maximum.` 
+      };
+    }
+
+    existing.quantity = newQty;
+
   } else {
+    // New item
+    if (qty > availableStock) {
+      throw new Error(`Only ${availableStock} units available in stock.`);
+    }
+
+    let message = null;
+    if (qty > MAX_QTY) {
+      qty = MAX_QTY;
+      message = `Quantity capped at ${MAX_QTY} units maximum.`;
+    }
 
     cart.items.push({
       product: productId,
       variant: variantId,
-      quantity: 1
+      quantity: qty
     });
+
+    if (message) {
+      await cart.save();
+      await Wishlist.updateOne({ user: userId }, { $pull: { items: { product: productId } } });
+      return { success: true, message };
+    }
   }
 
   await cart.save();
