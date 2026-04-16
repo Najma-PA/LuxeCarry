@@ -15,8 +15,13 @@ const variantSchema = new mongoose.Schema({
     type: Number,
     required: true,
     default: 0
-  }
-}, { _id: false });
+  },
+  images: [
+    {
+      type: String
+    }
+  ]
+}, { _id: true });
 
 
 // PRODUCT SCHEMA
@@ -74,7 +79,9 @@ const productSchema = new mongoose.Schema({
 
 // VIRTUAL FIELD 
 productSchema.virtual('finalPrice').get(function () {
-  return this.price - (this.price * this.offer / 100);
+  const price = this.price || 0;
+  const offer = this.offer || 0;
+  return Math.round(price - (price * offer / 100));
 });
 
 

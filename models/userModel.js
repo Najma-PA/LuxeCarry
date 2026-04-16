@@ -17,9 +17,10 @@ const userSchema = new mongoose.Schema({
 
     isBlocked: {type: Boolean,default: false},
 
+    profilePic: {type: String, default: null},
+
     createdAt: {type: Date,default: Date.now}
 
 });
 
 module.exports = mongoose.model("User", userSchema);
-
