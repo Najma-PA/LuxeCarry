@@ -59,26 +59,39 @@ exports.getProducts = async (query) => {
   };
 };
 
-exports.addProduct = async (data, files, variants) => {
-  // VALIDATION
-  if (!files || files.length < 3) {
-    throw new Error("Minimum 3 images required");
+const saveFile = (file) => {
+  const filename = `product-${Date.now()}-${file.fieldname}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
+  const outputPath = path.join('public', 'uploads', filename);
+  
+  if (!fs.existsSync(path.join('public', 'uploads'))) {
+    fs.mkdirSync(path.join('public', 'uploads'), { recursive: true });
   }
 
-  const imagePaths = [];
+  fs.copyFileSync(file.path, outputPath);
+  fs.unlinkSync(file.path);
+  return `/uploads/${filename}`;
+};
 
-  for (let file of files) {
+exports.addProduct = async (data, files, variants) => {
+  const baseImagePaths = [];
+  
+  // 1. Organize images by variant index
+  if (files && files.length > 0) {
+    files.forEach(file => {
+      if (file.fieldname === 'images' || file.fieldname.startsWith('baseImage_')) {
+        baseImagePaths.push(saveFile(file));
+      } else if (file.fieldname.startsWith('variantImages_')) {
+        const vIdx = parseInt(file.fieldname.split('_')[1]);
+        if (variants[vIdx]) {
+          if (!variants[vIdx].images) variants[vIdx].images = [];
+          variants[vIdx].images.push(saveFile(file));
+        }
+      }
+    });
+  }
 
-    const filename = `product-${Date.now()}-${file.originalname}`;
-    const outputPath = path.join('public/uploads', filename);
-
-    // Copy file
-    fs.copyFileSync(file.path, outputPath);
-
-    imagePaths.push(`/uploads/${filename}`);
-
-    // delete temp file
-    fs.unlinkSync(file.path);
+  if (baseImagePaths.length < 3) {
+    throw new Error("Minimum 3 base images required");
   }
 
   // Create Product
@@ -90,43 +103,50 @@ exports.addProduct = async (data, files, variants) => {
     description: data.description,
     stock: calculateTotalStock(variants),
     variants,
-    images: imagePaths,
+    images: baseImagePaths,
     isActive: true
   });
 };
 
 exports.updateProduct = async (id, data, files, variants) => {
-
   const product = await Product.findById(id);
-
   if (!product) throw new Error("Product not found");
 
-  let updatedImages = [];
+  let updatedBaseImages = [];
 
-  // 1. Handle Existing Images (passed as array/string in data.existingImages)
+  // 1. Handle Existing Base Images
   if (data.existingImages) {
-    updatedImages = Array.isArray(data.existingImages) 
-      ? data.existingImages 
-      : [data.existingImages];
+    updatedBaseImages = Array.isArray(data.existingImages) ? data.existingImages : [data.existingImages];
   }
 
-  // 2. Handle New Uploads
+  // 2. Handle New Uploads and Variant Images
   if (files && files.length > 0) {
-    for (let file of files) {
-      const filename = `product-${Date.now()}-${file.originalname}`;
-      const outputPath = path.join('public/uploads', filename);
-
-      fs.copyFileSync(file.path, outputPath);
-      updatedImages.push(`/uploads/${filename}`);
-
-      // delete temp file
-      fs.unlinkSync(file.path);
-    }
+    files.forEach(file => {
+      if (file.fieldname === 'images' || file.fieldname.startsWith('baseImage_')) {
+        updatedBaseImages.push(saveFile(file));
+      } else if (file.fieldname.startsWith('variantImages_')) {
+        const vIdx = parseInt(file.fieldname.split('_')[1]);
+        if (variants[vIdx]) {
+          if (!variants[vIdx].images) variants[vIdx].images = [];
+          variants[vIdx].images.push(saveFile(file));
+        }
+      }
+    });
   }
 
-  // 3. Validation
-  if (updatedImages.length < 3) {
-    throw new Error("Minimum 3 images required");
+  // 3. Handle Existing Variant Images (passed as strings/arrays per variant)
+  // We expect data.existingVariantImages_N in the request
+  variants.forEach((v, i) => {
+    const key = `existingVariantImages_${i}`;
+    let existingVImages = [];
+    if (data[key]) {
+      existingVImages = Array.isArray(data[key]) ? data[key] : [data[key]];
+    }
+    v.images = [...(v.images || []), ...existingVImages];
+  });
+
+  if (updatedBaseImages.length < 3) {
+    throw new Error("Minimum 3 base images required");
   }
 
   return Product.findByIdAndUpdate(id, {
@@ -137,7 +157,7 @@ exports.updateProduct = async (id, data, files, variants) => {
     description: data.description,
     stock: calculateTotalStock(variants),
     variants,
-    images: updatedImages
+    images: updatedBaseImages
   });
 };
 

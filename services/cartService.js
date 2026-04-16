@@ -5,40 +5,70 @@ const Wishlist = require('../models/wishlistModel');
 const MAX_QTY = 5;
 
 //Get Cart
-exports.getCart = async (userId) => {
+const getCart = async (userId) => {
 
   let cart = await Cart.findOne({ user: userId })
     .populate('items.product');
 
   if (!cart) {
-    return { items: [], total: 0 };
+    return { items: [], total: 0, subtotal: 0, totalDiscount: 0 };
   }
 
   // Remove inactive products automatically
   cart.items = cart.items.filter(i => i.product && i.product.isActive);
 
-  let total = 0;
+  let subtotal = 0;
+  let totalDiscount = 0;
 
   cart.items.forEach(item => {
-    total += item.product.price * item.quantity;
+    const originalPrice = item.product.price;
+    const finalPrice = Math.round(originalPrice - (originalPrice * item.product.offer / 100));
+    const discountAmount = originalPrice - finalPrice;
+
+    subtotal += originalPrice * item.quantity;
+    totalDiscount += discountAmount * item.quantity;
+    
+    // Attach details for premium UI
+    item.finalPrice = finalPrice;
+    item.itemTotal = finalPrice * item.quantity;
+
+    // Attach variant info for the view
+    if (item.variant && item.product.variants) {
+      item.variantDetail = item.product.variants.id(item.variant);
+    }
   });
 
   return {
     items: cart.items,
-    total
+    subtotal,
+    totalDiscount,
+    total: subtotal - totalDiscount
   };
+};
+
+// Get Cart Count (Global Badge)
+const getCartCount = async (userId) => {
+  if (!userId) return 0;
+  const cart = await Cart.findOne({ user: userId });
+  if (!cart) return 0;
+  return cart.items.reduce((sum, item) => sum + item.quantity, 0);
 };
 
 
 
 //Add to Cart
 
-exports.addToCart = async (userId, productId) => {
+const addToCart = async (userId, productId, variantId) => {
 
   const product = await Product.findById(productId);
 
   if (!product || !product.isActive) {
     throw new Error('Product unavailable');
+  }
+
+  // If no variantId, try to pick first available as default
+  if (!variantId && product.variants && product.variants.length > 0) {
+    variantId = product.variants[0]._id;
   }
 
   let cart = await Cart.findOne({ user: userId });
@@ -47,7 +77,11 @@ exports.addToCart = async (userId, productId) => {
     cart = new Cart({ user: userId, items: [] });
   }
 
-  const existing = cart.items.find(i => i.product.equals(productId));
+  // Check if same product AND same variant already exists
+  const existing = cart.items.find(i => 
+    i.product.equals(productId) && 
+    (variantId ? i.variant?.equals(variantId) : !i.variant)
+  );
 
   if (existing) {
 
@@ -59,6 +93,7 @@ exports.addToCart = async (userId, productId) => {
 
     cart.items.push({
       product: productId,
+      variant: variantId,
       quantity: 1
     });
   }
@@ -77,7 +112,7 @@ exports.addToCart = async (userId, productId) => {
 
 //Update Quantity
 
-exports.updateQuantity = async (userId, itemId, change) => {
+const updateQuantity = async (userId, itemId, change) => {
 
   const cart = await Cart.findOne({ user: userId })
     .populate('items.product');
@@ -116,7 +151,7 @@ exports.updateQuantity = async (userId, itemId, change) => {
 
 // Remove Item
 
-exports.removeItem = async (userId, itemId) => {
+const removeItem = async (userId, itemId) => {
 
   const cart = await Cart.findOne({ user: userId });
 
@@ -125,4 +160,12 @@ exports.removeItem = async (userId, itemId) => {
   cart.items.pull(itemId);
 
   await cart.save();
+};
+
+module.exports = {
+  getCart,
+  getCartCount,
+  addToCart,
+  updateQuantity,
+  removeItem
 };
