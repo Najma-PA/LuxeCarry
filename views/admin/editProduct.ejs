@@ -63,6 +63,14 @@
     .image-slot.has-image:hover .remove-img-btn {
       display: flex;
     }
+    .variant-img-preview {
+      width: 40px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 4px;
+      margin-right: 5px;
+      background: #eee;
+    }
   </style>
 </head>
 
@@ -168,21 +176,32 @@
           </button>
         </div>
 
-        <!-- Variant Container -->
         <div id="variantContainer">
-          <% product.variants.forEach(v => { %>
-            <div class="row mb-2 align-items-center variant-row">
-              <div class="col-md-3">
-                <input name="variantType[]" class="form-control" value="<%= v.type %>">
-              </div>
-              <div class="col-md-5">
-                <input name="variantValue[]" class="form-control" value="<%= v.value %>">
+          <% product.variants.forEach((v, vIdx) => { %>
+            <div class="row mb-3 align-items-center variant-row" data-index="<%= vIdx %>">
+              <div class="col-md-2">
+                <input name="variantType[]" class="form-control form-control-sm" value="<%= v.type %>">
               </div>
               <div class="col-md-3">
-                <input name="variantStock[]" type="number" class="form-control" value="<%= v.stock %>">
+                <input name="variantValue[]" class="form-control form-control-sm" value="<%= v.value %>">
+              </div>
+              <div class="col-md-2">
+                <input name="variantStock[]" type="number" class="form-control form-control-sm" value="<%= v.stock %>">
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex align-items-center">
+                    <div class="variant-images-previews d-flex" id="variantPreviews_<%= vIdx %>">
+                        <% (v.images || []).forEach(img => { %>
+                            <img src="<%= img %>" class="variant-img-preview">
+                        <% }) %>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-gold ms-auto" onclick="openVariantImageModal(<%= vIdx %>)">
+                        <i class="fas fa-images"></i> Images
+                    </button>
+                </div>
               </div>
               <div class="col-md-1 text-end">
-                <button type="button" class="btn btn-light text-danger" onclick="this.closest('.variant-row').remove()">🗑</button>
+                <button type="button" class="btn btn-sm btn-light text-danger" onclick="removeVariantRow(this, <%= vIdx %>)">🗑</button>
               </div>
             </div>
           <% }) %>
@@ -205,6 +224,27 @@
 
   </div>
 
+</div>
+
+<!-- VARIANT IMAGE MODAL -->
+<div class="modal fade" id="variantImageModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Manage Variant Images</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small">Select up to 4 images for this specific variant.</p>
+                <div class="row g-3" id="variantModalSlots">
+                    <!-- Slots will be injected here via JS -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-gold w-100" data-bs-dismiss="modal">Done</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- CROPPING MODAL -->
@@ -236,40 +276,64 @@
 <script>
 let cropper;
 let currentSlot = null;
+let currentVariantIndex = null; // null for base product, number for variant
 const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+const variantImageModal = new bootstrap.Modal(document.getElementById('variantImageModal'));
 
-// Data structures to track current state
-// existingImages stores URLs for slots that haven't been replaced by new uploads
-let existingImages = [
+// Base product images
+let baseExistingImages = [
     "<%= product.images[0] || '' %>",
     "<%= product.images[1] || '' %>",
     "<%= product.images[2] || '' %>",
     "<%= product.images[3] || '' %>"
 ];
-let newBlobs = [null, null, null, null];
+let baseNewBlobs = [null, null, null, null];
 
-function triggerFileInput(slot) {
-  document.getElementById(`input${slot}`).click();
+// Variant images data
+let variantImagesData = [
+    <% product.variants.forEach(v => { %>
+        {
+            existing: [
+                "<%= (v.images && v.images[0]) || '' %>",
+                "<%= (v.images && v.images[1]) || '' %>",
+                "<%= (v.images && v.images[2]) || '' %>",
+                "<%= (v.images && v.images[3]) || '' %>"
+            ],
+            newBlobs: [null, null, null, null]
+        },
+    <% }) %>
+];
+
+function triggerFileInput(slot, isVariant = false) {
+  if (isVariant) {
+    document.getElementById(`vInput_${slot}`).click();
+  } else {
+    document.getElementById(`input${slot}`).click();
+  }
 }
 
-function removeImage(event, slot) {
+function removeImage(event, slot, isVariant = false) {
     event.stopPropagation();
-    existingImages[slot-1] = "";
-    newBlobs[slot-1] = null;
-    
-    document.getElementById(`img${slot}`).src = "";
-    document.getElementById(`slot${slot}`).classList.remove('has-image');
-    
-    // Remove the button if it exists
-    const btn = document.getElementById(`slot${slot}`).querySelector('.remove-img-btn');
-    if(btn) btn.remove();
+    if (isVariant) {
+        variantImagesData[currentVariantIndex].existing[slot-1] = "";
+        variantImagesData[currentVariantIndex].newBlobs[slot-1] = null;
+        document.getElementById(`vImg_${slot}`).src = "";
+        document.getElementById(`vSlot_${slot}`).classList.remove('has-image');
+        updateVariantPreviews(currentVariantIndex);
+    } else {
+        baseExistingImages[slot-1] = "";
+        baseNewBlobs[slot-1] = null;
+        document.getElementById(`img${slot}`).src = "";
+        document.getElementById(`slot${slot}`).classList.remove('has-image');
+    }
 }
 
-function handleFileSelect(event, slot) {
+function handleFileSelect(event, slot, isVariant = false) {
   const file = event.target.files[0];
   if (!file) return;
 
   currentSlot = slot;
+  // If isVariant is true, currentVariantIndex should already be set
   const reader = new FileReader();
   reader.onload = (e) => {
     document.getElementById('cropperImage').src = e.target.result;
@@ -291,61 +355,136 @@ document.getElementById('cropModal').addEventListener('hidden.bs.modal', functio
     cropper.destroy();
     cropper = null;
   }
-  document.getElementById(`input${currentSlot}`).value = "";
+  // Reset logic depends on whether it's variant or base
+  if (currentVariantIndex !== null) {
+     const input = document.getElementById(`vInput_${currentSlot}`);
+     if(input) input.value = "";
+  } else {
+     document.getElementById(`input${currentSlot}`).value = "";
+  }
 });
 
 document.getElementById('cropButton').onclick = function () {
   if (!cropper) return;
   cropper.getCroppedCanvas({ width: 800, height: 1000 }).toBlob((blob) => {
-    newBlobs[currentSlot - 1] = blob;
-    existingImages[currentSlot - 1] = ""; // Mark as replaced
-    
-    const previewImg = document.getElementById(`img${currentSlot}`);
-    previewImg.src = URL.createObjectURL(blob);
-    document.getElementById(`slot${currentSlot}`).classList.add('has-image');
-    
-    // Ensure remove button is visible if it wasn't there
-    let btn = document.getElementById(`slot${currentSlot}`).querySelector('.remove-img-btn');
-    if(!btn) {
-        document.getElementById(`slot${currentSlot}`).insertAdjacentHTML('beforeend', `
-            <button type="button" class="remove-img-btn" onclick="removeImage(event, ${currentSlot})">
-                <i class="fas fa-times"></i>
-            </button>
-        `);
+    if (currentVariantIndex !== null) {
+        variantImagesData[currentVariantIndex].newBlobs[currentSlot - 1] = blob;
+        variantImagesData[currentVariantIndex].existing[currentSlot - 1] = "";
+        
+        const previewImg = document.getElementById(`vImg_${currentSlot}`);
+        previewImg.src = URL.createObjectURL(blob);
+        document.getElementById(`vSlot_${currentSlot}`).classList.add('has-image');
+        updateVariantPreviews(currentVariantIndex);
+    } else {
+        baseNewBlobs[currentSlot - 1] = blob;
+        baseExistingImages[currentSlot - 1] = "";
+        
+        const previewImg = document.getElementById(`img${currentSlot}`);
+        previewImg.src = URL.createObjectURL(blob);
+        document.getElementById(`slot${currentSlot}`).classList.add('has-image');
     }
-
     cropModal.hide();
   }, 'image/jpeg', 0.9);
 };
 
+function openVariantImageModal(vIdx) {
+    currentVariantIndex = vIdx;
+    const container = document.getElementById('variantModalSlots');
+    container.innerHTML = '';
+    
+    const data = variantImagesData[vIdx];
+    
+    for (let i = 1; i <= 4; i++) {
+        const src = data.newBlobs[i-1] ? URL.createObjectURL(data.newBlobs[i-1]) : data.existing[i-1];
+        const hasImg = src !== "";
+        
+        const slotHtml = `
+            <div class="col-6">
+                <div class="image-slot ${hasImg ? 'has-image' : ''}" id="vSlot_${i}" onclick="triggerFileInput(${i}, true)">
+                    <div class="slot-placeholder">
+                        <i class="fas fa-plus mb-2"></i>
+                        <div class="small">Image ${i}</div>
+                    </div>
+                    <img id="vImg_${i}" src="${src}" alt="" style="${hasImg ? 'display:block' : ''}">
+                    <input type="file" id="vInput_${i}" accept="image/*" hidden onchange="handleFileSelect(event, ${i}, true)">
+                    <button type="button" class="remove-img-btn" style="${hasImg ? 'display:flex' : ''}" onclick="removeImage(event, ${i}, true)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', slotHtml);
+    }
+    variantImageModal.show();
+}
+
+// Reset currentVariantIndex when modal closes (except when cropping)
+document.getElementById('variantImageModal').addEventListener('hidden.bs.modal', function() {
+    // We don't reset index here because crop modal might be opening
+});
+
+// Actually, we should only reset it when NOT opening crop modal
+// Or just be careful with logic.
+
+function updateVariantPreviews(vIdx) {
+    const previewContainer = document.getElementById(`variantPreviews_${vIdx}`);
+    previewContainer.innerHTML = '';
+    const data = variantImagesData[vIdx];
+    
+    data.existing.forEach(img => {
+        if(img) previewContainer.insertAdjacentHTML('beforeend', `<img src="${img}" class="variant-img-preview">`);
+    });
+    data.newBlobs.forEach(blob => {
+        if(blob) previewContainer.insertAdjacentHTML('beforeend', `<img src="${URL.createObjectURL(blob)}" class="variant-img-preview">`);
+    });
+}
+
 function addVariant() {
+  const vIdx = variantImagesData.length;
+  variantImagesData.push({
+      existing: ["", "", "", ""],
+      newBlobs: [null, null, null, null]
+  });
+  
   const row = `
-    <div class="row mb-2 align-items-center variant-row">
-      <div class="col-md-3">
-        <input name="variantType[]" class="form-control" value="Color">
-      </div>
-      <div class="col-md-5">
-        <input name="variantValue[]" class="form-control" placeholder="e.g. Black">
+    <div class="row mb-3 align-items-center variant-row" data-index="${vIdx}">
+      <div class="col-md-2">
+        <input name="variantType[]" class="form-control form-control-sm" value="Color">
       </div>
       <div class="col-md-3">
-        <input name="variantStock[]" type="number" class="form-control" placeholder="0">
+        <input name="variantValue[]" class="form-control form-control-sm" placeholder="e.g. Black">
+      </div>
+      <div class="col-md-2">
+        <input name="variantStock[]" type="number" class="form-control form-control-sm" placeholder="0">
+      </div>
+      <div class="col-md-4">
+        <div class="d-flex align-items-center">
+            <div class="variant-images-previews d-flex" id="variantPreviews_${vIdx}"></div>
+            <button type="button" class="btn btn-sm btn-outline-gold ms-auto" onclick="openVariantImageModal(${vIdx})">
+                <i class="fas fa-images"></i> Images
+            </button>
+        </div>
       </div>
       <div class="col-md-1 text-end">
-        <button type="button" class="btn btn-light text-danger" onclick="this.closest('.variant-row').remove()">🗑</button>
+        <button type="button" class="btn btn-sm btn-light text-danger" onclick="removeVariantRow(this, ${vIdx})">🗑</button>
       </div>
     </div>
   `;
   document.getElementById('variantContainer').insertAdjacentHTML('beforeend', row);
 }
 
+function removeVariantRow(btn, vIdx) {
+    btn.closest('.variant-row').remove();
+    // We don't strictly need to remove from variantImagesData if we use data-index on submission
+}
+
 document.getElementById('editProductForm').onsubmit = async function(e) {
     e.preventDefault();
 
-    // Validate images: combine existing + new
-    const finalImageCount = existingImages.filter(img => img !== "").length + newBlobs.filter(b => b !== null).length;
-    
-    if (finalImageCount < 3) {
-        Swal.fire('Wait!', 'A minimum of 3 images are required for each product.', 'warning');
+    // Validate base images
+    const baseCount = baseExistingImages.filter(img => img !== "").length + baseNewBlobs.filter(b => b !== null).length;
+    if (baseCount < 3) {
+        Swal.fire('Wait!', 'A minimum of 3 base images are required.', 'warning');
         return;
     }
 
@@ -355,19 +494,31 @@ document.getElementById('editProductForm').onsubmit = async function(e) {
 
     const formData = new FormData(this);
     
-    // Clear standard 'images' field
+    // 1. Handle Base Images
     formData.delete('images');
+    formData.delete('existingImages');
+    baseExistingImages.forEach(url => { if(url) formData.append('existingImages', url); });
+    baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
 
-    // Add existingImages to keep
-    existingImages.forEach(url => {
-        if(url) formData.append('existingImages', url);
-    });
-
-    // Add new cropped blobs
-    newBlobs.forEach((blob, idx) => {
-        if(blob) {
-            formData.append('images', blob, `update-${idx}.jpg`);
-        }
+    // 2. Handle Variant Images
+    // We need to correlate variant fields with their images
+    // The server expects variantType[i], variantValue[i], variantStock[i]
+    // And existingVariantImages_i, plus variantImages_i in req.files
+    
+    const rows = document.querySelectorAll('.variant-row');
+    rows.forEach((row, i) => {
+        const vIdx = row.getAttribute('data-index');
+        const data = variantImagesData[vIdx];
+        
+        // Add existing variant images
+        data.existing.forEach(url => {
+            if(url) formData.append(`existingVariantImages_${i}`, url);
+        });
+        
+        // Add new variant blobs
+        data.newBlobs.forEach((blob, bIdx) => {
+            if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
+        });
     });
 
     try {
@@ -376,15 +527,15 @@ document.getElementById('editProductForm').onsubmit = async function(e) {
             body: formData
         });
 
-        if (response.redirected) {
-            window.location.href = response.url;
+        const result = await response.json();
+        if (result.success) {
+            window.location.href = result.redirectUrl || '/admin/products';
         } else {
-            const msg = await response.text();
-            Swal.fire('Error', msg || 'Update failed', 'error');
+            Swal.fire('Error', result.message || 'Update failed', 'error');
         }
     } catch (err) {
         console.error(err);
-        Swal.fire('Error', 'Communication error', 'error');
+        Swal.fire('Error', 'Server communication failed or invalid response from server', 'error');
     } finally {
         document.getElementById('submitSpinner').classList.add('d-none');
         submitBtn.disabled = false;

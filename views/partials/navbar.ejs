@@ -25,11 +25,11 @@ LuxeCarry
 <li class="nav-item">
 <a class="nav-link " href="/user/shop">Shop</a>
 </li>
-
+<!--
 <li class="nav-item">
 <a class="nav-link" href="/user/new-arrivals">New Arrivals</a>
 </li>
-
+-->
 <li class="nav-item">
 <a class="nav-link" href="/contact">Contact</a>
 </li>
@@ -56,7 +56,9 @@ style="left:12px; top:10px; color:#999;"></i>
 <!-- Cart -->
 <a href="/user/cart" class="nav-icon position-relative">
 <i class="fa-solid fa-cart-arrow-down"></i>
-
+<% if(locals.cartCount > 0){ %>
+  <span class="cart-badge"><%= cartCount %></span>
+<% } %>
 </a>
 
 <!-- Login / Profile -->
@@ -71,9 +73,9 @@ Sign In
 
 <a href="/user/profile" style="text-decoration: none;">
 
-<% if(user.profileImage){ %>
+<% if(user.profilePic){ %>
 
-<img src="/images/<%= user.profileImage %>"
+<img src="<%= user.profilePic %>"
 class="profile-avatar">
 
 <% } else { %>
@@ -94,6 +96,8 @@ class="profile-avatar">
 
 </div>
 </nav>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
   // Force reload to prevent BFcache (Back-Forward cache) from bypassing logout

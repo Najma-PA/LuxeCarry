@@ -155,21 +155,21 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
     <div class="card border-0 shadow-sm product-card h-100" style="border-radius: 16px; overflow: hidden; background-color: #ffffff;">
       
       <!-- Image Wrapper -->
-      <div class="position-relative bg-light" style="padding: 20px; border-radius: 16px 16px 0 0; text-align: center; min-height: 220px; display: flex; align-items: center; justify-content: center;">
+      <a href="/user/product/<%= p._id %>" class="position-relative bg-light d-block" style="padding: 20px; border-radius: 16px 16px 0 0; text-align: center; min-height: 220px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
         
         <!-- Wishlist Heart -->
-        <a href="javascript:void(0)" class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm" style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; text-decoration: none; color: #6b7280; transition: color 0.2s;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#6b7280'">
+        <span class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm" style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; color: #6b7280; transition: color 0.2s; z-index: 2;" onmouseover="this.style.color='#ef4444'" onmouseout="this.style.color='#6b7280'">
           <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
-        </a>
+        </span>
 
         <img src="<%= p.images[0] %>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
-      </div>
+      </a>
 
       <div class="card-body p-4 d-flex flex-column">
 
         <!-- Offer Pill & Brand (Optional alignment) -->
         <div class="d-flex align-items-center mb-2">
-          <% if(p.offer && p.offer > 0) { %>
+          <% if(p.offer > 0) { %>
             <span class="badge text-white pb-1" style="background-color: #e53e3e; font-size: 9px; letter-spacing: 1px; border-radius: 4px;"><%= p.offer %>% OFF</span>
           <% } %>
         </div>
@@ -179,10 +179,10 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 
         <!-- Price -->
         <div class="mb-1">
-          <span class="fw-bold" style="font-size: 16px; color: #1f2937;">₹<%= p.finalPrice ? p.finalPrice.toLocaleString() : p.price.toLocaleString() %></span>
-          <% if(p.offer && p.offer > 0) { %>
+          <span class="fw-bold" style="font-size: 16px; color: #1f2937;">₹<%= Math.round((p.price || 0) - ((p.price || 0) * (p.offer || 0) / 100)).toLocaleString() %></span>
+          <% if(p.offer > 0) { %>
             <small class="text-muted text-decoration-line-through ms-1" style="font-size: 13px;">
-              ₹<%= p.price.toLocaleString() %>
+              ₹<%= (p.price || 0).toLocaleString() %>
             </small>
           <% } %>
         </div>
@@ -249,6 +249,37 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 
 </div>
 
+<!-- RECOMMENDED PRODUCTS -->
+<% if (typeof recommendedProducts !== 'undefined' && recommendedProducts.length > 0) { %>
+  <div class="mt-5 pt-5 border-top" style="border-color: #f1f1f1 !important;">
+    <h4 class="fw-bold mb-4 text-center" style="font-family: 'Playfair Display', serif; color: #111;">Recommended For You</h4>
+    <div class="row g-4 mb-5">
+      <% recommendedProducts.forEach(rel => { %>
+        <div class="col-md-3">
+          <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; transition: transform 0.3s ease;">
+            <div class="position-relative bg-light p-3 text-center" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+              <img src="<%= (rel.images && rel.images[0]) || '/img/placeholder.jpg' %>" class="img-fluid" style="max-height: 160px; object-fit: contain;">
+              <% if(rel.offer > 0) { %>
+                <span class="badge position-absolute" style="top: 15px; left: 15px; background-color: #b78846; font-size: 9px; padding: 4px 8px;">-<%= rel.offer %>%</span>
+              <% } %>
+            </div>
+            <div class="card-body p-4 d-flex flex-column">
+              <h6 class="fw-bold mb-2 text-truncate" style="font-size: 14px; color: #111;"><%= rel.name %></h6>
+              <div class="mb-3">
+                <span class="fw-bold" style="color: #b78846; font-size: 15px;">₹<%= Math.round((rel.price || 0) - ((rel.price || 0) * (rel.offer || 0) / 100)).toLocaleString() %></span>
+                <% if(rel.offer > 0) { %>
+                  <small class="text-muted text-decoration-line-through ms-1" style="font-size: 12px;">₹<%= (rel.price || 0).toLocaleString() %></small>
+                <% } %>
+              </div>
+              <a href="/user/product/<%= rel._id %>" class="btn btn-sm btn-outline-dark rounded-pill mt-auto fw-bold" style="font-size: 10px; border-color: #ddd; color: #b78846;">View Details</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+<% } %>
+
 <%- include('../partials/footer') %>
 
 <script>
@@ -258,12 +289,35 @@ async function addToCart(id){
     const data = await res.json();
 
     if(data.success){
-      window.location.href = '/user/cart';
+      Swal.fire({
+        title: 'Added to Cart!',
+        text: 'This product has been added to your shopping cart.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#c26a00',
+        cancelButtonColor: '#1a1a1a',
+        confirmButtonText: 'Go to Cart',
+        cancelButtonText: 'Continue Shopping'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/user/cart';
+        }
+      });
     }else{
-      alert(data.message);
+      Swal.fire({
+        title: 'Error',
+        text: data.message || 'Could not add product to cart',
+        icon: 'error',
+        confirmButtonColor: '#c26a00'
+      });
     }
   }catch(err){
-    alert("Error");
+    Swal.fire({
+      title: 'Oops!',
+      text: 'Something went wrong. Please try again.',
+      icon: 'warning',
+      confirmButtonColor: '#c26a00'
+    });
   }
 }
 </script>

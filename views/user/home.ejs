@@ -95,12 +95,12 @@ Explore our premium collection of bags and accessories
 
 <div class="new-product-card text-start border-0 bg-transparent">
 
-<div class="product-img-container position-relative mb-3" style="background-color: #f4f6f8; border-radius: 16px; padding: 25px; height: 260px; display: flex; align-items: center; justify-content: center;">
+<a href="/user/product/<%= p._id %>" class="product-img-container position-relative mb-3" style="background-color: #f4f6f8; border-radius: 16px; padding: 25px; height: 260px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
     <div class="position-absolute" style="top: 15px; right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;">
         <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
     </div>
     <img src="<%= p.images[0] %>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-</div>
+</a>
 
 <% if (p.offer > 0 || (p.category && p.category.offer > 0)) { 
     let pOffer = Number(p.offer) || 0;
@@ -204,13 +204,36 @@ async function addToCart(productId) {
     const data = await res.json();
 
     if (data.success) {
-      window.location.href = '/user/cart';
+      Swal.fire({
+        title: 'Added to Cart!',
+        text: 'This product has been added to your shopping cart.',
+        icon: 'success',
+        showCancelButton: true,
+        confirmButtonColor: '#c26a00',
+        cancelButtonColor: '#1a1a1a',
+        confirmButtonText: 'Go to Cart',
+        cancelButtonText: 'Continue Shopping'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = '/user/cart';
+        }
+      });
     } else {
-      alert(data.message);
+      Swal.fire({
+        title: 'Error',
+        text: data.message || 'Could not add product to cart',
+        icon: 'error',
+        confirmButtonColor: '#c26a00'
+      });
     }
 
   } catch (err) {
-    alert('Error adding to cart: ' + err.message);
+    Swal.fire({
+      title: 'Oops!',
+      text: 'Something went wrong. Please try again.',
+      icon: 'warning',
+      confirmButtonColor: '#c26a00'
+    });
   }
 }
 </script>

@@ -11,222 +11,276 @@
 <link rel="stylesheet" href="/css/style.css">
 
 <style>
+  :root {
+    --gold-primary: #b78846;
+    --gold-dark: #9f743a;
+    --bg-warm: #f5f5f1;
+    --text-main: #272727;
+    --text-muted: #7a7a7a;
+  }
+
   body {
-    background-color: #fbf9f6; /* Warm elegant off-white from mockup */
+    background-color: var(--bg-warm);
     font-family: 'Inter', sans-serif;
-    color: #272727;
+    color: var(--text-main);
   }
   
-  /* Shared utility classes */
   .heading-serif {
     font-family: 'Playfair Display', serif;
-    font-weight: 700;
   }
   
-  /* Zoom Image Container */
-  .img-zoom-container {
+  /* Image Gallery */
+  .product-gallery {
     position: relative;
+  }
+  .main-img-container {
+    background: #fff;
+    border-radius: 24px;
     overflow: hidden;
-    cursor: crosshair;
-    border-radius: 16px;
-    background: #f1f0ec;
-    height: 520px;
+    height: 550px;
     display: flex;
-    justify-content: center;
     align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+    cursor: zoom-in;
   }
-  .img-zoom-container img {
-    max-width: 90%;
-    max-height: 90%;
+  .main-img-container img {
+    max-width: 100%;
+    max-height: 100%;
     object-fit: contain;
-    transition: transform 0.1s ease;
+    transition: transform 0.2s ease-out;
+    pointer-events: none; /* Let container handle events */
   }
-  .img-zoom-container:hover img {
-    transform: scale(2.0);
+  .main-img-container.zoomed img {
+    transform: scale(2.5);
   }
   
-  /* Thumbnails */
-  .thumbnail {
+  .thumbnails-container {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-start;
+    overflow-x: auto;
+    padding-bottom: 10px;
+  }
+  .thumbnail-item {
+    width: 90px;
+    height: 90px;
+    border-radius: 12px;
+    background: #fff;
+    padding: 8px;
     cursor: pointer;
     border: 2px solid transparent;
-    border-radius: 12px;
-    transition: 0.2s;
-    background: #f1f0ec;
-    width: 100%; 
-    height: 90px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+  .thumbnail-item img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    padding: 10px;
   }
-  .thumbnail.active {
-    border-color: #b78846; /* Gold outline */
-    background: #fbf9f6;
+  .thumbnail-item.active {
+    border-color: var(--gold-primary);
   }
-  
-  /* Typography */
+
+  /* Product Info */
   .product-title {
-    font-size: 38px;
-    line-height: 1.1;
-    color: #2b2b2b;
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: #1a1a1a;
   }
   .product-price {
-    font-size: 26px;
-    font-weight: 700;
-    color: #c98a2c;
-  }
-  .old-price {
-    font-size: 16px;
-    color: #a3a3a3;
-    text-decoration: line-through;
-    font-weight: 400;
-  }
-  .save-badge {
-    color: #c98a2c;
-    font-size: 12px;
+    font-size: 28px;
+    color: var(--gold-primary);
     font-weight: 600;
-    letter-spacing: 0.5px;
+    margin-bottom: 25px;
+  }
+  .product-desc {
+    color: var(--text-muted);
+    line-height: 1.8;
+    font-size: 15px;
+    margin-bottom: 35px;
+  }
+
+  /* Variants */
+  .variant-section {
+    margin-bottom: 30px;
+  }
+  .variant-label {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 12px;
+    display: block;
   }
   
-  /* Buttons */
-  .qty-box {
+  .color-swatches {
+    display: flex;
+    gap: 12px;
+  }
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    padding: 2px;
+    transition: 0.2s;
+    position: relative;
+  }
+  .color-swatch.active {
+    border-color: #3b82f6; /* Blue outline as in mockup */
+  }
+  .color-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: block;
+  }
+  
+  .size-chips {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .size-chip {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .size-chip:hover {
+    border-color: var(--gold-primary);
+  }
+  .size-chip.active {
+    background: #eef2ff;
+    border-color: #3b82f6;
+    color: #3b82f6;
+  }
+  .size-chip.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    text-decoration: line-through;
+  }
+
+  /* Action Buttons */
+  .action-wrap {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    border: 1px solid #e1ded8;
-    border-radius: 30px;
-    padding: 6px 15px;
-    width: 100px;
-    background: #fff;
+    gap: 15px;
+    margin-top: 40px;
   }
-  .qty-box span { font-weight: 600; font-size: 14px; }
-  .qty-box i { cursor: pointer; font-size: 10px; color: #888; transition: 0.2s;}
-  .qty-box i:hover { color: #333; }
-  
-  .btn-buy {
-    background-color: #b78846;
+  .qty-selector {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    padding: 8px 15px;
+    background: #fff;
+    gap: 15px;
+  }
+  .qty-btn {
+    border: none;
+    background: none;
+    color: #888;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 5px;
+  }
+  .btn-buy-now {
+    background: var(--gold-primary);
     color: #fff;
     border: none;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 1px;
     border-radius: 30px;
-    padding: 12px 30px;
+    padding: 12px 35px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     transition: 0.3s;
   }
-  .btn-buy:hover {
-    background-color: #9f743a;
-    color: #fff;
+  .btn-buy-now:hover {
+    background: var(--gold-dark);
+    transform: translateY(-2px);
   }
-  .btn-add {
-    background-color: transparent;
-    color: #b78846;
-    border: 1.5px solid #b78846;
-    font-weight: 600;
-    font-size: 12px;
-    letter-spacing: 1px;
+  .btn-add-cart {
+    background: transparent;
+    color: var(--gold-primary);
+    border: 1.5px solid var(--gold-primary);
     border-radius: 30px;
-    padding: 12px 30px;
+    padding: 12px 35px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     transition: 0.3s;
   }
-  .btn-add:hover {
-    background-color: #b78846;
+  .btn-add-cart:hover {
+    background: var(--gold-primary);
     color: #fff;
   }
-  .btn-wishlist {
+  .btn-heart {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    border: 1px solid #e1ded8;
+    border: 1px solid #ddd;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #888;
     background: #fff;
     transition: 0.3s;
-    cursor: pointer;
-    text-decoration: none;
   }
-  .btn-wishlist:hover {
-    border-color: #e53e3e;
-    color: #e53e3e;
+  .btn-heart:hover {
+    color: #ef4444;
+    border-color: #ef4444;
   }
-  
-  /* Sections */
-  .section-title {
-    font-size: 13px;
+
+  .stock-status {
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 1.5px;
-    color: #7a7a7a;
-    text-transform: uppercase;
-    border-bottom: 2px solid #2b2b2b;
-    display: inline-block;
-    padding-bottom: 5px;
-    margin-bottom: 25px;
+    margin-bottom: 5px;
   }
-  .content-text {
-    line-height: 1.8;
-    font-size: 14px;
-    color: #555;
-  }
-  
-  /* Reviews */
-  .review-card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.02);
-  }
-  .star-gold { color: #E5A853; font-size: 10px; }
-  .star-gray { color: #e4e4e4; font-size: 10px; }
-  
-  .progress-wrap {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 10px;
-  }
-  .progress-bar-custom {
-    flex-grow: 1;
-    height: 4px;
-    background: #eee;
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    background: #b78846;
-  }
-  .review-number { font-size: 12px; font-weight: 600; width: 10px;}
-  .review-percent { font-size: 12px; color: #888; width: 25px; text-align: right;}
-  
-  /* Related products card */
-  .related-card {
-    background: #fff;
-    border-radius: 16px;
-    padding: 20px;
-    height: 100%;
-    transition: 0.3s;
-  }
-  .related-img {
-    height: 180px;
-    object-fit: contain;
-    width: 100%;
-    margin-bottom: 15px;
-    background: #fbf9f6;
-    border-radius: 12px;
-    padding: 15px;
-  }
+  .stock-status.in-stock { color: #10b981; }
+  .stock-status.out-stock { color: #ef4444; }
+  .stock-status.low-stock { color: #f59e0b; }
+
 </style>
 </head>
 <body>
 
 <%- include('../partials/navbar') %>
 
-<div class="container mt-4 mb-5 pb-5">
+<% 
+  // Pre-process variants for easier UI rendering
+  const productVariants = product.variants || [];
+  const colors = [...new Set(productVariants.filter(v => v.type === 'Color').map(v => v.value))];
+  const sizes = [...new Set(productVariants.filter(v => v.type === 'Size' || v.type === 'Storage').map(v => v.value))];
+  // Map hex if possible (dynamic later, for now just simple names or dummy colors)
+  const colorMap = {
+    'Black': '#000000',
+    'White': '#ffffff',
+    'Red': '#ef4444',
+    'Blue': '#3b82f6',
+    'Gold': '#b78846',
+    'Orange': '#f97316',
+    'Brown': '#78350f',
+    'Tan': '#d2b48c'
+  };
+%>
+
+<div class="container mt-5 mb-5 pb-5">
   
-  <nav aria-label="breadcrumb" class="mb-4">
-    <ol class="breadcrumb" style="font-size: 12px; font-weight: 500;">
-      <li class="breadcrumb-item"><a href="/user/home" class="text-muted text-decoration-none">Home</a></li>
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-5">
+    <ol class="breadcrumb" style="font-size: 12px; font-weight: 500; text-transform: capitalize;">
+      <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
       <li class="breadcrumb-item"><a href="/user/shop" class="text-muted text-decoration-none">Shop</a></li>
       <% if (product.category) { %>
         <li class="breadcrumb-item"><a href="/user/shop?category=<%= product.category._id %>" class="text-muted text-decoration-none"><%= product.category.name %></a></li>
@@ -235,331 +289,292 @@
     </ol>
   </nav>
 
-  <!-- TOP SECTION -->
-  <div class="row g-5 mb-5 pb-4">
+  <div class="row g-5">
     
-    <!-- LEFT: IMAGES -->
+    <!-- Gallery -->
     <div class="col-md-6">
-      
-      <!-- MAIN IMAGE -->
-      <div class="img-zoom-container mb-3" id="zoomContainer">
-        <img src="<%= product.images[0] %>" id="mainImg" alt="Product Image">
-      </div>
-      
-      <!-- THUMBNAILS -->
-      <div class="row g-2">
-        <% product.images.forEach((img, idx) => { %>
-          <div class="col-3">
-            <img src="<%= img %>" 
-                 class="thumbnail <%= idx === 0 ? 'active' : '' %>" 
-                 onclick="changeMainImage(this, '<%= img %>')">
-          </div>
-        <% }) %>
+      <div class="product-gallery">
+        <div class="main-img-container" id="mainImgContainer">
+          <img src="<%= (product.images && product.images[0]) || '/img/placeholder.jpg' %>" id="mainDisplayImg" alt="<%= product.name %>">
+        </div>
+        
+        <div class="thumbnails-container" id="thumbContainer">
+          <% (product.images || []).forEach((img, idx) => { %>
+            <div class="thumbnail-item <%= idx===0 ? 'active' : '' %>" onclick="updateMainImage(this, '<%= img %>')">
+              <img src="<%= img %>" alt="Thumbnail">
+            </div>
+          <% }) %>
+        </div>
       </div>
     </div>
 
-    <!-- RIGHT: PRODUCT INFO -->
-    <div class="col-md-6 ps-md-4">
+    <!-- Product Info -->
+    <div class="col-md-6 ps-md-5">
       
-      <h1 class="product-title heading-serif mb-3"><%= product.name %></h1>
+      <h1 class="product-title heading-serif"><%= product.name %></h1>
       
-      <div class="d-flex align-items-baseline mb-4">
-        <% if (product.price > product.finalPrice) { %>
-          <span class="product-price me-3">₹<%= product.finalPrice.toLocaleString() %></span>
-          <span class="old-price me-3">₹<%= product.price.toLocaleString() %></span>
-          <span class="save-badge">You save ₹<%= (product.price - product.finalPrice).toLocaleString() %></span>
-        <% } else { %>
-          <span class="product-price">₹<%= product.price.toLocaleString() %></span>
+      <div class="product-price">
+        ₹<%= Math.round((product.price || 0) - ((product.price || 0) * (product.offer || 0) / 100)).toLocaleString() %>
+        <% if(product.offer > 0) { %>
+          <span class="text-muted text-decoration-line-through fs-6 ms-2">₹<%= (product.price || 0).toLocaleString() %></span>
+          <span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 11px;"><%= product.offer %>% OFF</span>
         <% } %>
       </div>
 
-      <p class="content-text mb-4">
-        <%= product.description || 'Inspired by the timeless elegance of the 17th arrondissement, this handcrafted satchel combines premium Italian calfskin with a modern architectural silhouette.' %>
+      <p class="product-desc">
+        <%= product.description || 'Elevate your everyday style with this premium handcrafted piece, designed to blend elegance with functionality. Meticulously constructed from high-quality materials to ensure durability and a timeless silhouette.' %>
       </p>
 
-      <% if (product.stock > 0) { %>
-        <div class="d-flex gap-3 align-items-center mt-5">
-          <!-- Quantity -->
-          <!-- Simplified visual quantity box (functional tie-in left for actual cart feature) -->
-          <div class="qty-box">
-            <i class="fa-solid fa-minus"></i>
-            <span>1</span>
-            <i class="fa-solid fa-plus"></i>
+      <form id="addToCartForm">
+        <!-- Color Selection -->
+        <% if(colors.length > 0) { %>
+          <div class="variant-section">
+            <span class="variant-label">Color</span>
+            <div class="color-swatches">
+              <% colors.forEach((color, i) => { %>
+                <div class="color-swatch <%= i===0 ? 'active' : '' %>" 
+                     data-color="<%= color %>" 
+                     onclick="selectColor(this, '<%= color %>')">
+                  <span class="color-inner" style="background-color: <%= colorMap[color] || color %>; border: 1px solid #eee;"></span>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Size Selection -->
+        <% if(sizes.length > 0) { %>
+          <div class="variant-section">
+            <span class="variant-label">Size</span>
+            <div class="size-chips">
+              <% sizes.forEach((size, i) => { %>
+                <div class="size-chip <%= i===0 ? 'active' : '' %>" 
+                     data-size="<%= size %>" 
+                     onclick="selectSize(this, '<%= size %>')">
+                  <%= size %>
+                </div>
+              <% }) %>
+            </div>
+          </div>
+        <% } %>
+
+        <!-- Stock Status -->
+        <div id="stockInfo" class="stock-status in-stock">
+          <!-- Dynamically filled -->
+        </div>
+
+        <div class="action-wrap">
+          <div class="qty-selector">
+            <button type="button" class="qty-btn" onclick="updateQty(-1)">-</button>
+            <span id="qtyVal" style="font-weight: 700; min-width: 15px; text-align: center;">1</span>
+            <button type="button" class="qty-btn" onclick="updateQty(1)">+</button>
           </div>
           
-          <a href="/user/cart" class="btn-buy text-decoration-none d-flex align-items-center">BUY NOW</a>
+          <button type="button" onclick="handleBuyNow()" class="btn-buy-now">BUY NOW</button>
+          <button type="button" onclick="handleAddToCart()" class="btn-add-cart">ADD TO CART</button>
           
-          <button class="btn-add" onclick="addToCart('<%= product._id %>')">
-            ADD TO CART
-          </button>
-          
-          <a href="#" class="btn-wishlist">
+          <a href="javascript:void(0)" class="btn-heart text-decoration-none">
             <i class="fa-regular fa-heart"></i>
           </a>
         </div>
-      <% } else { %>
-        <p class="text-danger mb-4 fw-bold" style="font-size: 13px;"><i class="fa-solid fa-times-circle me-1"></i> Out of Stock</p>
-        <button class="btn btn-secondary px-5 py-3 rounded-pill fw-bold" disabled style="font-size: 12px; letter-spacing: 1px;">
-          OUT OF STOCK
-        </button>
-      <% } %>
+      </form>
 
-    </div>
-
-  </div>
-
-  <hr style="opacity: 0.1; border-color: #111;" class="mb-5">
-
-  <!-- DESCRIPTION SECTION 
-  <div class="mb-5 pb-4">
-    <div class="section-title">Description</div>
-    
-    <div class="row">
-      <div class="col-md-9">
-        <h3 class="heading-serif mb-4" style="color: #2b2b2b;">The Art of Craftsmanship</h3>
-        <p class="content-text">
-          Every LuxeCarry bag is meticulously constructed by master artisans in our Tuscany atelier. Using only the finest full-grain Italian leather, which is vegetable-tanned to achieve a rich, enduring patina, this piece is designed to be a companion for a lifetime of journeys. The interior is lined with our signature micro-suede and features thoughtfully placed pockets for your daily essentials.
-        </p>
-      </div>
     </div>
   </div>
--->
-  <!-- REVIEWS SECTION (Dummy UI) -->
-  <div class="mb-5 pb-5">
-    <h2 class="heading-serif text-center mb-5" style="font-size: 32px;">Customer Reviews</h2>
-    
-    <div class="row g-5 flex-row-reverse">
-      
-      <!-- Right side: Rating Summary -->
-      <div class="col-md-4">
-        <div class="review-card text-center py-4" style="position: sticky; top: 20px;">
-          <div class="d-flex justify-content-center align-items-end mb-1">
-            <span class="heading-serif me-3" style="font-size: 48px; line-height: 1;">4.8</span>
-            <div class="text-start mb-1">
-              <div>
-                <i class="fa-solid fa-star star-gold"></i>
-                <i class="fa-solid fa-star star-gold"></i>
-                <i class="fa-solid fa-star star-gold"></i>
-                <i class="fa-solid fa-star star-gold"></i>
-                <i class="fa-solid fa-star star-gold"></i>
-              </div>
-              <div style="font-size: 11px; color: #888;">Based on 128 reviews</div>
-            </div>
-          </div>
-          
-          <div class="mt-4 text-start">
-            <!-- 5 stars -->
-            <div class="progress-wrap">
-              <span class="review-number">5</span>
-              <div class="progress-bar-custom"><div class="progress-fill" style="width: 75%;"></div></div>
-              <span class="review-percent">75%</span>
-            </div>
-            <!-- 4 stars -->
-            <div class="progress-wrap">
-              <span class="review-number">4</span>
-              <div class="progress-bar-custom"><div class="progress-fill" style="width: 15%;"></div></div>
-              <span class="review-percent">15%</span>
-            </div>
-            <!-- 3 stars -->
-            <div class="progress-wrap">
-              <span class="review-number">3</span>
-              <div class="progress-bar-custom"><div class="progress-fill" style="width: 5%;"></div></div>
-              <span class="review-percent">5%</span>
-            </div>
-            <!-- 2 stars -->
-            <div class="progress-wrap">
-              <span class="review-number">2</span>
-              <div class="progress-bar-custom"><div class="progress-fill" style="width: 3%;"></div></div>
-              <span class="review-percent">3%</span>
-            </div>
-            <!-- 1 star -->
-            <div class="progress-wrap">
-              <span class="review-number">1</span>
-              <div class="progress-bar-custom"><div class="progress-fill" style="width: 2%;"></div></div>
-              <span class="review-percent">2%</span>
-            </div>
-          </div>
-          
-          <button class="btn btn-dark w-100 rounded-pill mt-4 fw-bold" style="font-size: 12px; letter-spacing: 1px; padding: 12px 0;">Write a Review</button>
-        </div>
-      </div>
-
-      <!-- Left side: Review List -->
-      <div class="col-md-8">
-        
-        <div class="review-card">
-          <div class="d-flex justify-content-between mb-2">
-            <div>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-            </div>
-            <span style="font-size: 11px; color: #a3a3a3;">Oct 12, 2023</span>
-          </div>
-          <div class="mb-3">
-            <span class="fw-bold" style="font-size: 14px;">Eleanor P.</span>
-            <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size: 9px; font-weight: 600;">VERIFIED PURCHASE</span>
-          </div>
-          <h6 class="fw-bold fs-6">Absolutely Breathless</h6>
-          <p class="content-text mb-0" style="font-size: 13px;">The quality of this leather is even better than expected. It has that rich, earthy smell that only real high-end Italian leather possesses. The Desert Grain texture is subtle yet sophisticated. It's truly a statement piece that I'll cherish for years.</p>
-        </div>
-        
-        <div class="review-card">
-          <div class="d-flex justify-content-between mb-2">
-            <div>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-            </div>
-            <span style="font-size: 11px; color: #a3a3a3;">Sep 28, 2023</span>
-          </div>
-          <div class="mb-3">
-            <span class="fw-bold" style="font-size: 14px;">Julian M.</span>
-            <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size: 9px; font-weight: 600;">VERIFIED PURCHASE</span>
-          </div>
-          <h6 class="fw-bold fs-6">The Perfect Work Companion</h6>
-          <p class="content-text mb-0" style="font-size: 13px;">I use this for work daily and it fits everything I need while keeping its structural integrity. The hardware is solid and has a very luxurious weight to it. Customer service was also excellent throughout the shipping process.</p>
-        </div>
-        
-        <div class="review-card">
-          <div class="d-flex justify-content-between mb-2">
-            <div>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gold"></i>
-              <i class="fa-solid fa-star star-gray"></i>
-            </div>
-            <span style="font-size: 11px; color: #a3a3a3;">Aug 15, 2023</span>
-          </div>
-          <div class="mb-3">
-            <span class="fw-bold" style="font-size: 14px;">Sophia L.</span>
-            <span class="badge bg-success bg-opacity-10 text-success ms-2" style="font-size: 9px; font-weight: 600;">VERIFIED PURCHASE</span>
-          </div>
-          <h6 class="fw-bold fs-6">Timeless Design</h6>
-          <p class="content-text mb-0" style="font-size: 13px;">Exactly as pictured. The color is a perfect neutral tan that goes with everything. My only small note is that it was slightly heavier than I expected, but that's a testament to the quality materials. Highly recommend if you want something that doesn't go out of style.</p>
-        </div>
-
-        <div class="text-center mt-4">
-          <a href="#" class="text-decoration-none fw-bold" style="color: #c98a2c; font-size: 11px; letter-spacing: 1px; text-transform: uppercase;">VIEW ALL 128 REVIEWS</a>
-        </div>
-        
-      </div>
-    </div>
-  </div>
-
-  <!-- RELATED PRODUCTS -->
-  <% if (typeof relatedProducts !== 'undefined' && relatedProducts.length > 0) { %>
-    <div class="mt-5 pt-4 border-top border-light">
-      <h2 class="heading-serif text-center mb-5" style="font-size: 28px;">You May Also Like This</h2>
-      
-      <div class="row g-4">
-        <% relatedProducts.forEach(rel => { %>
-          <div class="col-md-3">
-            <div class="related-card d-flex flex-column position-relative">
-              
-              <!-- Offer badge -->
-              <div class="position-absolute" style="top: 20px; left: 20px; z-index: 2;">
-                <% if(rel.offer > 0) { %>
-                  <span class="badge" style="background-color: #b78846; font-size: 9px; letter-spacing: 0.5px; padding: 4px 6px;">SAVE <%= rel.offer %>%</span>
-                <% } %>
-              </div>
-              
-              <!-- Wishlist heart -->
-              <div class="position-absolute" style="top: 20px; right: 20px; z-index: 2;">
-                <a href="#" class="text-decoration-none" style="color: #ccc;"><i class="fa-regular fa-heart bg-white rounded-circle p-2 shadow-sm"></i></a>
-              </div>
-
-              <!-- Image -->
-              <div class="text-center">
-                <img src="<%= rel.images[0] %>" class="related-img">
-              </div>
-
-              <div class="mt-auto">
-                <div class="text-uppercase" style="color: #c98a2c; font-size: 9px; font-weight: 700; letter-spacing: 1px; margin-bottom: 5px;">LUXECARRY</div>
-                
-                <h6 class="fw-bold mb-1 text-truncate" style="font-size: 14px; color: #2b2b2b;"><%= rel.name %></h6>
-                
-                <!-- Rating dummy -->
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <div class="fw-bold" style="font-size: 14px; color: #111;">₹<%= rel.finalPrice || rel.price %>
-                    <% if (rel.price > (rel.finalPrice || rel.price)) { %>
-                      <span class="text-muted fw-normal text-decoration-line-through ms-1" style="font-size: 11px;">₹<%= rel.price %></span>
-                    <% } %>
-                  </div>
-                  <div style="font-size: 11px; color: #c98a2c;">
-                    <i class="fa-solid fa-star"></i> 4.8
-                  </div>
-                </div>
-
-                <div class="d-flex gap-2">
-                  <button class="btn btn-outline-dark w-50 py-2 rounded-pill fw-bold" style="font-size: 10px; border-color: #e1ded8; color: #b78846;" onclick="addToCart('<%= rel._id %>')">
-                    Add to Cart
-                  </button>
-                  <a href="/user/product/<%= rel._id %>" class="btn w-50 py-2 rounded-pill fw-bold d-flex justify-content-center align-items-center text-white" style="font-size: 10px; background-color: #b78846; text-decoration: none;">
-                    Buy Now
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        <% }) %>
-      </div>
-    </div>
-  <% } %>
 
 </div>
 
 <%- include('../partials/footer') %>
 
 <script>
-  // Image Zoom Logic
-  const container = document.getElementById('zoomContainer');
-  const img = document.getElementById('mainImg');
+  const product = <%- JSON.stringify(product) %>;
+  let selectedColor = '<%= colors[0] || "" %>';
+  let selectedSize = '<%= sizes[0] || "" %>';
+  let quantity = 1;
 
-  container.addEventListener('mousemove', e => {
-    const rect = container.getBoundingClientRect();
-    const x = e.clientX - rect.left; 
-    const y = e.clientY - rect.top;  
-    
-    const xPercent = (x / rect.width) * 100;
-    const yPercent = (y / rect.height) * 100;
-    
-    img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-  });
+  // Initialize
+  window.onload = () => {
+    updateStockDisplay();
+    // If first color has specific images, load them
+    const colVariant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
+    if(colVariant && colVariant.images && colVariant.images.length > 0) {
+        swapGallery(colVariant.images);
+    }
+    initZoom();
+  };
 
-  container.addEventListener('mouseleave', () => {
-    img.style.transformOrigin = `center center`;
-  });
+  function initZoom() {
+    const container = document.getElementById('mainImgContainer');
+    const img = document.getElementById('mainDisplayImg');
 
-  // Thumbnail click logic
-  function changeMainImage(element, src) {
-    document.getElementById('mainImg').src = src;
-    
-    document.querySelectorAll('.thumbnail').forEach(thumb => {
-      thumb.classList.remove('active');
+    container.addEventListener('mousemove', (e) => {
+      const rect = container.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      
+      img.style.transformOrigin = `${x}% ${y}%`;
     });
-    element.classList.add('active');
+
+    container.addEventListener('mouseenter', () => {
+      container.classList.add('zoomed');
+    });
+
+    container.addEventListener('mouseleave', () => {
+      container.classList.add('zoomed'); // Wait, toggle it off!
+      container.classList.remove('zoomed');
+      img.style.transformOrigin = 'center center';
+    });
   }
 
-  // Add to cart function
-  async function addToCart(id){
-    try{
-      const res = await fetch('/user/cart/add/' + id);
-      const data = await res.json();
-      if(data.success){
-        window.location.href = '/user/cart';
-      }else{
-        alert(data.message || "Could not add to cart");
-      }
-    }catch(err){
-      alert("Error adding to cart");
+  function selectColor(el, color) {
+    selectedColor = color;
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    
+    // Find variant with these images
+    const variant = product.variants.find(v => v.type === 'Color' && v.value === color);
+    if(variant && variant.images && variant.images.length > 0) {
+      swapGallery(variant.images);
+    } else {
+      // Fallback to base product images
+      swapGallery(product.images);
+    }
+    
+    updateStockDisplay();
+    updateTitle();
+  }
+
+  function selectSize(el, size) {
+    selectedSize = size;
+    document.querySelectorAll('.size-chip').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    updateStockDisplay();
+    updateTitle();
+  }
+
+  function updateMainImage(el, src) {
+    document.getElementById('mainDisplayImg').src = src;
+    document.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function swapGallery(images) {
+    const mainImg = document.getElementById('mainDisplayImg');
+    const thumbContainer = document.getElementById('thumbContainer');
+    
+    mainImg.src = images[0];
+    
+    let html = '';
+    images.forEach((img, idx) => {
+      html += `
+        <div class="thumbnail-item ${idx===0 ? 'active' : ''}" onclick="updateMainImage(this, '${img}')">
+          <img src="${img}" alt="Thumbnail">
+        </div>
+      `;
+    });
+    thumbContainer.innerHTML = html;
+  }
+
+  function updateStockDisplay() {
+    // Find variant matching color AND size (if both exist)
+    let variant;
+    if(selectedColor && selectedSize) {
+        // This assumes variants are combinations, but the user added them separately in our admin UI
+        // Usually variants should be 1-dimensional for simple logic or combined
+        // Given current admin UI adds rows like {type: 'Color', value: 'Red'} and {type: 'Size', value: 'XL'}
+        // We will sum stock or pick the specific one if it's a "Color-Size" type. 
+        // For now, let's treat the variant selection as finding the row that match.
+        // If the product has multiple variant types, we'll try to find a match that fits the color.
+        variant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
+    } else if(selectedColor) {
+        variant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
+    } else if(selectedSize) {
+        variant = product.variants.find(v => (v.type === 'Size'||v.type==='Storage') && v.value === selectedSize);
+    }
+
+    const stockInfo = document.getElementById('stockInfo');
+    const stock = variant ? variant.stock : product.stock;
+
+    if(stock <= 0) {
+      stockInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> OUT OF STOCK';
+      stockInfo.className = 'stock-status out-stock';
+    } else if(stock < 5) {
+      stockInfo.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ONLY ${stock} LEFT IN STOCK`;
+      stockInfo.className = 'stock-status low-stock';
+    } else {
+      stockInfo.innerHTML = '<i class="fa-solid fa-circle-check"></i> IN STOCK';
+      stockInfo.className = 'stock-status in-stock';
     }
   }
+
+  function updateTitle() {
+    // Optional: match mockup by adding (Color, Size) to title 
+    // const baseName = product.name;
+    // document.querySelector('.product-title').innerText = `${baseName} ( ${selectedColor}${selectedSize ? ', ' + selectedSize : ''} )`;
+  }
+
+  function updateQty(delta) {
+    quantity += delta;
+    if(quantity < 1) quantity = 1;
+    document.getElementById('qtyVal').innerText = quantity;
+  }
+
+  async function handleAddToCart() {
+    try {
+      // Find the variant ID matching current selection (Color/Size)
+      let variantId = null;
+      if (product.variants && product.variants.length > 0) {
+        let vMat;
+        if (selectedColor && selectedSize) {
+           vMat = product.variants.find(v => (v.type === 'Color' && v.value === selectedColor) || (v.type === 'Size' && v.value === selectedSize));
+        } else if (selectedColor) {
+           vMat = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
+        } else if (selectedSize) {
+           vMat = product.variants.find(v => (v.type === 'Size' || v.type === 'Storage') && v.value === selectedSize);
+        }
+        if (vMat) variantId = vMat._id;
+      }
+
+      const url = `/user/cart/add/${product._id}${variantId ? '?variantId=' + variantId : ''}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if(data.success) {
+        Swal.fire({
+          title: 'Added to Cart!',
+          text: 'This product has been added to your shopping cart.',
+          icon: 'success',
+          showCancelButton: true,
+          confirmButtonColor: '#c26a00',
+          cancelButtonColor: '#1a1a1a',
+          confirmButtonText: 'Go to Cart',
+          cancelButtonText: 'Continue Shopping'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            window.location.href = '/user/cart';
+          }
+        });
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: data.message || 'Could not add product to cart',
+          icon: 'error',
+          confirmButtonColor: '#c26a00'
+        });
+      }
+    } catch (err) {
+      Swal.fire({
+        title: 'Oops!',
+        text: 'Something went wrong. Please try again.',
+        icon: 'warning',
+        confirmButtonColor: '#c26a00'
+      });
+    }
+  }
+
+  function handleBuyNow() {
+    handleAddToCart();
+  }
+
 </script>
 
 </body>
