@@ -28,11 +28,15 @@ exports.loadShop = async (req, res) => {
 
     console.log("Found colors:", colors);
 
+    // 3. get recommended products for bottom section
+    const recommendedProducts = await Product.find({ isActive: true }).limit(4);
+
     //render AFTER everything is ready
     res.render('user/shop', {
       ...data,
       categories,
-      colors  
+      colors,
+      recommendedProducts
     });
 
   } catch (err) {
@@ -44,7 +48,7 @@ exports.loadShop = async (req, res) => {
 // LOAD PRODUCT DETAILS PAGE
 exports.loadProductDetails = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id).populate('category').lean();
+    const product = await Product.findById(req.params.id).populate('category');
 
     if (!product) {
       return res.redirect('/user/shop');
@@ -54,7 +58,7 @@ exports.loadProductDetails = async (req, res) => {
       category: product.category._id,
       _id: { $ne: product._id },
       isActive: true
-    }).limit(4).lean();
+    }).limit(4);
 
     res.render('user/product', {
       product,

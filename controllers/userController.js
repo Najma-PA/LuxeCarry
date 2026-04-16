@@ -2,6 +2,8 @@ const userService = require('../services/userService');
 const emailService = require('../services/emailService');
 const Address = require("../models/addressModel");
 const bcrypt = require("bcryptjs");
+const fs = require('fs');
+const path = require('path');
 
 const Category = require('../models/categoryModel');
 const Product = require('../models/productModel');
@@ -29,6 +31,7 @@ exports.googleSuccess = (req, res) => {
       id: req.user._id,
       name: req.user.name,
       email: req.user.email,
+      profilePic: req.user.profilePic || null,
       role: req.user.role || 'user'
     };
   }
@@ -71,6 +74,7 @@ exports.loginUser = async (req, res) => {
       id: user._id,
       name: user.name,
       email: user.email,
+      profilePic: user.profilePic || null,
       role: 'user'
     };
 
@@ -371,6 +375,59 @@ exports.updateProfile = async (req, res) => {
 
   } catch (error) {
     res.render("user/editProfile", { error: "Something went wrong" });
+  }
+};
+
+exports.updateProfilePic = async (req, res) => {
+  try {
+    const debugLog = (msg) => {
+       try {
+         fs.appendFileSync('upload_debug.log', `${new Date().toISOString()} - ${msg}\n`);
+       } catch (e) {
+         console.error("Log failed", e);
+       }
+    };
+    
+    debugLog("Starting upload for user: " + (req.session.user ? req.session.user.id : "unknown"));
+    
+    if (!req.session.user) {
+        return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
+    const userId = req.session.user.id;
+    const file = req.file; // Using upload.single()
+
+    if (!file) {
+      debugLog("No file found in req.file");
+      return res.status(400).json({ success: false, message: 'No image provided' });
+    }
+
+    debugLog("File found: " + JSON.stringify({
+        originalname: file.originalname,
+        filename: file.filename,
+        path: file.path,
+        size: file.size
+    }));
+
+    // Save using the new service helper
+    const imagePath = userService.saveProfilePic(file);
+    debugLog("Saved to: " + imagePath);
+    
+    // Update DB
+    const updatedUser = await userService.updateUser(userId, { profilePic: imagePath });
+    debugLog("DB Updated for user: " + userId);
+
+    // Important: Update the current session so the UI reflects changes immediately
+    req.session.user.profilePic = updatedUser.profilePic;
+
+    res.json({ success: true, path: imagePath });
+
+  } catch (error) {
+    try {
+        fs.appendFileSync('upload_debug.log', `${new Date().toISOString()} - Error: ${error.stack}\n`);
+    } catch (e) {}
+    console.error("Profile Pic Upload Error:", error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to update profile picture' });
   }
 };
 

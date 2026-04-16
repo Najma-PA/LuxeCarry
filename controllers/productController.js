@@ -49,12 +49,11 @@ exports.addProduct = async (req, res) => {
     }
 
     await productService.addProduct(req.body, req.files, variants);
-
-    res.redirect('/admin/products');
+    res.json({ success: true, message: 'Product added', redirectUrl: '/admin/products' });
 
   } catch (err) {
     console.error(err);
-    res.status(500).send(err.message);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
@@ -105,11 +104,11 @@ exports.updateProduct = async (req, res) => {
       variants
     );
 
-    res.redirect('/admin/products');
+    res.json({ success: true, message: 'Product updated', redirectUrl: '/admin/products' });
 
   } catch (err) {
     console.error(err);
-    res.status(500).send(err.message);
+    res.status(500).json({ success: false, message: err.message });
   }
 };
 
