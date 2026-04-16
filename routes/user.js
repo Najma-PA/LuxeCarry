@@ -6,6 +6,7 @@ const passport = require("passport");
 const userController = require('../controllers/userController');
 const userProductController = require('../controllers/userProductController');
 const cartController = require('../controllers/cartController');
+const wishlistController = require('../controllers/wishlistController');
 const upload = require('../middleware/multer');
 const {
   isUserAuth,
@@ -54,6 +55,12 @@ router.get('/shop', userProductController.loadShop);
 // Product Details
 router.get('/product/:id', userProductController.loadProductDetails);
 
+// Wishlist
+console.log('Registering wishlist routes...');
+router.get('/wishlist', isUserAuth, wishlistController.showWishlist);
+router.post('/wishlist/toggle', isUserAuth, wishlistController.toggleWishlist);
+router.post('/wishlist/remove/:productId', isUserAuth, wishlistController.removeItem);
+
 // Add to cart
 router.get('/cart/add/:id', isUserAuth, cartController.addToCart);
 
@@ -64,6 +71,7 @@ router.get('/cart/update/:id', isUserAuth, cartController.updateQuantity);
 
 // Remove item
 router.get('/cart/remove/:id', isUserAuth, cartController.removeItem);
+
 
 // OTP
 router.get('/verifyOtp', noCache, userController.showVerifyOTP);
