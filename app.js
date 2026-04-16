@@ -36,10 +36,19 @@ app.use(userSession);
 /* PASSPORT */
 app.use(passport.initialize());
 app.use(passport.session());
+const cartService = require('./services/cartService');
+
 /* GLOBAL LOCALS */
-app.use((req, res, next) => {
-  res.locals.user = req.user || (req.session && req.session.user ? req.session.user : null);
-  res.locals.admin = req.session && req.session.admin ? req.session.admin : null;
+app.use(async (req, res, next) => {
+  try {
+    const user = req.user || (req.session && req.session.user ? req.session.user : null);
+    res.locals.user = user;
+    res.locals.admin = req.session && req.session.admin ? req.session.admin : null;
+    res.locals.cartCount = user ? await cartService.getCartCount(user._id) : 0;
+  } catch (err) {
+    console.error('Error in global locals middleware:', err);
+    res.locals.cartCount = 0;
+  }
   next();
 });
 
