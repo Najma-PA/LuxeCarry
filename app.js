@@ -58,8 +58,6 @@ app.use('/admin', adminSession, adminRoutes);
 /* USER ROUTES */
 app.use('/user', noCache, userRoutes);
 
-
-
 /* ROOT */
 const { redirectIfUserLoggedIn } = require('./middleware/userAuth');
 /*app.get('/', redirectIfUserLoggedIn, (req, res) => {
@@ -82,4 +80,6 @@ connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
   });
+}).catch(err => {
+  console.error('Failed to connect to DB:', err);
 });
