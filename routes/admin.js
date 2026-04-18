@@ -75,5 +75,6 @@ router.post('/products/edit/:id', noCache, isAdminAuth, (req, res, next) => {
 }, productController.updateProduct);
 
 router.get('/products/delete/:id',noCache, isAdminAuth, productController.deleteProduct);
+router.get('/products/restore/:id', noCache, isAdminAuth, productController.restoreProduct);
 
 module.exports = router;
