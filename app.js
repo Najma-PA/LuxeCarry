@@ -44,7 +44,11 @@ app.use(async (req, res, next) => {
     const user = req.user || (req.session && req.session.user ? req.session.user : null);
     res.locals.user = user;
     res.locals.admin = req.session && req.session.admin ? req.session.admin : null;
-    res.locals.cartCount = user ? await cartService.getCartCount(user._id) : 0;
+    
+    // Support both Passport (_id) and Custom Session (id)
+    const userId = user ? (user._id || user.id) : null;
+    res.locals.cartCount = userId ? await cartService.getCartCount(userId) : 0;
+    
   } catch (err) {
     console.error('Error in global locals middleware:', err);
     res.locals.cartCount = 0;
