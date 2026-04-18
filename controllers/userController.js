@@ -431,6 +431,52 @@ exports.updateProfilePic = async (req, res) => {
   }
 };
 
+exports.removeProfilePic = async (req, res) => {
+  try {
+    const debugLog = (msg) => {
+       try {
+         fs.appendFileSync('upload_debug.log', `${new Date().toISOString()} - ${msg}\n`);
+       } catch (e) {
+         console.error("Log failed", e);
+       }
+    };
+    debugLog("Removing profile picture for user: " + (req.session.user ? req.session.user.id : "No session"));
+    
+    if (!req.session.user) {
+      debugLog("Removal failed: Not authenticated");
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
+    const userId = req.session.user.id;
+    const user = await userService.findUserById(userId);
+
+    if (user.profilePic) {
+      // Basic relative path resolution
+      const relativePath = user.profilePic.startsWith('/') ? user.profilePic.substring(1) : user.profilePic;
+      const filePath = path.join(__dirname, '..', 'public', ...relativePath.split('/'));
+      
+      try {
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      } catch (err) {
+        console.error("Error deleting file:", err);
+      }
+    }
+
+    const updatedUser = await userService.updateUser(userId, { profilePic: null });
+    
+    // Update session
+    req.session.user.profilePic = null;
+
+    res.json({ success: true, message: 'Profile picture removed' });
+
+  } catch (error) {
+    console.error("Profile Pic Removal Error:", error);
+    res.status(500).json({ success: false, message: error.message || 'Failed to remove profile picture' });
+  }
+};
+
 /*CHANGE PASSWORD */
 exports.loadChangePassword = async (req, res) => {
   const user = await userService.findUserById(req.session.user.id);

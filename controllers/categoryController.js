@@ -15,32 +15,47 @@ exports.loadAddPage = (req, res) => {
 
 exports.addCategory = async (req, res) => {
   try {
-    console.log('--- ADD CATEGORY DEBUG ---');
-    console.log('req.body:', req.body);
-    console.log('req.file:', req.file);
     await categoryService.addCategory(req.body, req.file);
-    res.redirect('/admin/categories');
+    res.json({ success: true, message: 'Category added successfully', redirectUrl: '/admin/categories' });
   } catch (err) {
-    res.send(err.message);
+    console.error(err);
+    if (err.isValidationError) {
+      return res.status(400).json({ success: false, errors: err.errors });
+    }
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
 exports.loadEditPage = async (req, res) => {
-  const category = await categoryService.getCategoryById(req.params.id);
-  res.render('admin/editCategory', { category });
+  try {
+    const category = await categoryService.getCategoryById(req.params.id);
+    if (!category) {
+      return res.redirect('/admin/categories');
+    }
+    res.render('admin/editCategory', { category });
+  } catch (err) {
+    res.status(500).send(err.message);
+  }
 };
 
 exports.updateCategory = async (req, res) => {
   try {
     await categoryService.updateCategory(req.params.id, req.body, req.file);
-    res.redirect('/admin/categories');
+    res.json({ success: true, message: 'Category updated successfully', redirectUrl: '/admin/categories' });
   } catch (error) {
     console.error("Error updating category:", error);
-    res.status(500).send("There was an error updating the category: " + error.message);
+    if (error.isValidationError) {
+      return res.status(400).json({ success: false, errors: error.errors });
+    }
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
   }
 };
 
 exports.deleteCategory = async (req, res) => {
-  await categoryService.deleteCategory(req.params.id);
-  res.redirect('/admin/categories');
+  try {
+    await categoryService.deleteCategory(req.params.id);
+    res.json({ success: true, message: 'Category deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete category' });
+  }
 };

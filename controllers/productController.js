@@ -53,7 +53,10 @@ exports.addProduct = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    if (err.isValidationError) {
+      return res.status(400).json({ success: false, errors: err.errors });
+    }
+    res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
   }
 };
 
@@ -108,7 +111,10 @@ exports.updateProduct = async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ success: false, message: err.message });
+    if (err.isValidationError) {
+      return res.status(400).json({ success: false, errors: err.errors });
+    }
+    res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
   }
 };
 
@@ -123,6 +129,6 @@ exports.deleteProduct = async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-    res.status(500).json({ success: false });
+    res.status(500).json({ success: false, message: 'Server error during deletion' });
   }
 };

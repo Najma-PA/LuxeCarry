@@ -40,7 +40,7 @@ exports.updateQuantity = async (req, res) => {
     res.json(result);
 
   } catch (err) {
-    res.json({ success: false });
+    res.json({ success: false, message: err.message });
   }
 };
 
