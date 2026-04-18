@@ -544,31 +544,32 @@ document.getElementById('editProductForm').onsubmit = async function(e) {
     const submitBtn = this.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
 
-    const formData = new FormData(this);
-    
-    // Handle Base Images
-    formData.delete('images');
-    formData.delete('existingImages');
-    baseExistingImages.forEach(url => { if(url) formData.append('existingImages', url); });
-    baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
-
-    // Handle Variant Images
-    rows.forEach((row, i) => {
-        const vIdx = row.getAttribute('data-index');
-        const data = variantImagesData[vIdx];
-        
-        // Add existing variant images
-        data.existing.forEach(url => {
-            if(url) formData.append(`existingVariantImages_${i}`, url);
-        });
-        
-        // Add new variant blobs
-        data.newBlobs.forEach((blob, bIdx) => {
-            if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
-        });
-    });
-
     try {
+        const formData = new FormData(this);
+        
+        // Handle Base Images
+        formData.delete('images');
+        formData.delete('existingImages');
+        baseExistingImages.forEach(url => { if(url) formData.append('existingImages', url); });
+        baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
+
+        // Handle Variant Images
+        const rows = document.querySelectorAll('.variant-row');
+        rows.forEach((row, i) => {
+            const vIdx = row.getAttribute('data-index');
+            const data = variantImagesData[vIdx];
+            
+            // Add existing variant images
+            data.existing.forEach(url => {
+                if(url) formData.append(`existingVariantImages_${i}`, url);
+            });
+            
+            // Add new variant blobs
+            data.newBlobs.forEach((blob, bIdx) => {
+                if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
+            });
+        });
+
         const response = await fetch('/admin/products/edit/<%= product._id %>', {
             method: 'POST',
             body: formData

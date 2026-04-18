@@ -55,6 +55,7 @@
           <a href="?status=all&search=<%= search %>" class="<%= status==='all'?'active':'' %>">All Products</a>
           <a href="?status=active&search=<%= search %>" class="<%= status==='active'?'active':'' %>">Active</a>
           <a href="?status=low&search=<%= search %>" class="<%= status==='low'?'active':'' %>">Low Stock <span class="low-dot"></span></a>
+          <a href="?status=archived&search=<%= search %>" class="<%= status==='archived'?'active':'' %>">Archived</a>
         </div>
       
       </div>
@@ -95,9 +96,16 @@
                 <a href="/admin/products/edit/<%= p._id %>" class="btn-action" title="Edit">
                   <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
                 </a>
-                <button onclick="deleteProduct('<%= p._id %>')" class="btn-action" title="Delete">
-                  <i class="fa-regular fa-trash-can" style="font-size: 14px;"></i>
-                </button>
+                
+                <% if (p.isActive) { %>
+                  <button onclick="deleteProduct('<%= p._id %>')" class="btn-action" title="Delete">
+                    <i class="fa-regular fa-trash-can" style="font-size: 14px;"></i>
+                  </button>
+                <% } else { %>
+                  <button onclick="restoreProduct('<%= p._id %>')" class="btn-action text-success" title="Restore">
+                    <i class="fa-solid fa-trash-arrow-up" style="font-size: 14px;"></i>
+                  </button>
+                <% } %>
               </td>
             </tr>
             <% }) %>
@@ -177,17 +185,56 @@
 <script>
 function deleteProduct(id) {
   Swal.fire({
-    title: 'Delete product?',
-    text: "Are you sure you want to permanently remove this product?",
+    title: 'Archive product?',
+    text: "This product will be moved to the archived list.",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#dc2626',
     cancelButtonColor: '#64748b',
-    confirmButtonText: 'Yes, delete it!'
+    confirmButtonText: 'Yes, archive it!'
   }).then(async (result) => {
     if (result.isConfirmed) {
-      await fetch(`/admin/products/delete/${id}`);
-      location.reload();
+      try {
+        const response = await fetch(`/admin/products/delete/${id}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data.success) {
+          Swal.fire('Archived!', 'Product has been moved to archive.', 'success').then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.message || 'Failed to archive', 'error');
+        }
+      } catch (err) {
+        console.error('Delete Error:', err);
+        Swal.fire('Error', `Fetch Error: ${err.message}`, 'error');
+      }
+    }
+  });
+}
+
+function restoreProduct(id) {
+  Swal.fire({
+    title: 'Restore product?',
+    text: "Move this product back to the active list?",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#10b981',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Yes, restore it!'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/admin/products/restore/${id}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        if (data.success) {
+          Swal.fire('Restored!', 'Product is now active.', 'success').then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.message || 'Failed to restore', 'error');
+        }
+      } catch (err) {
+        console.error('Restore Error:', err);
+        Swal.fire('Error', `Fetch Error: ${err.message}`, 'error');
+      }
     }
   });
 }
