@@ -56,7 +56,6 @@ router.get('/shop', userProductController.loadShop);
 router.get('/product/:id', userProductController.loadProductDetails);
 
 // Wishlist
-console.log('Registering wishlist routes...');
 router.get('/wishlist', isUserAuth, wishlistController.showWishlist);
 router.post('/wishlist/toggle', isUserAuth, wishlistController.toggleWishlist);
 router.post('/wishlist/remove/:productId', isUserAuth, wishlistController.removeItem);
@@ -89,6 +88,7 @@ router.get("/profile", isUserAuth, userController.profilePage);
 router.get("/editProfile", isUserAuth, userController.loadEditProfile);
 router.post("/editProfile", isUserAuth, userController.updateProfile);
 router.post("/profile/update-picture", isUserAuth, upload.single('profilePic'), userController.updateProfilePic);
+router.post("/profile/remove-picture", isUserAuth, userController.removeProfilePic);
 
 // PASSWORD
 router.get("/changePassword", isUserAuth, userController.loadChangePassword);
