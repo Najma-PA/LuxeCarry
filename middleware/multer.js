@@ -2,10 +2,10 @@ const multer = require('multer');
 const path = require('path');
 
 
-// 📦 STORAGE CONFIG (temporary storage)
+// STORAGE CONFIG (temporary storage)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/temp'); // temp folder (important)
+    cb(null, 'public/temp'); // temp folder 
   },
 
   filename: function (req, file, cb) {
@@ -36,7 +36,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 
-// 📏 LIMITS
+//LIMITS
 const limits = {
   fileSize: 10 * 1024 * 1024,
   files: 50,                  // Allow up to 50 files
@@ -44,7 +44,7 @@ const limits = {
 };
 
 
-// 🚀 EXPORT MULTER
+//EXPORT MULTER
 const upload = multer({
   storage,
   fileFilter,
