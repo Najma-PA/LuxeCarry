@@ -46,13 +46,30 @@ exports.getCategories = async ({ search = '', page = 1 }) => {
 };
 
 exports.addCategory = async (data, file) => {
-    //CHECK DUPLICATE
-  const existing = await Category.findOne({
-    name: { $regex: `^${data.name}$`, $options: 'i' }
-  });
+  
+  const errors = {};
 
-  if (existing) {
-    throw new Error('Category already exists');
+  // VALIDATE DATA
+  if (!data.name || data.name.trim() === '') {
+    errors.name = 'Category name is required';
+  }
+
+  if (data.offer && (data.offer < 0 || data.offer > 99)) {
+    errors.offer = 'Offer must be between 0 and 99';
+  }
+
+  // CHECK DUPLICATE
+  if (data.name && data.name.trim() !== '') {
+    const existing = await Category.findOne({
+      name: { $regex: `^${data.name.trim()}$`, $options: 'i' }
+    });
+    if (existing) {
+      errors.name = 'Category already exists';
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw { isValidationError: true, errors };
   }
 
   
@@ -72,14 +89,30 @@ exports.getCategoryById = async (id) => {
 
 exports.updateCategory = async (id, data, file) => {
 
-    // CHECK DUPLICATE (exclude current category)
-  const existing = await Category.findOne({
-    _id: { $ne: id },
-    name: { $regex: `^${data.name}$`, $options: 'i' }
-  });
+  const errors = {};
 
-  if (existing) {
-    throw new Error('Category already exists');
+  // VALIDATE DATA
+  if (!data.name || data.name.trim() === '') {
+    errors.name = 'Category name is required';
+  }
+
+  if (data.offer && (data.offer < 0 || data.offer > 99)) {
+    errors.offer = 'Offer must be between 0 and 99';
+  }
+
+  // CHECK DUPLICATE (exclude current category)
+  if (data.name && data.name.trim() !== '') {
+    const existing = await Category.findOne({
+      _id: { $ne: id },
+      name: { $regex: `^${data.name.trim()}$`, $options: 'i' }
+    });
+    if (existing) {
+      errors.name = 'Category already exists';
+    }
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw { isValidationError: true, errors };
   }
   if (file) {
     const filename = `cat-${Date.now()}-${file.originalname}`;

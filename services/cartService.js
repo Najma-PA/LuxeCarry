@@ -176,10 +176,12 @@ const updateQuantity = async (userId, itemId, change) => {
   const cart = await Cart.findOne({ user: userId })
     .populate('items.product');
 
+  if (!cart) return { success: false, message: 'Cart not found' };
+
   const item = cart.items.id(itemId);
 
   if (!item || !item.product) {
-    return { success: false };
+    return { success: false, message: 'Item not found' };
   }
 
   if (!item.product.isActive) {
@@ -188,11 +190,24 @@ const updateQuantity = async (userId, itemId, change) => {
 
   change = parseInt(change);
 
+  // Determine available stock
+  let availableStock = item.product.stock;
+  if (item.variant && item.product.variants) {
+    const variant = item.product.variants.id(item.variant);
+    if (variant) {
+      availableStock = variant.stock;
+    }
+  }
+
   // Increase
   if (change === 1) {
-    if (item.quantity < item.product.stock && item.quantity < MAX_QTY) {
-      item.quantity++;
+    if (item.quantity >= MAX_QTY) {
+      return { success: false, message: `Maximum ${MAX_QTY} units allowed per item.` };
     }
+    if (item.quantity >= availableStock) {
+      return { success: false, message: 'Only ' + availableStock + ' units available in stock.' };
+    }
+    item.quantity++;
   }
 
   // Decrease

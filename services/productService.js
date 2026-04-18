@@ -19,7 +19,7 @@ exports.getProducts = async (query) => {
 
   let filter = {};
 
-  // 🔍 Search
+  //Search
   if (search) {
     const searchRegex = { $regex: search.trim(), $options: 'i' };
     
@@ -91,13 +91,44 @@ exports.addProduct = async (data, files, variants) => {
     });
   }
 
+  const errors = {};
+
   if (baseImagePaths.length < 3) {
-    throw new Error("Minimum 3 base images required");
+    errors.images = "Minimum 3 base images required";
+  }
+
+  // VALIDATE DATA
+  if (!data.name || data.name.trim() === '') errors.name = 'Product name is required';
+  if (!data.price || data.price <= 0) errors.price = 'Price must be a positive number';
+  if (data.offer && (data.offer < 0 || data.offer > 99)) errors.offer = 'Offer must be between 0 and 99';
+  if (!data.category) errors.category = 'Category is required';
+
+  // CHECK DUPLICATE
+  if (data.name && data.name.trim() !== '') {
+    const existing = await Product.findOne({
+      name: { $regex: `^${data.name.trim()}$`, $options: 'i' }
+    });
+    if (existing) errors.name = 'Product with this name already exists';
+  }
+
+  // VALIDATE VARIANTS
+  if (variants && variants.length > 0) {
+    variants.forEach((v, idx) => {
+      if (!v.type || !v.value || v.stock === undefined || v.stock === "") {
+        errors[`variant_${idx}`] = 'All variant fields are required';
+      } else if (v.stock < 0) {
+        errors[`variant_${idx}`] = 'Variant stock cannot be negative';
+      }
+    });
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw { isValidationError: true, errors };
   }
 
   // Create Product
   return Product.create({
-    name: data.name,
+    name: data.name.trim(),
     category: data.category,
     price: data.price,
     offer: data.offer || 0,
@@ -146,12 +177,44 @@ exports.updateProduct = async (id, data, files, variants) => {
     v.images = [...(v.images || []), ...existingVImages];
   });
 
+  const errors = {};
+
   if (updatedBaseImages.length < 3) {
-    throw new Error("Minimum 3 base images required");
+    errors.images = "Minimum 3 base images required";
+  }
+
+  // VALIDATE DATA
+  if (!data.name || data.name.trim() === '') errors.name = 'Product name is required';
+  if (!data.price || data.price <= 0) errors.price = 'Price must be a positive number';
+  if (data.offer && (data.offer < 0 || data.offer > 99)) errors.offer = 'Offer must be between 0 and 99';
+  if (!data.category) errors.category = 'Category is required';
+
+  // CHECK DUPLICATE (exclude current product)
+  if (data.name && data.name.trim() !== '') {
+    const existing = await Product.findOne({
+      _id: { $ne: id },
+      name: { $regex: `^${data.name.trim()}$`, $options: 'i' }
+    });
+    if (existing) errors.name = 'Product with this name already exists';
+  }
+
+  // VALIDATE VARIANTS
+  if (variants && variants.length > 0) {
+    variants.forEach((v, idx) => {
+      if (!v.type || !v.value || v.stock === undefined || v.stock === "") {
+        errors[`variant_${idx}`] = 'All variant fields are required';
+      } else if (v.stock < 0) {
+        errors[`variant_${idx}`] = 'Variant stock cannot be negative';
+      }
+    });
+  }
+
+  if (Object.keys(errors).length > 0) {
+    throw { isValidationError: true, errors };
   }
 
   return Product.findByIdAndUpdate(id, {
-    name: data.name,
+    name: data.name.trim(),
     category: data.category,
     price: data.price,
     offer: data.offer,
