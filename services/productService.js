@@ -35,11 +35,12 @@ exports.getProducts = async (query) => {
   }
 
   // Status Tabs
-  if (status === 'active') {
+  if (status === 'active' || status === 'all') {
     filter.isActive = true;
   } else if (status === 'archived') {
     filter.isActive = false;
   } else if (status === 'low') {
+    filter.isActive = true; // Still want only active ones for low stock
     filter.stock = { $lt: 10 };
   }
 
@@ -60,35 +61,45 @@ exports.getProducts = async (query) => {
   };
 };
 
-const saveFile = (file) => {
+const saveFile = async (file) => {
   const filename = `product-${Date.now()}-${file.fieldname}-${Math.round(Math.random() * 1E9)}${path.extname(file.originalname)}`;
-  const outputPath = path.join('public', 'uploads', filename);
+  const uploadDir = path.join('public', 'uploads');
+  const outputPath = path.join(uploadDir, filename);
   
-  if (!fs.existsSync(path.join('public', 'uploads'))) {
-    fs.mkdirSync(path.join('public', 'uploads'), { recursive: true });
+  if (!fs.existsSync(uploadDir)) {
+    await fs.promises.mkdir(uploadDir, { recursive: true });
   }
 
-  fs.copyFileSync(file.path, outputPath);
-  fs.unlinkSync(file.path);
+  try {
+    await fs.promises.rename(file.path, outputPath);
+  } catch (err) {
+    // Fallback if cross-device rename fails
+    await fs.promises.copyFile(file.path, outputPath);
+    await fs.promises.unlink(file.path);
+  }
+
   return `/uploads/${filename}`;
 };
 
 exports.addProduct = async (data, files, variants) => {
   const baseImagePaths = [];
   
-  // 1. Organize images by variant index
+  // 1. Organize images by variant index and save them asynchronously
   if (files && files.length > 0) {
-    files.forEach(file => {
+    const savePromises = files.map(async (file) => {
       if (file.fieldname === 'images' || file.fieldname.startsWith('baseImage_')) {
-        baseImagePaths.push(saveFile(file));
+        const savedPath = await saveFile(file);
+        baseImagePaths.push(savedPath);
       } else if (file.fieldname.startsWith('variantImages_')) {
         const vIdx = parseInt(file.fieldname.split('_')[1]);
         if (variants[vIdx]) {
           if (!variants[vIdx].images) variants[vIdx].images = [];
-          variants[vIdx].images.push(saveFile(file));
+          const savedPath = await saveFile(file);
+          variants[vIdx].images.push(savedPath);
         }
       }
     });
+    await Promise.all(savePromises);
   }
 
   const errors = {};
@@ -151,19 +162,22 @@ exports.updateProduct = async (id, data, files, variants) => {
     updatedBaseImages = Array.isArray(data.existingImages) ? data.existingImages : [data.existingImages];
   }
 
-  // 2. Handle New Uploads and Variant Images
+  // 2. Handle New Uploads and Variant Images asynchronously
   if (files && files.length > 0) {
-    files.forEach(file => {
+    const savePromises = files.map(async (file) => {
       if (file.fieldname === 'images' || file.fieldname.startsWith('baseImage_')) {
-        updatedBaseImages.push(saveFile(file));
+        const savedPath = await saveFile(file);
+        updatedBaseImages.push(savedPath);
       } else if (file.fieldname.startsWith('variantImages_')) {
         const vIdx = parseInt(file.fieldname.split('_')[1]);
         if (variants[vIdx]) {
           if (!variants[vIdx].images) variants[vIdx].images = [];
-          variants[vIdx].images.push(saveFile(file));
+          const savedPath = await saveFile(file);
+          variants[vIdx].images.push(savedPath);
         }
       }
     });
+    await Promise.all(savePromises);
   }
 
   // 3. Handle Existing Variant Images (passed as strings/arrays per variant)
@@ -231,6 +245,23 @@ exports.getProductById = async (id) => {
 
 exports.deleteProduct = async (id) => {
   return Product.findByIdAndUpdate(id, { isActive: false });
+};
+
+exports.restoreProduct = async (id) => {
+  try {
+    console.log('--- ProductService.restoreProduct ---');
+    console.log('ID:', id);
+    const updated = await Product.findByIdAndUpdate(id, { isActive: true }, { new: true });
+    if (!updated) {
+      console.log('Result: Product not found');
+      throw new Error('Product not found in database');
+    }
+    console.log('Result: Success');
+    return updated;
+  } catch (err) {
+    console.error('Error in ProductService.restoreProduct:', err.message);
+    throw err;
+  }
 };
 
 function calculateTotalStock(variants) {
