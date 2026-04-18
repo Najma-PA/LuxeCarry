@@ -132,3 +132,18 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error during deletion' });
   }
 };
+
+
+
+// RESTORE
+exports.restoreProduct = async (req, res) => {
+  try {
+    console.log('Product ID:', req.params.id);
+    await productService.restoreProduct(req.params.id);
+    console.log('Restoration Successful');
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Restoration Failed:', err.message);
+    res.status(500).json({ success: false, message: 'Server error during restoration: ' + err.message });
+  }
+};
