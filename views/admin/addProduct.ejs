@@ -96,33 +96,38 @@
                     
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold">Product Name</label>
-                        <input type="text" name="name" class="form-control" placeholder="Enter product name" required>
+                        <input type="text" name="name" class="form-control" id="prodName" placeholder="Enter product name">
+                        <div id="error-name" class="text-danger small d-none"></div>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label text-muted small fw-bold">Category</label>
-                        <select name="category" class="form-select" required>
+                        <select name="category" class="form-select" id="prodCategory">
                             <option value="" disabled selected>Select Category</option>
                             <% categories.forEach(c => { %>
                                 <option value="<%= c._id %>"><%= c.name %></option>
                             <% }) %>
                         </select>
+                        <div id="error-category" class="text-danger small d-none"></div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted small fw-bold">Base Price (₹)</label>
-                            <input type="number" name="price" class="form-control" placeholder="0.00" required>
+                            <input type="number" name="price" class="form-control" id="prodPrice" placeholder="0.00">
+                            <div id="error-price" class="text-danger small d-none"></div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted small fw-bold">Discount (%)</label>
-                            <input type="number" name="offer" class="form-control" placeholder="0" min="0" max="99">
+                            <input type="number" name="offer" class="form-control" id="prodOffer" placeholder="0" min="0" max="99">
+                            <div id="error-offer" class="text-danger small d-none"></div>
                         </div>
                     </div>
 
                     <div class="mb-0">
                         <label class="form-label text-muted small fw-bold">Description</label>
-                        <textarea name="description" class="form-control" rows="4" placeholder="Briefly describe the product..."></textarea>
+                        <textarea name="description" class="form-control" id="prodDesc" rows="4" placeholder="Briefly describe the product..."></textarea>
+                        <div id="error-description" class="text-danger small d-none"></div>
                     </div>
                 </div>
 
@@ -279,7 +284,10 @@
         
         const row = `
             <tr class="variant-row" data-index="${vIdx}">
-                <td><input name="variantType[]" value="Color" class="form-control form-control-sm border-0 bg-light"></td>
+                <td>
+                    <input name="variantType[]" value="Color" class="form-control form-control-sm border-0 bg-light">
+                    <div class="error-variant text-danger" style="font-size: 10px; display:none;"></div>
+                </td>
                 <td><input name="variantValue[]" class="form-control form-control-sm" placeholder="e.g. Black"></td>
                 <td><input type="number" name="variantStock[]" class="form-control form-control-sm" value="0"></td>
                 <td>
@@ -294,6 +302,14 @@
             </tr>
         `;
         document.getElementById('variantTable').insertAdjacentHTML('beforeend', row);
+        
+        // Add listeners to newly added variant inputs
+        const newRow = document.querySelector(`.variant-row[data-index="${vIdx}"]`);
+        newRow.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', () => {
+                newRow.querySelector('.error-variant').style.display = 'none';
+            });
+        });
     }
 
     addVariant();
@@ -410,40 +426,104 @@
         });
     }
 
+    // Validation Helpers
+    function setFieldError(id, msg) {
+        const errEl = document.getElementById(`error-${id}`);
+        if (errEl) {
+            errEl.innerText = msg;
+            errEl.classList.remove('d-none');
+        }
+    }
+
+    function clearFieldError(id) {
+        const errEl = document.getElementById(`error-${id}`);
+        if (errEl) {
+            errEl.classList.add('d-none');
+        }
+    }
+
+    // Attach listeners
+    ['Name', 'Category', 'Price', 'Offer', 'Desc'].forEach(idSuffix => {
+        const el = document.getElementById(`prod${idSuffix}`);
+        if (el) {
+            el.addEventListener('input', () => {
+                const map = { 'prodName': 'name', 'prodCategory': 'category', 'prodPrice': 'price', 'prodOffer': 'offer', 'prodDesc': 'description' };
+                clearFieldError(map[el.id]);
+            });
+            if (el.tagName === 'SELECT') {
+                el.addEventListener('change', () => clearFieldError('category'));
+            }
+        }
+    });
+
     document.getElementById('productForm').onsubmit = async function(e) {
         e.preventDefault();
-        const baseCount = baseNewBlobs.filter(b => b !== null).length;
-        if (baseCount < 3) {
-            Swal.fire('Wait!', 'A minimum of 3 base images are required.', 'warning');
-            return;
-        }
+
+        // Reset errors
+        ['name', 'category', 'price', 'offer', 'description'].forEach(clearFieldError);
+        document.querySelectorAll('.error-variant').forEach(el => el.style.display = 'none');
+
+        // Show spinner
         document.getElementById('submitSpinner').classList.remove('d-none');
-        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const submitBtn = this.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
+
         const formData = new FormData(this);
         formData.delete('images');
         baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
-        const rows = document.querySelectorAll('.variant-row');
-        rows.forEach((row, i) => {
+
+        variantRows.forEach((row, i) => {
             const vIdx = row.getAttribute('data-index');
             variantImagesData[vIdx].newBlobs.forEach((blob, bIdx) => {
                 if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
             });
         });
+
         try {
             const response = await fetch('/admin/products/add', {
                 method: 'POST',
                 body: formData
             });
+
             const result = await response.json();
             if (result.success) {
-                window.location.href = result.redirectUrl || '/admin/products';
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: result.message,
+                    confirmButtonColor: '#ca8a04'
+                }).then(() => {
+                    window.location.href = result.redirectUrl || '/admin/products';
+                });
             } else {
-                Swal.fire('Error', result.message || 'Something went wrong', 'error');
+                if (result.errors) {
+                    for (const [key, msg] of Object.entries(result.errors)) {
+                        if (key.startsWith('variant_')) {
+                            const idx = key.split('_')[1];
+                            const row = document.querySelectorAll('.variant-row')[idx];
+                            if (row) {
+                                const err = row.querySelector('.error-variant');
+                                err.innerText = msg;
+                                err.style.display = 'block';
+                            }
+                        } else if (key === 'images') {
+                             Swal.fire('Wait!', msg, 'warning');
+                        } else {
+                            setFieldError(key, msg);
+                        }
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: result.message || 'Something went wrong',
+                        confirmButtonColor: '#ca8a04'
+                    });
+                }
             }
         } catch (err) {
             console.error(err);
-            Swal.fire('Error', 'Server communication failed or invalid response', 'error');
+            Swal.fire('Error', 'Server communication failed. Please try again later.', 'error');
         } finally {
             document.getElementById('submitSpinner').classList.add('d-none');
             submitBtn.disabled = false;

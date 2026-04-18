@@ -120,6 +120,26 @@
         background: #a85700;
         transform: scale(1.1);
     }
+    .remove-pic-btn {
+        position: absolute;
+        bottom: 5px;
+        left: 5px;
+        background: #dc3545;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border: 2px solid white;
+        transition: 0.2s;
+    }
+    .remove-pic-btn:hover {
+        background: #bb2d3b;
+        transform: scale(1.1);
+    }
     .cropper-container {
         max-height: 400px;
         overflow: hidden;
@@ -214,6 +234,9 @@
         <label for="profilePicInput" class="change-pic-btn">
             <i class="fa fa-camera"></i>
         </label>
+        <button id="removePicBtn" class="remove-pic-btn <%= user.profilePic ? '' : 'd-none' %>" type="button" onclick="removeProfilePic()" title="Remove Picture">
+            <i class="fa fa-trash"></i>
+        </button>
         <input type="file" id="profilePicInput" accept="image/*" class="d-none" onchange="prepareCrop(event)">
     </div>
 </div>
@@ -409,12 +432,14 @@ async function performCrop() {
                     // Update previews
                     const picPreview = document.getElementById('profilePicPreview');
                     const letterAvatar = document.getElementById('profilePicLetter');
+                    const removeBtn = document.getElementById('removePicBtn');
                     
                     if(picPreview) {
                         picPreview.src = result.path;
                         picPreview.classList.remove('d-none');
                     }
                     if(letterAvatar) letterAvatar.classList.add('d-none');
+                    if(removeBtn) removeBtn.classList.remove('d-none');
                     
                     // Also update sidebar or navbar avatars
                     document.querySelectorAll('.profile-avatar').forEach(img => img.src = result.path);
@@ -427,6 +452,67 @@ async function performCrop() {
             Swal.fire('Error', 'Server error: ' + err.message, 'error');
         }
     });
+}
+
+async function removeProfilePic() {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "This will remove your profile picture.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c26a00',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch('/user/profile/remove-picture', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error("Failed to parse response:", text);
+                throw new Error("Server returned non-JSON response. Check console.");
+            }
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Removed!',
+                    text: 'Profile picture removed successfully',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    // Update preview
+                    const picPreview = document.getElementById('profilePicPreview');
+                    const letterAvatar = document.getElementById('profilePicLetter');
+                    const removeBtn = document.getElementById('removePicBtn');
+                    
+                    if(picPreview) picPreview.classList.add('d-none');
+                    if(letterAvatar) letterAvatar.classList.remove('d-none');
+                    if(removeBtn) removeBtn.classList.add('d-none');
+                    
+                    // Also update sidebar or navbar avatars
+                    // For sidebar initial avatar, we might need to Refresh or update manually
+                    // Since the sidebar initial avatar is already there but might be hidden or replaced
+                    location.reload(); // Simplest way to ensure all avatars across the page update
+                });
+            } else {
+                Swal.fire('Error', data.message || 'Removal failed', 'error');
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire('Error', 'Server error: ' + err.message, 'error');
+        }
+    }
 }
 </script>
 </body>

@@ -20,29 +20,34 @@
 
   <div class="card p-4">
 
-    <form method="POST" action="/admin/categories/add" enctype="multipart/form-data">
+    <form id="addCategoryForm" enctype="multipart/form-data">
 
       <div class="mb-3">
         <label class="form-label">Category Name</label>
-        <input type="text" name="name" class="form-control" required>
+        <input type="text" name="name" class="form-control" id="catName">
+        <div id="nameError" class="text-danger small mt-1 d-none"></div>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Description</label>
-        <textarea name="description" class="form-control"></textarea>
+        <textarea name="description" class="form-control" id="catDesc"></textarea>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Offer (%)</label>
-        <input type="number" name="offer" class="form-control">
+        <input type="number" name="offer" class="form-control" id="catOffer" min="0" max="99">
+        <div id="offerError" class="text-danger small mt-1 d-none"></div>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Category Image</label>
-        <input type="file" name="image" class="form-control" accept="image/*">
+        <input type="file" name="image" class="form-control" accept="image/*" id="catImage">
       </div>
 
-      <button class="btn btn-warning text-white">Save Category</button>
+      <button type="submit" class="btn btn-gold text-white w-100" id="submitBtn">
+        <span id="btnText">Save Category</span>
+        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+      </button>
 
     </form>
 
@@ -53,28 +58,94 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-function deleteCategory(id) {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: "This will deactivate the category",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, delete it!'
-  }).then(async (result) => {
+// Helper to show error
+function setFieldError(id, msg) {
+  const errEl = document.getElementById(id);
+  if (errEl) {
+    errEl.innerText = msg;
+    errEl.classList.remove('d-none');
+  }
+}
 
-    if (result.isConfirmed) {
+// Helper to clear error
+function clearFieldError(id) {
+  const errEl = document.getElementById(id);
+  if (errEl) {
+    errEl.classList.add('d-none');
+  }
+}
 
-      const res = await fetch(`/admin/categories/delete/${id}`);
+// Attach listeners to clear errors on input
+document.querySelectorAll('input, textarea').forEach(el => {
+  el.addEventListener('input', () => {
+    const errorId = el.id === 'catName' ? 'nameError' : (el.id === 'catOffer' ? 'offerError' : '');
+    if (errorId) clearFieldError(errorId);
+  });
+});
 
-      if (res.ok) {
-        Swal.fire('Deleted!', '', 'success')
-          .then(() => location.reload());
+document.getElementById('addCategoryForm').onsubmit = async function(e) {
+  e.preventDefault();
+
+  // Reset errors
+  clearFieldError('nameError');
+  clearFieldError('offerError');
+
+  // Show loading
+  const btnText = document.getElementById('btnText');
+  const btnSpinner = document.getElementById('btnSpinner');
+  const submitBtn = document.getElementById('submitBtn');
+  
+  submitBtn.disabled = true;
+  btnText.classList.add('d-none');
+  btnSpinner.classList.remove('d-none');
+
+  const formData = new FormData(this);
+
+  try {
+    const response = await fetch('/admin/categories/add', {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+        confirmButtonColor: '#ca8a04'
+      }).then(() => {
+        window.location.href = result.redirectUrl || '/admin/categories';
+      });
+    } else {
+      if (result.errors) {
+        // Backend returned field-specific errors
+        if (result.errors.name) setFieldError('nameError', result.errors.name);
+        if (result.errors.offer) setFieldError('offerError', result.errors.offer);
       } else {
-        Swal.fire('Error', 'Failed to delete', 'error');
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: result.message || 'Something went wrong',
+          confirmButtonColor: '#ca8a04'
+        });
       }
     }
-  });
-}
+  } catch (err) {
+    console.error(err);
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Server communication failed',
+      confirmButtonColor: '#ca8a04'
+    });
+  } finally {
+    submitBtn.disabled = false;
+    btnText.classList.remove('d-none');
+    btnSpinner.classList.add('d-none');
+  }
+};
 </script>
 
 </body>

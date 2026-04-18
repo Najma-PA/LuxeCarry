@@ -394,22 +394,29 @@
         <div class="row g-4 mb-5">
           <% relatedProducts.forEach(rel => { %>
             <div class="col-md-3">
-              <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; transition: transform 0.3s ease; background: #fff;">
-                <div class="position-relative bg-light p-3 text-center" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
-                  <img src="<%= (rel.images && rel.images[0]) || '/img/placeholder.jpg' %>" class="img-fluid" style="max-height: 160px; object-fit: contain;">
+              <div class="card h-100 border-0 shadow-sm" style="border-radius: 16px; overflow: hidden; 
+              transition: transform 0.3s ease; background: #fff;">
+                <div class="position-relative bg-light p-3 text-center" style="min-height: 200px; display: flex;
+                 align-items: center; justify-content: center;">
+                  <img src="<%= (rel.images && rel.images[0]) || '/img/placeholder.jpg' %>" class="img-fluid" style="max-height: 160px; 
+                  object-fit: contain;">
                   <% if(rel.offer > 0) { %>
-                    <span class="badge position-absolute" style="top: 15px; left: 15px; background-color: #b78846; font-size: 9px; padding: 4px 8px;">-<%= rel.offer %>%</span>
+                    <span class="badge position-absolute" style="top: 15px; left: 15px; background-color: #b78846; 
+                    font-size: 9px; padding: 4px 8px;">-<%= rel.offer %>%</span>
                   <% } %>
                 </div>
                 <div class="card-body p-4 d-flex flex-column">
                   <h6 class="fw-bold mb-2 text-truncate" style="font-size: 14px; color: #111;"><%= rel.name %></h6>
                   <div class="mb-3">
-                    <span class="fw-bold" style="color: #b78846; font-size: 15px;">₹<%= Math.round((rel.price || 0) - ((rel.price || 0) * (rel.offer || 0) / 100)).toLocaleString() %></span>
+                    <span class="fw-bold" style="color: #b78846; font-size: 15px;">
+                      ₹<%= Math.round((rel.price || 0) - ((rel.price || 0) * (rel.offer || 0) / 100)).toLocaleString() %></span>
                     <% if(rel.offer > 0) { %>
-                      <small class="text-muted text-decoration-line-through ms-1" style="font-size: 12px;">₹<%= (rel.price || 0).toLocaleString() %></small>
+                      <small class="text-muted text-decoration-line-through ms-1" style="font-size: 12px;">
+                        ₹<%= (rel.price || 0).toLocaleString() %></small>
                     <% } %>
                   </div>
-                  <a href="/user/product/<%= rel._id %>" class="btn btn-sm btn-outline-dark rounded-pill mt-auto fw-bold" style="font-size: 10px; border-color: #ddd; color: #b78846;">View Details</a>
+                  <a href="/user/product/<%= rel._id %>" class="btn btn-sm btn-outline-dark rounded-pill 
+                    mt-auto fw-bold" style="font-size: 10px; border-color: #ddd; color: #b78846;">View Details</a>
                 </div>
               </div>
             </div>
@@ -510,23 +517,26 @@
     thumbContainer.innerHTML = html;
   }
 
-  function updateStockDisplay() {
-    // Find variant matching color AND size (if both exist)
-    let variant;
-    if(selectedColor && selectedSize) {
-        // This assumes variants are combinations, but the user added them separately in our admin UI
-        // Usually variants should be 1-dimensional for simple logic or combined
-        // Given current admin UI adds rows like {type: 'Color', value: 'Red'} and {type: 'Size', value: 'XL'}
-        // We will sum stock or pick the specific one if it's a "Color-Size" type. 
-        // For now, let's treat the variant selection as finding the row that match.
-        // If the product has multiple variant types, we'll try to find a match that fits the color.
-        variant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
-    } else if(selectedColor) {
-        variant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
-    } else if(selectedSize) {
-        variant = product.variants.find(v => (v.type === 'Size'||v.type==='Storage') && v.value === selectedSize);
-    }
+  function getSelectedVariant() {
+    if (!product.variants || product.variants.length === 0) return null;
 
+    // Prioritize specific selection. If multiple exist, we pick the one matching current state.
+    // In this model, we'll favor Color if both are present, or whichever matches.
+    let variant = null;
+    if (selectedColor) {
+      variant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
+    }
+    
+    // If not found by color or color not selected, try size
+    if (!variant && selectedSize) {
+      variant = product.variants.find(v => (v.type === 'Size' || v.type === 'Storage') && v.value === selectedSize);
+    }
+    
+    return variant;
+  }
+
+  function updateStockDisplay() {
+    const variant = getSelectedVariant();
     const stockInfo = document.getElementById('stockInfo');
     const stock = variant ? variant.stock : product.stock;
 
@@ -552,9 +562,18 @@
     try {
       const res = await fetch('/user/wishlist/toggle', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
         body: JSON.stringify({ productId })
       });
+
+      if (res.status === 401) {
+        window.location.href = '/user/login';
+        return;
+      }
+
       const data = await res.json();
       if (data.success) {
         Swal.fire({
@@ -566,11 +585,15 @@
           timer: 3000
         });
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: data.message || 'Login required'
-        });
+        if (data.message === 'Please log in to continue.') {
+          window.location.href = '/user/login';
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            text: data.message || 'Login required'
+          });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -585,22 +608,19 @@
 
   async function handleAddToCart() {
     try {
-      // Find the variant ID matching current selection (Color/Size)
-      let variantId = null;
-      if (product.variants && product.variants.length > 0) {
-        let vMat;
-        if (selectedColor && selectedSize) {
-           vMat = product.variants.find(v => (v.type === 'Color' && v.value === selectedColor) || (v.type === 'Size' && v.value === selectedSize));
-        } else if (selectedColor) {
-           vMat = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
-        } else if (selectedSize) {
-           vMat = product.variants.find(v => (v.type === 'Size' || v.type === 'Storage') && v.value === selectedSize);
-        }
-        if (vMat) variantId = vMat._id;
-      }
+      const variant = getSelectedVariant();
+      const variantId = variant ? variant._id : null;
 
       const url = `/user/cart/add/${product._id}?qty=${quantity}${variantId ? '&variantId=' + variantId : ''}`;
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.status === 401) {
+        window.location.href = '/user/login';
+        return;
+      }
+
       const data = await res.json();
       if(data.success) {
         Swal.fire({
@@ -618,12 +638,16 @@
           }
         });
       } else {
-        Swal.fire({
-          title: 'Error',
-          text: data.message || 'Could not add product to cart',
-          icon: 'error',
-          confirmButtonColor: '#c26a00'
-        });
+        if (data.message === 'Please log in to continue.') {
+          window.location.href = '/user/login';
+        } else {
+          Swal.fire({
+            title: 'Error',
+            text: data.message || 'Could not add product to cart',
+            icon: 'error',
+            confirmButtonColor: '#c26a00'
+          });
+        }
       }
     } catch (err) {
       Swal.fire({

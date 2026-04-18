@@ -160,7 +160,7 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
         <!-- Wishlist Heart -->
         <span class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm" 
               style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; color: #6b7280; transition: color 0.2s; z-index: 2; cursor: pointer;" 
-              onclick="toggleWishlist('<%= p._id %>')"
+              onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('<%= p._id %>')"
               onmouseover="this.style.color='#ef4444'" 
               onmouseout="this.style.color='#6b7280'">
           <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
@@ -261,9 +261,18 @@ async function toggleWishlist(productId) {
   try {
     const res = await fetch('/user/wishlist/toggle', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({ productId })
     });
+
+    if (res.status === 401) {
+      window.location.href = '/user/login';
+      return;
+    }
+
     const data = await res.json();
     if (data.success) {
       Swal.fire({
@@ -275,11 +284,15 @@ async function toggleWishlist(productId) {
         timer: 3000
       });
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: data.message || 'Login required'
-      });
+      if (data.message === 'Please log in to continue.') {
+        window.location.href = '/user/login';
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: data.message || 'Login required'
+        });
+      }
     }
   } catch (err) {
     console.error(err);
@@ -288,7 +301,15 @@ async function toggleWishlist(productId) {
 
 async function addToCart(id){
   try{
-    const res = await fetch('/user/cart/add/' + id);
+    const res = await fetch('/user/cart/add/' + id, {
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (res.status === 401) {
+      window.location.href = '/user/login';
+      return;
+    }
+
     const data = await res.json();
 
     if(data.success){
@@ -307,12 +328,16 @@ async function addToCart(id){
         }
       });
     }else{
-      Swal.fire({
-        title: 'Error',
-        text: data.message || 'Could not add product to cart',
-        icon: 'error',
-        confirmButtonColor: '#c26a00'
-      });
+      if (data.message === 'Please log in to continue.') {
+        window.location.href = '/user/login';
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: data.message || 'Could not add product to cart',
+          icon: 'error',
+          confirmButtonColor: '#c26a00'
+        });
+      }
     }
   }catch(err){
     Swal.fire({

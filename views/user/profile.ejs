@@ -171,10 +171,29 @@ Update your account details and contact information
 </p>
 
 <!-- Avatar Section -->
+ 
 <div class="d-flex align-items-center mb-4 mt-4">
-    <div class="avatar-letter me-3" style="width: 80px; height: 80px; font-size: 32px;">
-        <%= user.name.charAt(0).toUpperCase() %>
+    <div class="me-2">
+    <% if(user.profilePic) { %>
+        <img src="<%= user.profilePic %>" class="profile-avatar" style="width: 40px; height: 40px;">
+    <% } else { %>
+        <div class="avatar-letter">
+            <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+    <% } %>
+</div>
+
+    <!--<div class="avatar-letter me-3" style="width: 80px; height: 80px; font-size: 32px;">
+         <% if(user.profilePic) { %>
+        <img src="<%= user.profilePic %>" class="profile-avatar" style="width: 40px; height: 40px;">
+    <% } else { %>
+        <div class="avatar-letter">
+            <%= user.name.charAt(0).toUpperCase() %>
+        </div>
+    <% } %>
+    
     </div>
+-->
     <div>
         <h5 class="mb-1"><%= user.name %></h5>
         <p class="text-muted mb-0 small">User Profile</p>

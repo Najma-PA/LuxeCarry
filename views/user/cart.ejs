@@ -51,6 +51,7 @@
                                 
                                 <div class="item-attr">
                                     <span class="label">Color:</span> <%= item.variantDetail ? item.variantDetail.value : '-' %>
+                                    <span class="badge bg-light text-dark ms-2" style="font-size: 10px; border: 1px solid #ddd;">Limit: 5 per item</span>
                                 </div>
 
                                 <div class="mt-4 d-flex justify-content-between align-items-end">
@@ -58,9 +59,12 @@
                                     <div class="qty-pill">
                                         <button onclick="updateQty('<%= item._id %>', -1)">-</button>
                                         <span><%= item.quantity %></span>
+                                        <% 
+                                            const availableStock = item.variantDetail ? item.variantDetail.stock : (item.product ? item.product.stock : 0);
+                                        %>
                                         <button 
                                             onclick="updateQty('<%= item._id %>', 1)"
-                                            <%= item.quantity >= item.product.stock ? 'disabled' : '' %>>
+                                            <%= (item.quantity >= 5 || item.quantity >= availableStock) ? 'disabled' : '' %>>
                                             +
                                         </button>
                                     </div>
@@ -75,7 +79,10 @@
                                     </div>
                                 </div>
 
-                                <% if(item.product.stock === 0){ %>
+                                <% 
+                                    const currentStock = item.variantDetail ? item.variantDetail.stock : (item.product ? item.product.stock : 0);
+                                    if(currentStock === 0){ 
+                                %>
                                     <div class="text-danger mt-2 fw-bold" style="font-size: 11px;">Out of Stock</div>
                                 <% } %>
                             </div>
@@ -160,10 +167,21 @@ async function updateQty(itemId, change){
         if(data.success){
             window.location.reload();
         }else{
-            alert(data.message || 'Error updating quantity');
+            Swal.fire({
+                icon: 'error',
+                title: 'Limit Reached',
+                text: data.message || 'Error updating quantity',
+                confirmButtonColor: '#b78846'
+            });
         }
     }catch(err){
         console.error(err);
+        Swal.fire({
+            icon: 'warning',
+            title: 'Oops!',
+            text: 'Something went wrong. Please try again.',
+            confirmButtonColor: '#b78846'
+        });
     }
 }
 </script>

@@ -91,56 +91,69 @@ Explore our premium collection of bags and accessories
 
 <% products.forEach(p => { %>
 
-<div class="col-md-3">
+<div class="col-md-3 mb-4">
 
-<div class="new-product-card text-start border-0 bg-transparent">
+<div class="card border-0 shadow-sm h-100" style="border-radius: 20px; overflow: hidden; background: white; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
 
-<a href="/user/product/<%= p._id %>" class="product-img-container position-relative mb-3" style="background-color: #f4f6f8; border-radius: 16px; padding: 25px; height: 260px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-    <div onclick="toggleWishlist('<%= p._id %>')" class="position-absolute" style="top: 15px; right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;">
-        <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
-    </div>
-    <img src="<%= p.images[0] %>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-</a>
+  <a href="/user/product/<%= p._id %>" class="position-relative d-block" 
+    style="background-color: #f4f6f8; padding: 25px; height: 260px; 
+    display: flex; align-items: center; justify-content: center; text-decoration: none;">
+      <div onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('<%= p._id %>')" class="position-absolute" style="top: 15px; 
+      right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; 
+      align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;">
+          <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
+      </div>
+      <img src="<%= p.images[0] %>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+  </a>
 
-<% if (p.offer > 0 || (p.category && p.category.offer > 0)) { 
-    let pOffer = Number(p.offer) || 0;
-    let cOffer = (p.category && typeof p.category === 'object') ? (Number(p.category.offer) || 0) : 0;
-    let bestOffer = Math.max(pOffer, cOffer);
-%>
-    <span class="badge bg-danger rounded-pill px-2 py-1 mb-2" style="font-size: 9px; font-weight: 600; letter-spacing: 0.5px;"><%= bestOffer %>% OFF</span>
-<% } else { %>
-    <div style="height: 22px;" class="mb-2"></div>
-<% } %>
+  <div class="card-body p-4 d-flex flex-column">
 
-<div class="text-uppercase fw-bold mb-1" style="color: #c26a00; font-size: 9px; letter-spacing: 0.8px;">
-    <%= (p.category && p.category.name) ? p.category.name : 'LUXECARRY PREMIUM' %>
-</div>
-
-<h6 class="mb-1 text-truncate" style="font-family: 'Playfair Display', 'Georgia', serif; font-weight: 600; font-size: 15px; color: #2d3748; letter-spacing: 0.2px;"><%= p.name %></h6>
-
-<div class="mb-2 d-flex align-items-baseline">
-    <span class="fw-bold" style="font-size: 15px; color: #1a202c;">₹<%= p.finalPrice %></span>
-    <% if (p.price > p.finalPrice) { %>
-        <span class="text-muted text-decoration-line-through ms-2" style="font-size: 12px;">₹<%= p.price %></span>
+    <% if (p.offer > 0 || (p.category && p.category.offer > 0)) { 
+        let pOffer = Number(p.offer) || 0;
+        let cOffer = (p.category && typeof p.category === 'object') ? (Number(p.category.offer) || 0) : 0;
+        let bestOffer = Math.max(pOffer, cOffer);
+    %>
+        <span class="badge bg-danger rounded-pill px-2 py-1 mb-2 align-self-start" style="font-size: 9px; font-weight: 600; 
+        letter-spacing: 0.5px;"><%= bestOffer %>% OFF</span>
+    <% } else { %>
+        <div style="height: 22px;" class="mb-2"></div>
     <% } %>
-</div>
 
-<div class="mb-3">
-    <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-    <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-    <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-    <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-    <i class="far fa-star" style="color: #dcb360; font-size: 9px;"></i>
-</div>
+    <div class="text-uppercase fw-bold mb-1" style="color: #c26a00; font-size: 9px; letter-spacing: 0.8px;">
+        <%= (p.category && p.category.name) ? p.category.name : 'LUXECARRY PREMIUM' %>
+    </div>
 
-<div class="d-flex gap-2">
-    <button class="btn btn-dark w-50 rounded-pill py-1" style="font-size: 11px; font-weight: 600; background-color: #1a1a1a; border: none; letter-spacing: 0.3px;" onclick="addToCart('<%= p._id %>')">
-        Add to Cart
-    </button>
-    <a href="/user/product/<%= p._id %>" class="btn w-50 rounded-pill py-1" style="font-size: 11px; font-weight: 600; background: transparent; color: #c26a00; border: 1px solid #dfc3a3; text-decoration: none; text-align: center; display: inline-block; letter-spacing: 0.3px;">
-        Buy Now
-    </a>
-</div>
+    <h6 class="mb-1 text-truncate" style="font-family: 'Playfair Display', 'Georgia', serif; font-weight: 600; 
+    font-size: 15px; color: #2d3748; letter-spacing: 0.2px;"><%= p.name %></h6>
+
+    <div class="mb-2 d-flex align-items-baseline">
+        <span class="fw-bold" style="font-size: 15px; color: #1a202c;">₹<%= p.finalPrice %></span>
+        <% if (p.price > p.finalPrice) { %>
+            <span class="text-muted text-decoration-line-through ms-2" style="font-size: 12px;">₹<%= p.price %></span>
+        <% } %>
+    </div>
+
+    <div class="mb-3">
+        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
+        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
+        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
+        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
+        <i class="far fa-star" style="color: #dcb360; font-size: 9px;"></i>
+    </div>
+
+    <div class="mt-auto d-flex gap-2">
+        <button class="btn btn-dark w-50 rounded-pill py-1" style="font-size: 11px; font-weight: 600; 
+        background-color: #1a1a1a; border: none; letter-spacing: 0.3px;" onclick="addToCart('<%= p._id %>')">
+            Add to Cart
+        </button>
+        <a href="/user/product/<%= p._id %>" class="btn w-50 rounded-pill py-1" style="font-size: 11px; 
+          font-weight: 600; background: transparent; color: #c26a00; border: 1px solid #dfc3a3; text-decoration: none; 
+          text-align: center; display: inline-block; letter-spacing: 0.3px;">
+            Buy Now
+        </a>
+    </div>
+
+  </div>
 
 </div>
 
@@ -201,9 +214,18 @@ async function toggleWishlist(productId) {
   try {
     const res = await fetch('/user/wishlist/toggle', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({ productId })
     });
+
+    if (res.status === 401) {
+      window.location.href = '/user/login';
+      return;
+    }
+
     const data = await res.json();
     if (data.success) {
       Swal.fire({
@@ -215,11 +237,15 @@ async function toggleWishlist(productId) {
         timer: 3000
       });
     } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Oops...',
-        text: data.message || 'Login required'
-      });
+      if (data.message === 'Please log in to continue.') {
+        window.location.href = '/user/login';
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: data.message || 'Login required'
+        });
+      }
     }
   } catch (err) {
     console.error(err);
@@ -228,7 +254,14 @@ async function toggleWishlist(productId) {
 
 async function addToCart(productId) {
   try {
-    const res = await fetch('/user/cart/add/' + productId);
+    const res = await fetch('/user/cart/add/' + productId, {
+      headers: { 'Accept': 'application/json' }
+    });
+
+    if (res.status === 401) {
+      window.location.href = '/user/login';
+      return;
+    }
 
     const data = await res.json();
 
@@ -248,12 +281,16 @@ async function addToCart(productId) {
         }
       });
     } else {
-      Swal.fire({
-        title: 'Error',
-        text: data.message || 'Could not add product to cart',
-        icon: 'error',
-        confirmButtonColor: '#c26a00'
-      });
+      if (data.message === 'Please log in to continue.') {
+        window.location.href = '/user/login';
+      } else {
+        Swal.fire({
+          title: 'Error',
+          text: data.message || 'Could not add product to cart',
+          icon: 'error',
+          confirmButtonColor: '#c26a00'
+        });
+      }
     }
 
   } catch (err) {
