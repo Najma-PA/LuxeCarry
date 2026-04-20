@@ -45,7 +45,7 @@ router.post('/categories/add', noCache, isAdminAuth, upload.single('image'), con
 router.get('/categories/edit/:id', noCache, isAdminAuth,controller.loadEditPage);
 router.post('/categories/edit/:id', noCache, isAdminAuth, upload.single('image'), controller.updateCategory);
 
-router.get('/categories/delete/:id',noCache, isAdminAuth, controller.deleteCategory);
+router.get('/categories/toggle/:id',noCache, isAdminAuth, controller.toggleCategoryStatus);
 
 //Product management
 router.get('/products',noCache, isAdminAuth, productController.getProducts);
