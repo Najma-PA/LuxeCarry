@@ -8,6 +8,7 @@ exports.getCategories = async ({ search = '', page = 1, isAdmin = false }) => {
   const skip = (page - 1) * limit;
 
   const filter = {
+    isDeleted: { $ne: true },
     name: { $regex: search, $options: 'i' }
   };
 
@@ -133,4 +134,8 @@ exports.toggleCategoryStatus = async (id) => {
   
   category.isActive = !category.isActive;
   return await category.save();
+};
+
+exports.softDeleteCategory = async (id) => {
+  return Category.findByIdAndUpdate(id, { isDeleted: true });
 };

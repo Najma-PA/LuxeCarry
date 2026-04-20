@@ -22,7 +22,8 @@ const getCart = async (userId) => {
     i.product && 
     i.product.isActive && 
     i.product.category && 
-    i.product.category.isActive
+    i.product.category.isActive &&
+    i.product.category.isDeleted !== true
   );
 
   let subtotal = 0;
@@ -70,7 +71,8 @@ const getCartCount = async (userId) => {
     i.product && 
     i.product.isActive && 
     i.product.category && 
-    i.product.category.isActive
+    i.product.category.isActive &&
+    i.product.category.isDeleted !== true
   );
 
   return activeItems.reduce((sum, item) => sum + item.quantity, 0);
