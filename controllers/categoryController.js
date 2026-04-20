@@ -2,7 +2,7 @@ const categoryService = require('../services/categoryService');
 
 exports.getCategories = async (req, res) => {
   try {
-    const data = await categoryService.getCategories(req.query);
+    const data = await categoryService.getCategories({ ...req.query, isAdmin: true });
     res.render('admin/categories', data);
   } catch (err) {
     res.send(err.message);
@@ -51,11 +51,11 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-exports.deleteCategory = async (req, res) => {
+exports.toggleCategoryStatus = async (req, res) => {
   try {
-    await categoryService.deleteCategory(req.params.id);
-    res.json({ success: true, message: 'Category deleted' });
+    await categoryService.toggleCategoryStatus(req.params.id);
+    res.json({ success: true, message: 'Category status updated successfully' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to delete category' });
+    res.status(500).json({ success: false, message: 'Failed to update category status' });
   }
 };
