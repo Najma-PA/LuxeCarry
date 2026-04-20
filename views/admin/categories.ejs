@@ -76,9 +76,15 @@
                   <a href="/admin/categories/edit/<%= cat._id %>" class="btn-action" title="Edit">
                     <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
                   </a>
-                  <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
-                    <i class="fa-regular fa-trash-can" style="font-size: 14px;"></i>
-                  </button>
+                  <% if (cat.isActive) { %>
+                    <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
+                      <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
+                    </button>
+                  <% } else { %>
+                    <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
+                      <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
+                    </button>
+                  <% } %>
                 </td>
               </tr>
             <% }) %>
@@ -112,22 +118,46 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-function deleteCategory(id) {
+function toggleStatus(id, action) {
+  const isUnlisting = action === 'unlist';
   Swal.fire({
-    title: 'Delete Category?',
-    text: "Deactivating this category will affect all associated products.",
+    title: isUnlisting ? 'Unlist Category?' : 'List Category?',
+    text: isUnlisting 
+      ? "Unlisting this category will hide it and its products from customers." 
+      : "Listing this category will make it and its products visible to customers.",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#dc2626',
+    confirmButtonColor: isUnlisting ? '#dc2626' : '#16a34a',
     cancelButtonColor: '#64748b',
-    confirmButtonText: 'Yes, delete it!'
+    confirmButtonText: isUnlisting ? 'Yes, unlist it!' : 'Yes, list it!'
   }).then(async (result) => {
     if (result.isConfirmed) {
-      const res = await fetch(`/admin/categories/delete/${id}`);
-      if (res.ok) {
-        Swal.fire('Deleted!', '', 'success').then(() => location.reload());
-      } else {
-        Swal.fire('Error', 'Failed to delete category.', 'error');
+      try {
+        console.log('Toggling status for ID:', id);
+        const res = await fetch(`/admin/categories/toggle/${id}`);
+
+        if (!res.ok) {
+          const contentType = res.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await res.json();
+            throw new Error(errorData.message || `Server returned ${res.status}`);
+          } else {
+            const errorText = await res.text();
+            console.error('Non-JSON Error Response:', errorText);
+            throw new Error(`Server returned ${res.status}`);
+          }
+        }
+
+        const data = await res.json();
+        if (data.success) {
+          Swal.fire(isUnlisting ? 'Unlisted!' : 'Listed!', data.message, 'success')
+            .then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.message || 'Action failed', 'error');
+        }
+      } catch (err) {
+        console.error('Toggle Status Error:', err);
+        Swal.fire('Error', err.message || 'Something went wrong', 'error');
       }
     }
   });
