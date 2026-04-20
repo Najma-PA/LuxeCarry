@@ -9,7 +9,7 @@ exports.loadShop = async (req, res) => {
     const data = await productService.getShopProducts(req.query);
 
     // get categories
-    const categories = await Category.find({ isActive: true });
+    const categories = await Category.find({ isActive: true, isDeleted: { $ne: true } });
 
     // get all products (for color filter)
     const allProducts = await Product.find({ isActive: true }).lean();

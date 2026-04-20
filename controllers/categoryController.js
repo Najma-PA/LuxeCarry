@@ -59,3 +59,12 @@ exports.toggleCategoryStatus = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to update category status' });
   }
 };
+
+exports.deleteCategory = async (req, res) => {
+  try {
+    await categoryService.softDeleteCategory(req.params.id);
+    res.json({ success: true, message: 'Category deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to delete category' });
+  }
+};
