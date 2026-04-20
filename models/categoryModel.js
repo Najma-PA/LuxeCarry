@@ -5,7 +5,8 @@ const categorySchema = new mongoose.Schema({
   description: String,
   offer: Number,
   image: String,
-  isActive: { type: Boolean, default: true }
+  isActive: { type: Boolean, default: true },
+  isDeleted: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Category', categorySchema);
