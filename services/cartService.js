@@ -57,9 +57,23 @@ const getCart = async (userId) => {
 // Get Cart Count (Global Badge)
 const getCartCount = async (userId) => {
   if (!userId) return 0;
-  const cart = await Cart.findOne({ user: userId });
+  const cart = await Cart.findOne({ user: userId })
+    .populate({
+      path: 'items.product',
+      populate: { path: 'category' }
+    });
+
   if (!cart) return 0;
-  return cart.items.reduce((sum, item) => sum + item.quantity, 0);
+
+  // Filter items matching getCart logic
+  const activeItems = cart.items.filter(i => 
+    i.product && 
+    i.product.isActive && 
+    i.product.category && 
+    i.product.category.isActive
+  );
+
+  return activeItems.reduce((sum, item) => sum + item.quantity, 0);
 };
 
 

@@ -2,15 +2,18 @@ const Category = require('../models/categoryModel');
 const fs = require('fs');
 const path = require('path');
 
-exports.getCategories = async ({ search = '', page = 1 }) => {
+exports.getCategories = async ({ search = '', page = 1, isAdmin = false }) => {
 
   const limit = 5;
   const skip = (page - 1) * limit;
 
   const filter = {
-    isActive: true,
     name: { $regex: search, $options: 'i' }
   };
+
+  if (!isAdmin) {
+    filter.isActive = true;
+  }
 
   const categoriesQuery = await Category.aggregate([
     { $match: filter },
@@ -124,6 +127,10 @@ exports.updateCategory = async (id, data, file) => {
   return Category.findByIdAndUpdate(id, data);
 };
 
-exports.deleteCategory = async (id) => {
-  return Category.findByIdAndUpdate(id, { isActive: false });
+exports.toggleCategoryStatus = async (id) => {
+  const category = await Category.findById(id);
+  if (!category) throw new Error('Category not found');
+  
+  category.isActive = !category.isActive;
+  return await category.save();
 };
