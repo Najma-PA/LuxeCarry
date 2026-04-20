@@ -85,6 +85,9 @@
                       <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
                     </button>
                   <% } %>
+                  <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
+                    <i class="fa-solid fa-trash" style="font-size: 14px; color: #64748b;"></i>
+                  </button>
                 </td>
               </tr>
             <% }) %>
@@ -158,6 +161,32 @@ function toggleStatus(id, action) {
       } catch (err) {
         console.error('Toggle Status Error:', err);
         Swal.fire('Error', err.message || 'Something went wrong', 'error');
+      }
+    }
+  });
+}
+
+async function deleteCategory(id) {
+  Swal.fire({
+    title: 'Delete Category?',
+    text: "This category will be removed from your list.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#dc2626',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Yes, delete it!'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/admin/categories/delete/${id}`);
+        const data = await res.json();
+        if (data.success) {
+          Swal.fire('Deleted!', data.message, 'success').then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.message || 'Action failed', 'error');
+        }
+      } catch (err) {
+        Swal.fire('Error', 'Something went wrong', 'error');
       }
     }
   });
