@@ -101,7 +101,20 @@
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        form.submit();
+        const addressId = form.action.split('/').pop();
+        fetch(`/user/addresses/${addressId}`, {
+          method: 'DELETE'
+        }).then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              window.location.reload();
+            } else {
+              Swal.fire('Error', data.message || 'Failed to delete address', 'error');
+            }
+          }).catch(err => {
+            console.error(err);
+            Swal.fire('Error', 'Something went wrong', 'error');
+          });
       }
     });
   }

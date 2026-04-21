@@ -260,7 +260,7 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 async function toggleWishlist(productId) {
   try {
     const res = await fetch('/user/wishlist/toggle', {
-      method: 'POST',
+      method: 'PATCH',
       headers: { 
         'Content-Type': 'application/json',
         'Accept': 'application/json'
