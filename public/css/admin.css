@@ -218,6 +218,41 @@ body {
   color: white;
 }
 
+/* User Management Pill Buttons */
+.btn-pill {
+    padding: 6px 25px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    border: none;
+    transition: all 0.3s ease;
+    text-transform: capitalize;
+}
+
+.btn-block-pill {
+    background-color: #ed915d;
+    color: #4a2b1a;
+}
+
+.btn-block-pill:hover {
+    background-color: #e37e46;
+    color: #4a2b1a;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(237, 145, 93, 0.2);
+}
+
+.btn-unblock-pill {
+    background-color: #10b981;
+    color: white;
+}
+
+.btn-unblock-pill:hover {
+    background-color: #059669;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);
+}
+
 /* ===============================
    PAGINATION
 ================================ */
