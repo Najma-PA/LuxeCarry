@@ -14,19 +14,22 @@ exports.loadShop = async (req, res) => {
     // get all products (for color filter)
     const allProducts = await Product.find({ isActive: true }).lean();
 
-    let colors = [];
-
+    let colorsMap = new Set();
     allProducts.forEach(p => {
       if (p.variants && Array.isArray(p.variants)) {
         p.variants.forEach(v => {
-          if (v.type && v.type.trim().toLowerCase() === "color" && !colors.includes(v.value)) {
-            colors.push(v.value);
+          if (v.type && v.type.trim().toLowerCase() === "color" && v.value) {
+            colorsMap.add(v.value.trim().toLowerCase());
           }
         });
       }
     });
 
-    console.log("Found colors:", colors);
+    // Convert back to Array and capitalize for display
+    let colors = Array.from(colorsMap).map(c => {
+       return c.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    });
+
 
     //render AFTER everything is ready
     res.render('user/shop', {

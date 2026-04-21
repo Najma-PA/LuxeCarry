@@ -3,7 +3,6 @@ const categoryService = require('../services/categoryService');
 exports.getCategories = async (req, res) => {
   try {
     const status = req.query.status || 'active';
-    console.log('Category Controller - Status:', status, 'Query:', req.query);
     const data = await categoryService.getCategories({ ...req.query, status, isAdmin: true });
     res.render('admin/categories', { ...data, status });
   } catch (err) {

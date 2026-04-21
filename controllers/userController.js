@@ -650,7 +650,6 @@ exports.deleteAddress = async (req, res) => {
       const remainingAddresses = await Address.find({ userId })
         .sort({ createdAt: -1 });
 
-      console.log("Remaining:", remainingAddresses.length);
 
       if (remainingAddresses.length > 0) {
 
@@ -663,15 +662,13 @@ exports.deleteAddress = async (req, res) => {
           { $set: { isDefault: true } }
         );
 
-        console.log("New default:", latest._id);
       }
     }
-
-    res.redirect("/user/addresses");
+    res.json({ success: true, message: 'Address deleted successfully' });
 
   } catch (error) {
     console.error(error);
-    res.status(500).send("Something went wrong");
+    res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
