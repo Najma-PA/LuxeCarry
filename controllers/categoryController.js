@@ -2,8 +2,10 @@ const categoryService = require('../services/categoryService');
 
 exports.getCategories = async (req, res) => {
   try {
-    const data = await categoryService.getCategories({ ...req.query, isAdmin: true });
-    res.render('admin/categories', data);
+    const status = req.query.status || 'active';
+    console.log('Category Controller - Status:', status, 'Query:', req.query);
+    const data = await categoryService.getCategories({ ...req.query, status, isAdmin: true });
+    res.render('admin/categories', { ...data, status });
   } catch (err) {
     res.send(err.message);
   }
@@ -63,8 +65,17 @@ exports.toggleCategoryStatus = async (req, res) => {
 exports.deleteCategory = async (req, res) => {
   try {
     await categoryService.softDeleteCategory(req.params.id);
-    res.json({ success: true, message: 'Category deleted' });
+    res.json({ success: true, message: 'Category archived successfully' });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Failed to delete category' });
+    res.status(500).json({ success: false, message: 'Failed to archive category' });
+  }
+};
+
+exports.restoreCategory = async (req, res) => {
+  try {
+    await categoryService.restoreCategory(req.params.id);
+    res.json({ success: true, message: 'Category restored successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to restore category' });
   }
 };
