@@ -1,20 +1,27 @@
 const Category = require('../models/categoryModel');
 const fs = require('fs');
 const path = require('path');
-
-exports.getCategories = async ({ search = '', page = 1, isAdmin = false }) => {
+exports.getCategories = async (query) => {
+  const { search = '', page = 1, isAdmin = false, status = 'active' } = query;
 
   const limit = 5;
   const skip = (page - 1) * limit;
 
-  const filter = {
-    isDeleted: { $ne: true },
+  let filter = {
     name: { $regex: search, $options: 'i' }
   };
+
+  if (status === 'archived') {
+    filter.isDeleted = true;
+  } else {
+    filter.isDeleted = { $ne: true };
+  }
 
   if (!isAdmin) {
     filter.isActive = true;
   }
+
+  console.log('Category Service - Final Filter:', JSON.stringify(filter, null, 2));
 
   const categoriesQuery = await Category.aggregate([
     { $match: filter },
@@ -45,7 +52,8 @@ exports.getCategories = async ({ search = '', page = 1, isAdmin = false }) => {
     categories,
     currentPage: page,
     totalPages: Math.ceil(total / limit),
-    search
+    search,
+    status
   };
 };
 
@@ -138,4 +146,8 @@ exports.toggleCategoryStatus = async (id) => {
 
 exports.softDeleteCategory = async (id) => {
   return Category.findByIdAndUpdate(id, { isDeleted: true });
+};
+
+exports.restoreCategory = async (id) => {
+  return Category.findByIdAndUpdate(id, { isDeleted: false });
 };
