@@ -71,31 +71,31 @@
         <tbody>
           <% if(categories && categories.length > 0) { %>
             <% categories.forEach(cat => { %>
-              <tr>
+              <tr id="row-<%= cat._id %>">
                 <td><span class="fw-bold" style="color: #1e293b;"><%= cat.name %></span></td>
                 <td><span style="color: #475569; font-weight: 500;"><%= cat.offer || 0 %>%</span></td>
                 <td><span style="color: #475569;"><%= cat.productCount || 0 %></span></td>
                 <td>
-                  <% if(cat.isActive){ %>
-                    <span class="pill-badge status-active px-3 py-1">Active</span>
-                  <% } else { %>
-                    <span class="pill-badge status-inactive px-3 py-1">Inactive</span>
-                  <% } %>
+                  <span id="badge-<%= cat._id %>" class="pill-badge <%= cat.isActive ? 'status-active' : 'status-inactive' %> px-3 py-1">
+                    <%= cat.isActive ? 'Active' : 'Inactive' %>
+                  </span>
                 </td>
                 <td>
                   <% if (currentStatus !== 'archived') { %>
                     <a href="/admin/categories/edit/<%= cat._id %>" class="btn-action" title="Edit">
                       <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
                     </a>
-                    <% if (cat.isActive) { %>
-                      <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
-                        <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
-                      </button>
-                    <% } else { %>
-                      <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
-                        <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
-                      </button>
-                    <% } %>
+                    <span id="toggle-container-<%= cat._id %>">
+                      <% if (cat.isActive) { %>
+                        <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
+                          <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
+                        </button>
+                      <% } else { %>
+                        <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
+                          <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
+                        </button>
+                      <% } %>
+                    </span>
                     <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
                       <i class="fa-solid fa-trash" style="font-size: 14px; color: #64748b;"></i>
                     </button>
@@ -171,8 +171,36 @@ function toggleStatus(id, action) {
 
         const data = await res.json();
         if (data.success) {
-          Swal.fire(isUnlisting ? 'Unlisted!' : 'Listed!', data.message, 'success')
-            .then(() => location.reload());
+          Swal.fire({
+            icon: 'success',
+            title: isUnlisting ? 'Unlisted!' : 'Listed!',
+            text: data.message,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          // Update Badge
+          const badge = document.getElementById(`badge-${id}`);
+          if (badge) {
+            badge.className = `pill-badge ${isUnlisting ? 'status-inactive' : 'status-active'} px-3 py-1`;
+            badge.innerText = isUnlisting ? 'Inactive' : 'Active';
+          }
+
+          // Update Toggle Button
+          const container = document.getElementById(`toggle-container-${id}`);
+          if (container) {
+            if (isUnlisting) {
+              container.innerHTML = `
+                <button onclick="toggleStatus('${id}', 'list')" class="btn-action" title="List">
+                  <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
+                </button>`;
+            } else {
+              container.innerHTML = `
+                <button onclick="toggleStatus('${id}', 'unlist')" class="btn-action" title="Unlist">
+                  <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
+                </button>`;
+            }
+          }
         } else {
           Swal.fire('Error', data.message || 'Action failed', 'error');
         }
@@ -201,7 +229,21 @@ async function deleteCategory(id) {
         });
         const data = await res.json();
         if (data.success) {
-          Swal.fire('Archived!', data.message, 'success').then(() => location.reload());
+          Swal.fire({
+            icon: 'success',
+            title: 'Archived!',
+            text: data.message,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          const row = document.getElementById(`row-${id}`);
+          if (row) row.remove();
+
+          // Check if table is empty
+          const tbody = document.querySelector('table tbody');
+          if (tbody.children.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No categories found.</td></tr>';
+          }
         } else {
           Swal.fire('Error', data.message || 'Action failed', 'error');
         }
@@ -229,7 +271,21 @@ async function restoreCategory(id) {
         });
         const data = await res.json();
         if (data.success) {
-          Swal.fire('Restored!', data.message, 'success').then(() => location.reload());
+          Swal.fire({
+            icon: 'success',
+            title: 'Restored!',
+            text: data.message,
+            timer: 1500,
+            showConfirmButton: false
+          });
+          const row = document.getElementById(`row-${id}`);
+          if (row) row.remove();
+
+          // Check if table is empty
+          const tbody = document.querySelector('table tbody');
+          if (tbody.children.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No categories found.</td></tr>';
+          }
         } else {
           Swal.fire('Error', data.message || 'Action failed', 'error');
         }

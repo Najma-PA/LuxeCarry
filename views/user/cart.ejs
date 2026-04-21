@@ -18,7 +18,7 @@
     <!-- Header -->
     <div class="cart-title-container">
         <h1 class="text-serif m-0">Shopping Cart</h1>
-        <span class="item-count">(<%= cart.items.length %> items)</span>
+        <span class="item-count" id="cart-count">(<%= cart.items.length %> items)</span>
     </div>
 
     <% if(cart.items.length === 0){ %>
@@ -58,11 +58,12 @@
                                     <!-- Qty -->
                                     <div class="qty-pill">
                                         <button onclick="updateQty('<%= item._id %>', -1)">-</button>
-                                        <span><%= item.quantity %></span>
+                                        <span id="qty-<%= item._id %>"><%= item.quantity %></span>
                                         <% 
                                             const availableStock = item.variantDetail ? item.variantDetail.stock : (item.product ? item.product.stock : 0);
                                         %>
                                         <button 
+                                            id="plus-<%= item._id %>"
                                             onclick="updateQty('<%= item._id %>', 1)"
                                             <%= (item.quantity >= 5 || item.quantity >= availableStock) ? 'disabled' : '' %>>
                                             +
@@ -75,7 +76,7 @@
                                             <span class="original-price">₹<%= item.product.price.toLocaleString() %></span>
                                             <span class="discount-tag"><%= item.product.offer %>% OFF</span>
                                         <% } %>
-                                        <span class="final-price text-serif">₹<%= item.itemTotal.toLocaleString() %>.00</span>
+                                        <span class="final-price text-serif" id="subtotal-<%= item._id %>">₹<%= item.itemTotal.toLocaleString() %>.00</span>
                                     </div>
                                 </div>
 
@@ -99,15 +100,13 @@
                 
                 <div class="summary-row">
                     <span>Subtotal</span>
-                    <span>₹<%= cart.subtotal.toLocaleString() %>.00</span>
+                    <span id="cart-subtotal">₹<%= cart.subtotal.toLocaleString() %>.00</span>
                 </div>
 
-                <% if(cart.totalDiscount > 0) { %>
-                <div class="summary-row savings">
+                <div class="summary-row savings" id="discount-row" style="<%= cart.totalDiscount > 0 ? '' : 'display: none;' %>">
                     <span>Savings</span>
-                    <span>-₹<%= cart.totalDiscount.toLocaleString() %>.00</span>
+                    <span id="cart-discount">-₹<%= cart.totalDiscount.toLocaleString() %>.00</span>
                 </div>
-                <% } %>
 
                 <div class="summary-row">
                     <span>Shipping</span>
@@ -116,7 +115,7 @@
 
                 <div class="summary-row total">
                     <span class="fw-bold">Total</span>
-                    <span class="price text-serif">₹<%= cart.total.toLocaleString() %>.00</span>
+                    <span class="price text-serif" id="cart-total">₹<%= cart.total.toLocaleString() %>.00</span>
                 </div>
 
                 <% 
@@ -191,7 +190,36 @@ async function updateQty(itemId, change){
         });
         const data = await res.json();
         if(data.success){
-            window.location.reload();
+            if(data.newQty === 0){
+                window.location.reload();
+                return;
+            }
+            // Update individual item elements
+            document.getElementById(`qty-${itemId}`).innerText = data.newQty;
+            document.getElementById(`subtotal-${itemId}`).innerText = `₹${data.itemTotal.toLocaleString()}.00`;
+            
+            // Update Summary
+            document.getElementById('cart-subtotal').innerText = `₹${data.cartSubtotal.toLocaleString()}.00`;
+            document.getElementById('cart-total').innerText = `₹${data.cartTotal.toLocaleString()}.00`;
+            document.getElementById('cart-count').innerText = `(${data.itemCount} items)`;
+            
+            const discountRow = document.getElementById('discount-row');
+            const discountSpan = document.getElementById('cart-discount');
+            if(data.cartDiscount > 0){
+                discountRow.style.display = 'flex';
+                discountSpan.innerText = `-₹${data.cartDiscount.toLocaleString()}.00`;
+            } else {
+                discountRow.style.display = 'none';
+            }
+
+            // Disable plus button if limit reached
+            const plusBtn = document.getElementById(`plus-${itemId}`);
+            if(data.newQty >= 5){
+                plusBtn.disabled = true;
+            } else {
+                plusBtn.disabled = false;
+            }
+
         }else{
             Swal.fire({
                 icon: 'error',

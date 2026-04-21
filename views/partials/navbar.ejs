@@ -40,13 +40,50 @@ LuxeCarry
 <div class="d-flex align-items-center gap-3">
 
 <!-- Search -->
-<div class="search-box position-relative">
-<input type="text"
-class="form-control rounded-pill ps-4"
-placeholder="  Search collection...">
-<i class="fa fa-search position-absolute"
-style="left:12px; top:10px; color:#999;"></i>
-</div>
+<form action="/user/shop" method="GET" class="search-box position-relative d-flex align-items-center" id="navSearchForm">
+  <input type="text" 
+    id="navSearchInput"
+    name="search"
+    class="form-control rounded-pill ps-4 pe-5"
+    placeholder="Search collection..."
+    value="<%= locals.query ? query.search || '' : '' %>"
+    style="padding-right: 70px !important;">
+  
+  <div class="position-absolute end-0 d-flex align-items-center me-3 gap-2">
+    <!-- Clear Icon -->
+    <i class="fa-solid fa-xmark" id="navSearchClear" 
+       style="cursor: pointer; color: #999; <%= (locals.query && query.search) ? '' : 'display: none !important;' %>"></i>
+    
+    <!-- Search Icon Button -->
+    <button type="submit" style="background: none; border: none; padding: 0; color: #666;">
+       <i class="fa fa-search"></i>
+    </button>
+  </div>
+</form>
+
+<script>
+  const navSearchInput = document.getElementById('navSearchInput');
+  const navSearchClear = document.getElementById('navSearchClear');
+
+  navSearchInput.addEventListener('input', function() {
+    if (this.value) {
+      navSearchClear.style.setProperty('display', 'block', 'important');
+    } else {
+      navSearchClear.style.setProperty('display', 'none', 'important');
+    }
+  });
+
+  navSearchClear.addEventListener('click', function() {
+    navSearchInput.value = '';
+    navSearchClear.style.setProperty('display', 'none', 'important');
+    navSearchInput.focus();
+    
+    // If we are on the shop page, we might want to trigger a search with empty string or redirect to shop
+    if (window.location.pathname === '/user/shop') {
+       window.location.href = '/user/shop';
+    }
+  });
+</script>
 
 <!-- Wishlist -->
 <a href="/user/wishlist" class="nav-icon">
