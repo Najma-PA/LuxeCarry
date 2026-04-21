@@ -6,6 +6,7 @@ const passport = require("passport");
 const userController = require('../controllers/userController');
 const userProductController = require('../controllers/userProductController');
 const cartController = require('../controllers/cartController');
+const checkoutController = require('../controllers/checkoutController');
 const wishlistController = require('../controllers/wishlistController');
 const upload = require('../middleware/multer');
 const {
@@ -57,19 +58,23 @@ router.get('/product/:id', userProductController.loadProductDetails);
 
 // Wishlist
 router.get('/wishlist', isUserAuth, wishlistController.showWishlist);
-router.post('/wishlist/toggle', isUserAuth, wishlistController.toggleWishlist);
-router.post('/wishlist/remove/:productId', isUserAuth, wishlistController.removeItem);
+router.patch('/wishlist/toggle', isUserAuth, wishlistController.toggleWishlist);
+router.delete('/wishlist/:productId', isUserAuth, wishlistController.removeItem);
 
 // Add to cart
 router.get('/cart/add/:id', isUserAuth, cartController.addToCart);
 
 // Get cart page
 router.get('/cart', isUserAuth, cartController.getCart);
+
+// Checkout
+router.get('/checkout', isUserAuth, checkoutController.getCheckoutPage);
+
 // Update quantity
-router.get('/cart/update/:id', isUserAuth, cartController.updateQuantity);
+router.patch('/cart/update/:id', isUserAuth, cartController.updateQuantity);
 
 // Remove item
-router.get('/cart/remove/:id', isUserAuth, cartController.removeItem);
+router.delete('/cart/item/:id', isUserAuth, cartController.removeItem);
 
 
 // OTP
@@ -101,7 +106,7 @@ router.post("/addAddress", isUserAuth, userController.addAddress);
 
 router.get("/editAddress/:id", isUserAuth, userController.loadEditAddress);
 router.post("/editAddress/:id", isUserAuth, userController.updateAddress);
-router.post("/deleteAddress/:id", isUserAuth, userController.deleteAddress);
+router.delete("/addresses/:id", isUserAuth, userController.deleteAddress);
 
 // LOGOUT
 router.get('/logout', noCache, userController.userLogout);

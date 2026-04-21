@@ -34,7 +34,7 @@ router.get('/users', noCache, isAdminAuth, adminController.loadUsers);
 
 router.get('/users/add', noCache, isAdminAuth, adminController.loadAddUser);
 
-router.post('/users/toggle/:id', noCache, isAdminAuth, adminController.toggleUser);
+router.patch('/users/toggle/:id', noCache, isAdminAuth, adminController.toggleUser);
 
 //Category management
 router.get('/categories', noCache, isAdminAuth,controller.getCategories);
@@ -45,8 +45,9 @@ router.post('/categories/add', noCache, isAdminAuth, upload.single('image'), con
 router.get('/categories/edit/:id', noCache, isAdminAuth,controller.loadEditPage);
 router.post('/categories/edit/:id', noCache, isAdminAuth, upload.single('image'), controller.updateCategory);
 
-router.get('/categories/toggle/:id',noCache, isAdminAuth, controller.toggleCategoryStatus);
-router.get('/categories/delete/:id', noCache, isAdminAuth, controller.deleteCategory);
+router.patch('/categories/toggle/:id', noCache, isAdminAuth, controller.toggleCategoryStatus);
+router.delete('/categories/:id', noCache, isAdminAuth, controller.deleteCategory);
+router.patch('/categories/restore/:id', noCache, isAdminAuth, controller.restoreCategory);
 
 //Product management
 router.get('/products',noCache, isAdminAuth, productController.getProducts);
@@ -75,7 +76,7 @@ router.post('/products/edit/:id', noCache, isAdminAuth, (req, res, next) => {
   });
 }, productController.updateProduct);
 
-router.get('/products/delete/:id',noCache, isAdminAuth, productController.deleteProduct);
-router.get('/products/restore/:id', noCache, isAdminAuth, productController.restoreProduct);
+router.delete('/products/:id',noCache, isAdminAuth, productController.deleteProduct);
+router.patch('/products/restore/:id', noCache, isAdminAuth, productController.restoreProduct);
 
 module.exports = router;
