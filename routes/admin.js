@@ -55,7 +55,6 @@ router.get('/products/add',noCache, isAdminAuth, productController.loadAddPage);
 router.post('/products/add', noCache, isAdminAuth, (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {
-      console.error('Multer error [Add]:', err);
       return res.status(400).json({ success: false, message: err.message + (err.field ? ` (${err.field})` : '') });
     }
     next();
@@ -67,9 +66,6 @@ router.get('/products/edit/:id',noCache, isAdminAuth, productController.loadEdit
 router.post('/products/edit/:id', noCache, isAdminAuth, (req, res, next) => {
   upload.any()(req, res, (err) => {
     if (err) {
-      console.error('Multer error [Edit]:', err.message);
-      console.error('Multer Error Code:', err.code);
-      console.error('Multer Field:', err.field);
       return res.status(400).json({ success: false, message: err.message + (err.field ? ` (${err.field})` : '') });
     }
     next();
