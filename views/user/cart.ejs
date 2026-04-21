@@ -123,10 +123,10 @@
                     const hasOutOfStock = cart.items.some(i => !i.product || i.product.stock === 0);
                 %>
 
-                <button class="btn-checkout-premium mt-4"
-                    <%= hasOutOfStock ? 'disabled' : '' %>>
+                <a href="/user/checkout" class="btn-checkout-premium mt-4 text-center d-block text-decoration-none"
+                    <%= hasOutOfStock ? 'style="pointer-events: none; opacity: 0.5;"' : '' %>>
                     Proceed to Checkout
-                </button>
+                </a>
 
                 <div class="text-center mt-3">
                     <small class="text-muted" style="font-size: 11px;">
@@ -145,24 +145,50 @@
 
 <script>
 async function removeItem(itemId){
-    if(confirm('Are you sure you want to remove this item?')){
-        try{
-            const res = await fetch('/user/cart/remove/' + itemId);
-            const data = await res.json();
-            if(data.success){
-                window.location.reload();
-            }else{
-                alert(data.message || 'Error removing item');
+    Swal.fire({
+        title: 'Remove Item?',
+        text: 'Are you sure you want to remove this item from your cart?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#b78846',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, remove it!',
+        cancelButtonText: 'No, keep it'
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch('/user/cart/item/' + itemId, {
+                    method: 'DELETE'
+                });
+                const data = await res.json();
+                if(data.success){
+                    window.location.reload();
+                }else{
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops!',
+                        text: data.message || 'Error removing item',
+                        confirmButtonColor: '#b78846'
+                    });
+                }
+            } catch(err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong. Please try again.',
+                    confirmButtonColor: '#b78846'
+                });
             }
-        }catch(err){
-            console.error(err);
         }
-    }
+    });
 }
 
 async function updateQty(itemId, change){
     try{
-        const res = await fetch(`/user/cart/update/${itemId}?change=${change}`);
+        const res = await fetch(`/user/cart/update/${itemId}?change=${change}`, {
+            method: 'PATCH'
+        });
         const data = await res.json();
         if(data.success){
             window.location.reload();

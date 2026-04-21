@@ -195,7 +195,9 @@ function deleteProduct(id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`/admin/products/delete/${id}`);
+        const response = await fetch(`/admin/products/${id}`, {
+          method: 'DELETE'
+        });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         if (data.success) {
@@ -223,7 +225,9 @@ function restoreProduct(id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`/admin/products/restore/${id}`);
+        const response = await fetch(`/admin/products/restore/${id}`, {
+          method: 'PATCH'
+        });
         if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         if (data.success) {

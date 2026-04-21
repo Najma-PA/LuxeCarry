@@ -85,8 +85,8 @@
 <script>
     async function removeItem(productId) {
         try {
-            const res = await fetch(`/user/wishlist/remove/${productId}`, {
-                method: 'POST'
+            const res = await fetch(`/user/wishlist/${productId}`, {
+                method: 'DELETE'
             });
             const data = await res.json();
             if(data.success) {

@@ -110,10 +110,10 @@
             <div class="mb-3">
               <label class="form-label text-muted small fw-bold">Category</label>
               <select class="form-select" name="category" id="prodCategory">
-                 <option value="categories">Select category</option>
+                <option value="">Select category</option>
                 <% categories.forEach(c => { %>
                   <option value="<%= c._id %>"
-                    <%= (product.category && c._id.toString() === product.category.toString()) ? 'selected':'' %>>
+                    <%= (product.category && String(c._id) === String(product.category._id || product.category)) ? 'selected' : '' %>>
                     <%= c.name %>
                   </option>
                 <% }) %>

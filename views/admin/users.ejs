@@ -137,7 +137,7 @@
       if (result.isConfirmed) {
         try {
           const response = await fetch(`/admin/users/toggle/${userId}`, {
-            method: 'POST',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' }
           });
           

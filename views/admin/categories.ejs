@@ -16,6 +16,7 @@
 
   <!-- Main -->
   <div class="main-content p-5 w-100">
+    <% const currentStatus = typeof status !== 'undefined' ? status : 'active'; %>
 
     <!-- Header Section -->
     <div class="d-flex justify-content-between align-items-end mb-4">
@@ -28,9 +29,10 @@
         <!-- Search -->
         <form method="GET" class="search-bar-wrapper position-relative">
           <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 14px;"></i>
+          <input type="hidden" name="status" value="<%= typeof status !== 'undefined' ? status : 'active' %>">
           <input type="text" name="search" value="<%= search || '' %>" placeholder="Search" class="ms-2 pe-4" onchange="this.form.submit()">
           <% if (search) { %>
-            <a href="/admin/categories" class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #dc2626; text-decoration: none;" title="Clear Search">
+            <a href="/admin/categories?status=<%= typeof status !== 'undefined' ? status : 'active' %>" class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #dc2626; text-decoration: none;" title="Clear Search">
               <i class="fa-solid fa-circle-xmark fs-6"></i>
             </a>
           <% } %>
@@ -47,6 +49,14 @@
 
     <!-- Table Card -->
     <div class="card-shadow">
+
+      <!-- Tabs -->
+      <div class="d-flex justify-content-between align-items-center px-4 pt-3 pb-0 border-bottom" style="border-color: #f1f5f9 !important;">
+        <div class="tab-nav d-flex gap-4">
+          <a href="?status=active&search=<%= search %>" class="pb-2 text-decoration-none <%= currentStatus === 'active' ? 'active-tab' : 'text-muted' %>" style="<%= currentStatus === 'active' ? 'border-bottom: 2px solid #c26a00; color: #c26a00 !important; font-weight: 600;' : '' %>">Active Categories</a>
+          <a href="?status=archived&search=<%= search %>" class="pb-2 text-decoration-none <%= currentStatus === 'archived' ? 'active-tab' : 'text-muted' %>" style="<%= currentStatus === 'archived' ? 'border-bottom: 2px solid #c26a00; color: #c26a00 !important; font-weight: 600;' : '' %>">Archived</a>
+        </div>
+      </div>
 
       <table class="table table-hover mb-0">
         <thead>
@@ -73,21 +83,27 @@
                   <% } %>
                 </td>
                 <td>
-                  <a href="/admin/categories/edit/<%= cat._id %>" class="btn-action" title="Edit">
-                    <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
-                  </a>
-                  <% if (cat.isActive) { %>
-                    <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
-                      <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
+                  <% if (currentStatus !== 'archived') { %>
+                    <a href="/admin/categories/edit/<%= cat._id %>" class="btn-action" title="Edit">
+                      <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
+                    </a>
+                    <% if (cat.isActive) { %>
+                      <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
+                        <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
+                      </button>
+                    <% } else { %>
+                      <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
+                        <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
+                      </button>
+                    <% } %>
+                    <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
+                      <i class="fa-solid fa-trash" style="font-size: 14px; color: #64748b;"></i>
                     </button>
                   <% } else { %>
-                    <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
-                      <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
+                    <button onclick="restoreCategory('<%= cat._id %>')" class="btn-action" title="Restore" style="color: #16a34a;">
+                      <i class="fa-solid fa-trash-arrow-up" style="font-size: 14px;"></i> Restore
                     </button>
                   <% } %>
-                  <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
-                    <i class="fa-solid fa-trash" style="font-size: 14px; color: #64748b;"></i>
-                  </button>
                 </td>
               </tr>
             <% }) %>
@@ -100,15 +116,15 @@
       <!-- Pagination -->
       <div class="pagination-wrapper">
         <% if(currentPage > 1) { %>
-          <a href="?page=<%= currentPage - 1 %>&search=<%= search %>" class="page-btn"><i class="fa-solid fa-chevron-left" style="font-size: 12px;"></i></a>
+          <a href="?page=<%= currentPage - 1 %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn"><i class="fa-solid fa-chevron-left" style="font-size: 12px;"></i></a>
         <% } %>
         
         <% for(let i=1; i<=totalPages; i++){ %>
-          <a href="?page=<%= i %>&search=<%= search %>" class="page-btn <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+          <a href="?page=<%= i %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
         <% } %>
 
         <% if(currentPage < totalPages) { %>
-          <a href="?page=<%= currentPage + 1 %>&search=<%= search %>" class="page-btn"><i class="fa-solid fa-chevron-right" style="font-size: 12px;"></i></a>
+          <a href="?page=<%= currentPage + 1 %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn"><i class="fa-solid fa-chevron-right" style="font-size: 12px;"></i></a>
         <% } %>
       </div>
 
@@ -137,7 +153,9 @@ function toggleStatus(id, action) {
     if (result.isConfirmed) {
       try {
         console.log('Toggling status for ID:', id);
-        const res = await fetch(`/admin/categories/toggle/${id}`);
+        const res = await fetch(`/admin/categories/toggle/${id}`, {
+          method: 'PATCH'
+        });
 
         if (!res.ok) {
           const contentType = res.headers.get('content-type');
@@ -168,20 +186,50 @@ function toggleStatus(id, action) {
 
 async function deleteCategory(id) {
   Swal.fire({
-    title: 'Delete Category?',
-    text: "This category will be removed from your list.",
+    title: 'Archive Category?',
+    text: "This category will be moved to the archived list.",
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#dc2626',
     cancelButtonColor: '#64748b',
-    confirmButtonText: 'Yes, delete it!'
+    confirmButtonText: 'Yes, archive it!'
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        const res = await fetch(`/admin/categories/delete/${id}`);
+        const res = await fetch(`/admin/categories/${id}`, {
+          method: 'DELETE'
+        });
         const data = await res.json();
         if (data.success) {
-          Swal.fire('Deleted!', data.message, 'success').then(() => location.reload());
+          Swal.fire('Archived!', data.message, 'success').then(() => location.reload());
+        } else {
+          Swal.fire('Error', data.message || 'Action failed', 'error');
+        }
+      } catch (err) {
+        Swal.fire('Error', 'Something went wrong', 'error');
+      }
+    }
+  });
+}
+
+async function restoreCategory(id) {
+  Swal.fire({
+    title: 'Restore Category?',
+    text: "This category will be moved back to the active list.",
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#16a34a',
+    cancelButtonColor: '#64748b',
+    confirmButtonText: 'Yes, restore it!'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        const res = await fetch(`/admin/categories/restore/${id}`, {
+          method: 'PATCH'
+        });
+        const data = await res.json();
+        if (data.success) {
+          Swal.fire('Restored!', data.message, 'success').then(() => location.reload());
         } else {
           Swal.fire('Error', data.message || 'Action failed', 'error');
         }
