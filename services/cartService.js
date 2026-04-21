@@ -236,7 +236,21 @@ const updateQuantity = async (userId, itemId, change) => {
 
   await cart.save();
 
-  return { success: true };
+  // Return full updated cart for dynamic UI
+  const updatedCart = await getCart(userId);
+  
+  // Find the specific item's new subtotal
+  const updatedItem = item.quantity > 0 ? updatedCart.items.find(i => i._id.toString() === itemId.toString()) : null;
+
+  return { 
+    success: true, 
+    newQty: item.quantity,
+    itemTotal: updatedItem ? updatedItem.itemTotal : 0,
+    cartSubtotal: updatedCart.subtotal,
+    cartDiscount: updatedCart.totalDiscount,
+    cartTotal: updatedCart.total,
+    itemCount: updatedCart.items.length
+  };
 };
 
 // Remove Item

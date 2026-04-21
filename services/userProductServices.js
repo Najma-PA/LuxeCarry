@@ -42,7 +42,7 @@ exports.getShopProducts = async (query) => {
 if (color) {
   filter.$and = [
     { "variants.type": { $regex: /^color$/i } },
-    { "variants.value": color }
+    { "variants.value": { $regex: new RegExp(`^${color}$`, 'i') } }
   ];
 }
 
