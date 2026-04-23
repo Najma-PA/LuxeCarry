@@ -80,8 +80,10 @@ const productSchema = new mongoose.Schema({
 // VIRTUAL FIELD 
 productSchema.virtual('finalPrice').get(function () {
   const price = this.price || 0;
-  const offer = this.offer || 0;
-  return Math.round(price - (price * offer / 100));
+  const pOffer = this.offer || 0;
+  const cOffer = (this.category && typeof this.category === 'object') ? (this.category.offer || 0) : 0;
+  const bestOffer = Math.max(pOffer, cOffer);
+  return Math.round(price - (price * bestOffer / 100));
 });
 
 
