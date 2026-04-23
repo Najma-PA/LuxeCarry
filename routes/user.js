@@ -8,7 +8,7 @@ const userProductController = require('../controllers/userProductController');
 const cartController = require('../controllers/cartController');
 const checkoutController = require('../controllers/checkoutController');
 const wishlistController = require('../controllers/wishlistController');
-const upload = require('../middleware/multer');
+const { upload, handleMulterError } = require('../middleware/multer');
 const {
   isUserAuth,
   redirectIfUserLoggedIn
@@ -98,7 +98,7 @@ router.post('/resetPassword', userController.resetPassword);
 router.get("/profile", isUserAuth, userController.profilePage);
 router.get("/editProfile", isUserAuth, userController.loadEditProfile);
 router.post("/editProfile", isUserAuth, userController.updateProfile);
-router.post("/profile/update-picture", isUserAuth, upload.single('profilePic'), userController.updateProfilePic);
+router.post("/profile/update-picture", isUserAuth, handleMulterError(upload.single('profilePic')), userController.updateProfilePic);
 router.post("/profile/remove-picture", isUserAuth, userController.removeProfilePic);
 
 // PASSWORD
