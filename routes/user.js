@@ -67,6 +67,12 @@ router.get('/cart/add/:id', isUserAuth, cartController.addToCart);
 // Get cart page
 router.get('/cart', isUserAuth, cartController.getCart);
 
+// Validate cart
+router.get('/cart/validate', isUserAuth, cartController.validateCart);
+
+// Get cart items status (real-time polling)
+router.get('/cart/items-status', isUserAuth, cartController.getCartItemsStatus);
+
 // Checkout
 router.get('/checkout', isUserAuth, checkoutController.getCheckoutPage);
 
