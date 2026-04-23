@@ -31,7 +31,30 @@ exports.loadShop = async (req, res) => {
     });
 
 
-    //render AFTER everything is ready
+    // Detect AJAX request
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      const gridHtml = await new Promise((resolve, reject) => {
+        res.render('partials/user/product-grid', { ...data }, (err, html) => {
+          if (err) reject(err); else resolve(html);
+        });
+      });
+
+      const paginationHtml = await new Promise((resolve, reject) => {
+        res.render('partials/user/pagination', { ...data }, (err, html) => {
+          if (err) reject(err); else resolve(html);
+        });
+      });
+
+      return res.json({
+        success: true,
+        gridHtml,
+        paginationHtml,
+        currentPage: data.currentPage,
+        totalPages: data.totalPages
+      });
+    }
+
+    // Standard render for normal page load
     res.render('user/shop', {
       ...data,
       categories,
@@ -49,7 +72,7 @@ exports.loadProductDetails = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate('category');
 
-    if (!product) {
+    if (!product || !product.isActive || !product.category || !product.category.isActive || product.category.isDeleted) {
       return res.redirect('/user/shop');
     }
 

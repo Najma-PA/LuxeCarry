@@ -7,6 +7,22 @@ exports.getProducts = async (req, res) => {
   try {
     const data = await productService.getProducts(req.query);
 
+    // Detect AJAX request
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      const tableHtml = await new Promise((resolve, reject) => {
+        res.render('partials/admin/product-table', { ...data }, (err, html) => {
+          if (err) reject(err); else resolve(html);
+        });
+      });
+
+      return res.json({
+        success: true,
+        tableHtml,
+        currentPage: data.currentPage,
+        totalPages: data.totalPages
+      });
+    }
+
     res.render('admin/products', data);
 
   } catch (err) {

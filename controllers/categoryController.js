@@ -4,6 +4,23 @@ exports.getCategories = async (req, res) => {
   try {
     const status = req.query.status || 'active';
     const data = await categoryService.getCategories({ ...req.query, status, isAdmin: true });
+
+    // Detect AJAX request
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      const tableHtml = await new Promise((resolve, reject) => {
+        res.render('partials/admin/category-table', { ...data, status }, (err, html) => {
+          if (err) reject(err); else resolve(html);
+        });
+      });
+
+      return res.json({
+        success: true,
+        tableHtml,
+        currentPage: data.currentPage,
+        totalPages: data.totalPages
+      });
+    }
+
     res.render('admin/categories', { ...data, status });
   } catch (err) {
     res.send(err.message);

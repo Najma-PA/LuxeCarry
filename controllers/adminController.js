@@ -101,6 +101,22 @@ exports.loadUsers = async (req, res) => {
       status
     });
 
+    // AJAX Hook
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      const tableHtml = await new Promise((resolve, reject) => {
+        res.render('partials/admin/user-table', { users }, (err, html) => {
+          if (err) reject(err); else resolve(html);
+        });
+      });
+
+      return res.json({
+        success: true,
+        tableHtml,
+        currentPage: page,
+        totalPages
+      });
+    }
+
     res.render("admin/users", {
       title: "Users",
       users,

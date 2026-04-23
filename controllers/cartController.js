@@ -47,11 +47,40 @@ exports.updateQuantity = async (req, res) => {
 // Remove item
 exports.removeItem = async (req, res) => {
   try {
-    await cartService.removeItem(req.user._id, req.params.id);
+    const updatedCart = await cartService.removeItem(req.user._id, req.params.id);
+    const cartCount = await cartService.getCartCount(req.user._id);
 
-    res.json({ success: true });
+    res.json({ 
+      success: true,
+      cartSubtotal: updatedCart.subtotal,
+      cartDiscount: updatedCart.totalDiscount,
+      cartTotal: updatedCart.total,
+      itemCount: updatedCart.items.length,
+      cartCount
+    });
 
   } catch (err) {
-    res.json({ success: false });
+    res.json({ success: false, message: err.message || "Could not remove item" });
+  }
+};
+
+// Validate Cart
+exports.validateCart = async (req, res) => {
+  try {
+    const result = await cartService.validateCart(req.user._id);
+    res.json(result);
+  } catch (err) {
+    console.error('Validation Error:', err);
+    res.status(500).json({ success: false, message: 'Could not validate cart' });
+  }
+};
+
+// Get Cart Items Status (for real-time updates)
+exports.getCartItemsStatus = async (req, res) => {
+  try {
+    const result = await cartService.getCartItemsStatus(req.user._id);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ success: false });
   }
 };

@@ -301,11 +301,17 @@ exports.registerUser = async (req, res) => {
 exports.userHome = async (req, res) => {
   try {
 
-    //Get active categories
-    const categories = await Category.find({ isActive: true });
+    // Get active and non-archived categories
+    const categories = await Category.find({ isActive: true, isDeleted: { $ne: true } });
 
-    //Get latest products (limit for "New Arrivals")
-    const products = await Product.find({ isActive: true })
+    // Get active category IDs for product filtering
+    const activeCategoryIds = categories.map(c => c._id);
+
+    // Get latest products belonging to active categories
+    const products = await Product.find({ 
+      isActive: true,
+      category: { $in: activeCategoryIds }
+    })
       .populate('category')
       .sort({ createdAt: -1 })
       .limit(8);
