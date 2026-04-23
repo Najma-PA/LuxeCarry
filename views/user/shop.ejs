@@ -9,6 +9,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 
 <body>
@@ -125,10 +126,6 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
     <option value="z-a" <%= query.sort==='z-a'?'selected':'' %>>Z-A</option>
   </select>
 
-  <!-- APPLY BUTTON -->
-  <button type="submit" class="btn w-100 fw-bold pb-2 pt-2 mb-3 mt-2 d-flex justify-content-center align-items-center" style="background-color: #b36b00; color: white; border-radius: 12px; font-size: 13px; letter-spacing: 1px; transition: background 0.2s; border: none;" onmouseover="this.style.backgroundColor='#995c00'" onmouseout="this.style.backgroundColor='#b36b00'">
-    APPLY FILTERS
-  </button>
 
 </form>
 
@@ -137,105 +134,16 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 <!-- PRODUCTS -->
 <div class="col-md-9">
 
-<div class="row">
+<div class="row" id="product-grid">
 
-<% if(typeof products !== 'undefined' && products && products.length > 0){ %>
-
-  <% products.forEach(p => { %>
-
-  <div class="col-md-4 mb-4">
-    <div class="card border-0 shadow-sm product-card h-100" style="border-radius: 16px; overflow: hidden; background-color: #ffffff;">
-      
-      <!-- Image Wrapper -->
-      <a href="/user/product/<%= p._id %>" class="position-relative bg-light d-block" style="padding: 20px; border-radius: 16px 16px 0 0; text-align: center; min-height: 220px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-        
-        <!-- Wishlist Heart -->
-        <span class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm" 
-              style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; color: #6b7280; transition: color 0.2s; z-index: 2; cursor: pointer;" 
-              onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('<%= p._id %>')"
-              onmouseover="this.style.color='#ef4444'" 
-              onmouseout="this.style.color='#6b7280'">
-          <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
-        </span>
-
-        <img src="<%= p.images[0] %>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
-      </a>
-
-      <div class="card-body p-4 d-flex flex-column">
-
-        <!-- Offer Pill & Brand (Optional alignment) -->
-        <div class="d-flex align-items-center mb-2">
-          <% if(p.offer > 0) { %>
-            <span class="badge text-white pb-1" style="background-color: #e53e3e; font-size: 9px; letter-spacing: 1px; border-radius: 4px;"><%= p.offer %>% OFF</span>
-          <% } %>
-        </div>
-
-        <!-- Product Name -->
-        <h6 class="fw-bold mb-2" style="font-size: 15px; color: #111827; font-family: 'Times New Roman', Times, serif;"><%= p.name %></h6>
-
-        <!-- Price -->
-        <div class="mb-1">
-          <span class="fw-bold" style="font-size: 16px; color: #1f2937;">₹<%= Math.round((p.price || 0) - ((p.price || 0) * (p.offer || 0) / 100)).toLocaleString() %></span>
-          <% if(p.offer > 0) { %>
-            <small class="text-muted text-decoration-line-through ms-1" style="font-size: 13px;">
-              ₹<%= (p.price || 0).toLocaleString() %>
-            </small>
-          <% } %>
-        </div>
-
-        <!-- Rating -->
-        <div class="mb-3">
-          <span style="color: #c98a2c; font-size: 10px;">
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-solid fa-star"></i>
-            <i class="fa-regular fa-star"></i>
-          </span>
-        </div>
-
-        <% if(p.stock === 0){ %>
-          <span class="text-danger fw-bold mb-3 d-block" style="font-size: 12px;">Out of Stock</span>
-        <% } %>
-
-        <!-- Buttons -->
-        <div class="d-flex gap-2 mt-auto">
-          <button class="btn btn-sm w-50 fw-bold"
-            onclick="addToCart('<%= p._id %>')"
-            style="border: 1px solid #c98a2c; color: #b76e10; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px; padding: 8px 0; background: transparent; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#fffbf2'" onmouseout="this.style.backgroundColor='transparent'">
-            ADD TO CART
-          </button>
-
-          <a href="/user/product/<%= p._id %>"
-            class="btn btn-sm w-50 fw-bold d-flex justify-content-center align-items-center"
-            style="background-color: #b76e10; color: #000000; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px;text-decoration: none; border: none; padding: 8px 0; transition: background 0.2s;" onmouseover="this.style.backgroundColor='#a35f0b'" onmouseout="this.style.backgroundColor='#b76e10'">
-            BUY NOW
-          </a>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <% }) %>
-
-<% } else { %>
-  <p>No products found</p>
-<% } %>
+<%- include('../partials/user/product-grid') %>
 
 </div>
 
 <!-- PAGINATION -->
-<div class="text-center mt-3">
+<div class="text-center mt-3" id="pagination-container">
 
-<% for(let i = 1; i <= totalPages; i++){ %>
-
-  <a href="?page=<%= i %>"
-     class="btn btn-sm <%= currentPage === i ? 'btn-warning' : 'btn-light' %>">
-     <%= i %>
-  </a>
-
-<% } %>
+<%- include('../partials/user/pagination') %>
 
 </div>
 
@@ -248,98 +156,138 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 
 <%- include('../partials/footer') %>
 
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-async function toggleWishlist(productId) {
-  try {
-    const res = await fetch('/user/wishlist/toggle', {
-      method: 'PATCH',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ productId })
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    // --- SHOP LOGIC ---
+    const filterForm = document.getElementById('filterForm');
+    const productGrid = document.getElementById('product-grid');
+    const paginationContainer = document.getElementById('pagination-container');
 
-    if (res.status === 401) {
-      window.location.href = '/user/login';
-      return;
-    }
-
-    const data = await res.json();
-    if (data.success) {
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: data.message,
-        showConfirmButton: false,
-        timer: 3000
-      });
-    } else {
-      if (data.message === 'Please log in to continue.') {
-        window.location.href = '/user/login';
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: data.message || 'Login required'
+    if (filterForm) {
+        filterForm.querySelectorAll('input[type="radio"], input[type="range"], select').forEach(input => {
+            input.addEventListener('change', () => {
+                updateShop();
+            });
         });
-      }
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function addToCart(id){
-  try{
-    const res = await fetch('/user/cart/add/' + id, {
-      headers: { 'Accept': 'application/json' }
-    });
-
-    if (res.status === 401) {
-      window.location.href = '/user/login';
-      return;
     }
 
-    const data = await res.json();
+    if (paginationContainer) {
+        paginationContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('.pagination-link');
+            if (link) {
+                e.preventDefault();
+                const page = link.dataset.page;
+                updateShop(page);
+            }
+        });
+    }
 
-    if(data.success){
-      Swal.fire({
-        title: 'Added to Cart!',
-        text: 'This product has been added to your shopping cart.',
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonColor: '#c26a00',
-        cancelButtonColor: '#1a1a1a',
-        confirmButtonText: 'Go to Cart',
-        cancelButtonText: 'Continue Shopping'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/user/cart';
+    async function updateShop(page = 1) {
+        if (!productGrid) return;
+        productGrid.style.opacity = '0.5';
+        productGrid.style.pointerEvents = 'none';
+
+        const formData = new FormData(filterForm);
+        const params = new URLSearchParams(formData);
+        params.set('page', page);
+
+        try {
+            const res = await fetch(`/user/shop?${params.toString()}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            const data = await res.json();
+            if (data.success) {
+                productGrid.innerHTML = data.gridHtml;
+                paginationContainer.innerHTML = data.paginationHtml;
+                const newUrl = `${window.location.pathname}?${params.toString()}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                window.scrollTo({ top: productGrid.offsetTop - 100, behavior: 'smooth' });
+            }
+        } catch (err) {
+            console.error('Shop update error:', err);
+        } finally {
+            productGrid.style.opacity = '1';
+            productGrid.style.pointerEvents = 'auto';
         }
-      });
-    }else{
-      if (data.message === 'Please log in to continue.') {
-        window.location.href = '/user/login';
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: data.message || 'Could not add product to cart',
-          icon: 'error',
-          confirmButtonColor: '#c26a00'
-        });
-      }
     }
-  }catch(err){
-    Swal.fire({
-      title: 'Oops!',
-      text: 'Something went wrong. Please try again.',
-      icon: 'warning',
-      confirmButtonColor: '#c26a00'
+
+    // --- WISHLIST & CART FLOW ---
+    document.addEventListener('click', async (e) => {
+        const wishlistToggle = e.target.closest('.wishlist-toggle');
+        if (wishlistToggle) {
+            e.preventDefault();
+            await handleToggleWishlist(wishlistToggle.dataset.id, wishlistToggle);
+        }
+
+        const addToCartBtn = e.target.closest('.add-to-cart-btn');
+        if (addToCartBtn) {
+            handleAddToCart(addToCartBtn.dataset.id);
+        }
     });
-  }
-}
+
+    async function handleToggleWishlist(productId, element) {
+        try {
+            const res = await fetch('/user/wishlist/toggle', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            if (res.status === 401) { window.location.href = '/user/login'; return; }
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message);
+                const icon = element.querySelector('i');
+                if (data.message.includes('added')) {
+                    icon.classList.replace('fa-regular', 'fa-solid');
+                    icon.style.color = '#ef4444';
+                } else {
+                    icon.classList.replace('fa-solid', 'fa-regular');
+                    icon.style.color = '#6b7280';
+                }
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    async function handleAddToCart(productId) {
+        try {
+            const res = await fetch('/user/cart/add/' + productId, {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (res.status === 401) { window.location.href = '/user/login'; return; }
+            const data = await res.json();
+            if (data.success) {
+                showToast('Added to cart!');
+                updateCartBadge(data.cartCount);
+            } else {
+                showToast(data.message || 'Out of stock', 'error');
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    function updateCartBadge(count) {
+        const badge = document.getElementById('cart-count-badge');
+        if (badge) {
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+
+    function showToast(msg, icon = 'success') {
+        Toastify({
+            text: msg,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: icon === 'success' ? "#c26a00" : "#dc3545",
+                borderRadius: "10px",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+            }
+        }).showToast();
+    }
+});
 </script>
 
 </body>

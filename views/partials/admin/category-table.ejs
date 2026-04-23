@@ -1,0 +1,41 @@
+<% if(categories && categories.length > 0) { %>
+  <% categories.forEach(cat => { %>
+    <tr id="row-<%= cat._id %>">
+      <td><span class="fw-bold" style="color: #1e293b;"><%= cat.name %></span></td>
+      <td><span style="color: #475569; font-weight: 500;"><%= cat.offer || 0 %>%</span></td>
+      <td><span style="color: #475569;"><%= cat.productCount || 0 %></span></td>
+      <td>
+        <span id="badge-<%= cat._id %>" class="pill-badge <%= cat.isActive ? 'status-active' : 'status-inactive' %> px-3 py-1">
+          <%= cat.isActive ? 'Active' : 'Inactive' %>
+        </span>
+      </td>
+      <td>
+        <% if (cat.isDeleted !== true) { %>
+          <a href="/admin/categories/edit/<%= cat._id %>" class="btn-action" title="Edit">
+            <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
+          </a>
+          <span id="toggle-container-<%= cat._id %>">
+            <% if (cat.isActive) { %>
+              <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
+                <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
+              </button>
+            <% } else { %>
+              <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
+                <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
+              </button>
+            <% } %>
+          </span>
+          <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
+            <i class="fa-solid fa-trash" style="font-size: 14px; color: #64748b;"></i>
+          </button>
+        <% } else { %>
+          <button onclick="restoreCategory('<%= cat._id %>')" class="btn-action" title="Restore" style="color: #16a34a;">
+            <i class="fa-solid fa-trash-arrow-up" style="font-size: 14px;"></i> Restore
+          </button>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+<% } else { %>
+  <tr><td colspan="5" class="text-center py-5 text-muted">No categories found.</td></tr>
+<% } %>

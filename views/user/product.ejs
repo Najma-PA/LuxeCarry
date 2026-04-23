@@ -131,7 +131,7 @@
     position: relative;
   }
   .color-swatch.active {
-    border-color: #3b82f6; /* Blue outline as in mockup */
+    border-color: var(--gold-primary); /* Changed from blue to match branding */
   }
   .color-inner {
     width: 100%;
@@ -159,9 +159,9 @@
     border-color: var(--gold-primary);
   }
   .size-chip.active {
-    background: #eef2ff;
-    border-color: #3b82f6;
-    color: #3b82f6;
+    background: #fff8ee;
+    border-color: var(--gold-primary);
+    color: var(--gold-primary);
   }
   .size-chip.disabled {
     opacity: 0.4;
@@ -314,10 +314,15 @@
       <h1 class="product-title heading-serif"><%= product.name %></h1>
       
       <div class="product-price">
-        ₹<%= Math.round((product.price || 0) - ((product.price || 0) * (product.offer || 0) / 100)).toLocaleString() %>
-        <% if(product.offer > 0) { %>
+        <% 
+            const pOffer = product.offer || 0;
+            const cOffer = (product.category && typeof product.category === 'object') ? (product.category.offer || 0) : 0;
+            const bestEffectiveOffer = Math.max(pOffer, cOffer);
+        %>
+        ₹<%= (product.finalPrice || 0).toLocaleString() %>
+        <% if(bestEffectiveOffer > 0) { %>
           <span class="text-muted text-decoration-line-through fs-6 ms-2">₹<%= (product.price || 0).toLocaleString() %></span>
-          <span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 11px;"><%= product.offer %>% OFF</span>
+          <span class="badge bg-danger bg-opacity-10 text-danger ms-2" style="font-size: 11px;"><%= bestEffectiveOffer %>% OFF</span>
         <% } %>
       </div>
 
@@ -408,9 +413,14 @@
                 <div class="card-body p-4 d-flex flex-column">
                   <h6 class="fw-bold mb-2 text-truncate" style="font-size: 14px; color: #111;"><%= rel.name %></h6>
                   <div class="mb-3">
+                    <% 
+                        const rpOffer = rel.offer || 0;
+                        const rcOffer = (rel.category && typeof rel.category === 'object') ? (rel.category.offer || 0) : 0;
+                        const rBestOffer = Math.max(rpOffer, rcOffer);
+                    %>
                     <span class="fw-bold" style="color: #b78846; font-size: 15px;">
-                      ₹<%= Math.round((rel.price || 0) - ((rel.price || 0) * (rel.offer || 0) / 100)).toLocaleString() %></span>
-                    <% if(rel.offer > 0) { %>
+                      ₹<%= (rel.finalPrice || 0).toLocaleString() %></span>
+                    <% if(rBestOffer > 0) { %>
                       <small class="text-muted text-decoration-line-through ms-1" style="font-size: 12px;">
                         ₹<%= (rel.price || 0).toLocaleString() %></small>
                     <% } %>
@@ -433,6 +443,14 @@
   let selectedColor = '<%= colors[0] || "" %>';
   let selectedSize = '<%= sizes[0] || "" %>';
   let quantity = 1;
+
+  function updateCartBadge(count) {
+      const badge = document.getElementById('cart-count-badge');
+      if (badge) {
+          badge.innerText = count;
+          badge.style.display = count > 0 ? 'flex' : 'none';
+      }
+  }
 
   // Initialize
   window.onload = () => {
@@ -576,14 +594,17 @@
 
       const data = await res.json();
       if (data.success) {
-        Swal.fire({
-          toast: true,
-          position: 'top-end',
-          icon: 'success',
-          title: data.message,
-          showConfirmButton: false,
-          timer: 3000
-        });
+          Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: data.message,
+            showConfirmButton: false,
+            timer: 3000,
+            background: '#ffffff',
+            color: '#1a1a1a',
+            iconColor: '#c26a00' // Gold icon instead of default green/blue
+          });
       } else {
         if (data.message === 'Please log in to continue.') {
           window.location.href = '/user/login';
@@ -623,6 +644,9 @@
 
       const data = await res.json();
       if(data.success) {
+        // Update global cart badge
+        updateCartBadge(data.cartCount);
+
         Swal.fire({
           title: 'Added to Cart!',
           text: 'This product has been added to your shopping cart.',

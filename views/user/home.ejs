@@ -12,6 +12,7 @@
 <link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
 <link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 
 
 </head>
@@ -98,9 +99,10 @@ Explore our premium collection of bags and accessories
   <a href="/user/product/<%= p._id %>" class="position-relative d-block" 
     style="background-color: #f4f6f8; padding: 25px; height: 260px; 
     display: flex; align-items: center; justify-content: center; text-decoration: none;">
-      <div onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('<%= p._id %>')" class="position-absolute" style="top: 15px; 
+      <div class="position-absolute wishlist-toggle" style="top: 15px; 
       right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; 
-      align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;">
+      align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;" 
+      data-id="<%= p._id %>">
           <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
       </div>
       <img src="<%= p.images[0] %>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
@@ -142,8 +144,8 @@ Explore our premium collection of bags and accessories
     </div>
 
     <div class="mt-auto d-flex gap-2">
-        <button class="btn btn-dark w-50 rounded-pill py-1" style="font-size: 11px; font-weight: 600; 
-        background-color: #1a1a1a; border: none; letter-spacing: 0.3px;" onclick="addToCart('<%= p._id %>')">
+        <button class="btn btn-dark w-50 rounded-pill py-1 add-to-cart-btn" style="font-size: 11px; font-weight: 600; 
+        background-color: #1a1a1a; border: none; letter-spacing: 0.3px;" data-id="<%= p._id %>">
             Add to Cart
         </button>
         <a href="/user/product/<%= p._id %>" class="btn w-50 rounded-pill py-1" style="font-size: 11px; 
@@ -198,110 +200,84 @@ Upgrade your wardrobe with our best sellers
 
 <%- include('../partials/footer') %>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script>
-  
-  window.history.pushState(null, null, location.href);
-
-  window.addEventListener('popstate', function () {
-    window.location.href = '/user/home';  // stay inside app
-  });
-</script>
-
-<script>
-async function toggleWishlist(productId) {
-  try {
-    const res = await fetch('/user/wishlist/toggle', {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({ productId })
-    });
-
-    if (res.status === 401) {
-      window.location.href = '/user/login';
-      return;
-    }
-
-    const data = await res.json();
-    if (data.success) {
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'success',
-        title: data.message,
-        showConfirmButton: false,
-        timer: 3000
-      });
-    } else {
-      if (data.message === 'Please log in to continue.') {
-        window.location.href = '/user/login';
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: data.message || 'Login required'
-        });
-      }
-    }
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-async function addToCart(productId) {
-  try {
-    const res = await fetch('/user/cart/add/' + productId, {
-      headers: { 'Accept': 'application/json' }
-    });
-
-    if (res.status === 401) {
-      window.location.href = '/user/login';
-      return;
-    }
-
-    const data = await res.json();
-
-    if (data.success) {
-      Swal.fire({
-        title: 'Added to Cart!',
-        text: 'This product has been added to your shopping cart.',
-        icon: 'success',
-        showCancelButton: true,
-        confirmButtonColor: '#c26a00',
-        cancelButtonColor: '#1a1a1a',
-        confirmButtonText: 'Go to Cart',
-        cancelButtonText: 'Continue Shopping'
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = '/user/cart';
+document.addEventListener('DOMContentLoaded', () => {
+    // Shared functionality for Home page Toggle and Add to Cart
+    document.addEventListener('click', async (e) => {
+        const wishlistToggle = e.target.closest('.wishlist-toggle');
+        if (wishlistToggle) {
+            e.preventDefault();
+            await handleToggleWishlist(wishlistToggle.dataset.id, wishlistToggle);
         }
-      });
-    } else {
-      if (data.message === 'Please log in to continue.') {
-        window.location.href = '/user/login';
-      } else {
-        Swal.fire({
-          title: 'Error',
-          text: data.message || 'Could not add product to cart',
-          icon: 'error',
-          confirmButtonColor: '#c26a00'
-        });
-      }
+
+        const addToCartBtn = e.target.closest('.add-to-cart-btn');
+        if (addToCartBtn) {
+            handleAddToCart(addToCartBtn.dataset.id);
+        }
+    });
+
+    async function handleToggleWishlist(productId, element) {
+        try {
+            const res = await fetch('/user/wishlist/toggle', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId })
+            });
+            if (res.status === 401) { window.location.href = '/user/login'; return; }
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.message);
+                const icon = element.querySelector('i');
+                if (data.message.includes('added')) {
+                    icon.classList.replace('far', 'fas');
+                    icon.style.color = '#ef4444';
+                } else {
+                    icon.classList.replace('fas', 'far');
+                    icon.style.color = '#a0aec0';
+                }
+            }
+        } catch (err) { console.error(err); }
     }
 
-  } catch (err) {
-    Swal.fire({
-      title: 'Oops!',
-      text: 'Something went wrong. Please try again.',
-      icon: 'warning',
-      confirmButtonColor: '#c26a00'
-    });
-  }
-}
+    async function handleAddToCart(productId) {
+        try {
+            const res = await fetch('/user/cart/add/' + productId, {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (res.status === 401) { window.location.href = '/user/login'; return; }
+            const data = await res.json();
+            if (data.success) {
+                showToast('Added to cart!');
+                updateCartBadge(data.cartCount);
+            } else {
+                showToast(data.message || 'Out of stock', 'error');
+            }
+        } catch (err) { console.error(err); }
+    }
+
+    function updateCartBadge(count) {
+        const badge = document.getElementById('cart-count-badge');
+        if (badge) {
+            badge.innerText = count;
+            badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+
+    function showToast(msg, icon = 'success') {
+        Toastify({
+            text: msg,
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            style: {
+                background: icon === 'success' ? "#c26a00" : "#dc3545",
+                borderRadius: "10px",
+                boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+            }
+        }).showToast();
+    }
+});
 </script>
 
 </body>

@@ -1,0 +1,8 @@
+<% for(let i = 1; i <= totalPages; i++){ %>
+  <a href="?page=<%= i %>"
+     class="btn btn-sm pagination-link <%= currentPage === i ? 'btn-gold shadow-sm' : 'btn-light' %>"
+     data-page="<%= i %>"
+     style="<%= currentPage === i ? 'background-color: #c26a00; color: white !important;' : 'color: #1e293b;' %>">
+     <%= i %>
+  </a>
+<% } %>

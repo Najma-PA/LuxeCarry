@@ -26,7 +26,7 @@
 
   <% addresses.forEach(address => { %>
 
-  <div class="col-md-6">
+  <div class="col-md-6" id="address-card-<%= address._id %>">
 
     <div class="address-card <%= address.isDefault ? 'default-card' : '' %>">
 
@@ -46,22 +46,17 @@
 
       <hr>
 
-      <div class="address-actions d-flex gap-2">
+  <div class="address-actions d-flex gap-2">
 
-  <a href="/user/editAddress/<%= address._id %>" class="edit-btn">
-    <i class="fa-solid fa-pen"></i> EDIT
-  </a>
+    <a href="/user/editAddress/<%= address._id %>" class="edit-btn">
+      <i class="fa-solid fa-pen"></i> EDIT
+    </a>
 
-  <form action="/user/deleteAddress/<%= address._id %>" method="POST"
-        onsubmit="handleDeleteForm(event, this)" style="margin:0;">
-        
-    <button type="submit" class="delete-btn">
+    <button type="button" class="delete-btn address-delete-btn" data-id="<%= address._id %>">
       <i class="fa-solid fa-trash"></i> DELETE
     </button>
 
-  </form>
-
-</div>
+  </div>
 
     </div>
 
@@ -89,35 +84,55 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function handleDeleteForm(e, form) {
-    e.preventDefault();
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "Are you sure you want to delete this address?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#c26a00',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, delete it!'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        const addressId = form.action.split('/').pop();
-        fetch(`/user/addresses/${addressId}`, {
-          method: 'DELETE'
-        }).then(res => res.json())
-          .then(data => {
-            if (data.success) {
-              window.location.reload();
-            } else {
-              Swal.fire('Error', data.message || 'Failed to delete address', 'error');
+document.addEventListener('DOMContentLoaded', () => {
+    const addressContainer = document.querySelector('.container.account-container');
+
+    if (addressContainer) {
+        addressContainer.addEventListener('click', async (e) => {
+            const deleteBtn = e.target.closest('.address-delete-btn');
+            if (deleteBtn) {
+                const addressId = deleteBtn.dataset.id;
+                handleDeleteAddress(addressId);
             }
-          }).catch(err => {
-            console.error(err);
-            Swal.fire('Error', 'Something went wrong', 'error');
-          });
-      }
-    });
-  }
+        });
+    }
+
+    async function handleDeleteAddress(addressId) {
+        const result = await Swal.fire({
+            title: 'Delete Address?',
+            text: "Are you sure you want to remove this address?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#c26a00',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/user/addresses/${addressId}`, { method: 'DELETE' });
+                const data = await res.json();
+
+                if (data.success) {
+                    const card = document.getElementById(`address-card-${addressId}`);
+                    if (card) {
+                        card.style.transition = 'all 0.3s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            card.remove();
+                        }, 300);
+                    }
+                } else {
+                    Swal.fire('Error', data.message || 'Failed to delete address', 'error');
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Error', 'Something went wrong', 'error');
+            }
+        }
+    }
+});
 </script>
 </body>
 </html>

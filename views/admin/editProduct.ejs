@@ -281,13 +281,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
 <script>
-let cropper;
-let currentSlot = null;
-let currentVariantIndex = null; // null for base product, number for variant
-const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
-const variantImageModal = new bootstrap.Modal(document.getElementById('variantImageModal'));
-
-// Base product images
+// Data initialized from server
+const productId = "<%= product._id %>";
 let baseExistingImages = [
     "<%= product.images[0] || '' %>",
     "<%= product.images[1] || '' %>",
@@ -296,7 +291,6 @@ let baseExistingImages = [
 ];
 let baseNewBlobs = [null, null, null, null];
 
-// Variant images data
 let variantImagesData = [
     <% product.variants.forEach(v => { %>
         {
@@ -310,6 +304,17 @@ let variantImagesData = [
         },
     <% }) %>
 ];
+</script>
+
+<!-- SweetAlert2, Cropper.js, etc should be loaded above this -->
+
+<script>
+let cropper;
+let currentSlot = null;
+let currentVariantIndex = null; // null for base product, number for variant
+
+const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+const variantImageModal = new bootstrap.Modal(document.getElementById('variantImageModal'));
 
 function triggerFileInput(slot, isVariant = false) {
   if (isVariant) {
@@ -340,7 +345,6 @@ function handleFileSelect(event, slot, isVariant = false) {
   if (!file) return;
 
   currentSlot = slot;
-  // If isVariant is true, currentVariantIndex should already be set
   const reader = new FileReader();
   reader.onload = (e) => {
     document.getElementById('cropperImage').src = e.target.result;
@@ -362,7 +366,6 @@ document.getElementById('cropModal').addEventListener('hidden.bs.modal', functio
     cropper.destroy();
     cropper = null;
   }
-  // Reset logic depends on whether it's variant or base
   if (currentVariantIndex !== null) {
      const input = document.getElementById(`vInput_${currentSlot}`);
      if(input) input.value = "";
@@ -377,7 +380,6 @@ document.getElementById('cropButton').onclick = function () {
     if (currentVariantIndex !== null) {
         variantImagesData[currentVariantIndex].newBlobs[currentSlot - 1] = blob;
         variantImagesData[currentVariantIndex].existing[currentSlot - 1] = "";
-        
         const previewImg = document.getElementById(`vImg_${currentSlot}`);
         previewImg.src = URL.createObjectURL(blob);
         document.getElementById(`vSlot_${currentSlot}`).classList.add('has-image');
@@ -385,7 +387,6 @@ document.getElementById('cropButton').onclick = function () {
     } else {
         baseNewBlobs[currentSlot - 1] = blob;
         baseExistingImages[currentSlot - 1] = "";
-        
         const previewImg = document.getElementById(`img${currentSlot}`);
         previewImg.src = URL.createObjectURL(blob);
         document.getElementById(`slot${currentSlot}`).classList.add('has-image');
@@ -398,13 +399,10 @@ function openVariantImageModal(vIdx) {
     currentVariantIndex = vIdx;
     const container = document.getElementById('variantModalSlots');
     container.innerHTML = '';
-    
     const data = variantImagesData[vIdx];
-    
     for (let i = 1; i <= 4; i++) {
         const src = data.newBlobs[i-1] ? URL.createObjectURL(data.newBlobs[i-1]) : data.existing[i-1];
         const hasImg = src !== "";
-        
         const slotHtml = `
             <div class="col-6">
                 <div class="image-slot ${hasImg ? 'has-image' : ''}" id="vSlot_${i}" onclick="triggerFileInput(${i}, true)">
@@ -425,19 +423,10 @@ function openVariantImageModal(vIdx) {
     variantImageModal.show();
 }
 
-// Reset currentVariantIndex when modal closes (except when cropping)
-document.getElementById('variantImageModal').addEventListener('hidden.bs.modal', function() {
-    // We don't reset index here because crop modal might be opening
-});
-
-// Actually, we should only reset it when NOT opening crop modal
-// Or just be careful with logic.
-
 function updateVariantPreviews(vIdx) {
     const previewContainer = document.getElementById(`variantPreviews_${vIdx}`);
     previewContainer.innerHTML = '';
     const data = variantImagesData[vIdx];
-    
     data.existing.forEach(img => {
         if(img) previewContainer.insertAdjacentHTML('beforeend', `<img src="${img}" class="variant-img-preview">`);
     });
@@ -448,11 +437,7 @@ function updateVariantPreviews(vIdx) {
 
 function addVariant() {
   const vIdx = variantImagesData.length;
-  variantImagesData.push({
-      existing: ["", "", "", ""],
-      newBlobs: [null, null, null, null]
-  });
-  
+  variantImagesData.push({ existing: ["", "", "", ""], newBlobs: [null, null, null, null] });
   const row = `
     <div class="row mb-3 align-items-center variant-row" data-index="${vIdx}">
       <div class="col-md-2">
@@ -474,42 +459,27 @@ function addVariant() {
         </div>
       </div>
       <div class="col-md-1 text-end">
-        <button type="button" class="btn btn-sm btn-light text-danger" onclick="removeVariantRow(this, ${vIdx})">🗑</button>
+        <button type="button" class="btn btn-sm btn-light text-danger" onclick="this.closest('.variant-row').remove()">🗑</button>
       </div>
     </div>
   `;
   document.getElementById('variantContainer').insertAdjacentHTML('beforeend', row);
-
-  // Add listeners to new row
   const newRow = document.querySelector(`.variant-row[data-index="${vIdx}"]`);
   newRow.querySelectorAll('input').forEach(input => {
-      input.addEventListener('input', () => {
-          newRow.querySelector('.error-variant').style.display = 'none';
-      });
+      input.addEventListener('input', () => { newRow.querySelector('.error-variant').style.display = 'none'; });
   });
 }
 
-function removeVariantRow(btn, vIdx) {
-    btn.closest('.variant-row').remove();
-}
-
-// Validation Helpers
 function setFieldError(id, msg) {
     const errEl = document.getElementById(`error-${id}`);
-    if (errEl) {
-        errEl.innerText = msg;
-        errEl.classList.remove('d-none');
-    }
+    if (errEl) { errEl.innerText = msg; errEl.classList.remove('d-none'); }
 }
 
 function clearFieldError(id) {
     const errEl = document.getElementById(`error-${id}`);
-    if (errEl) {
-        errEl.classList.add('d-none');
-    }
+    if (errEl) { errEl.classList.add('d-none'); }
 }
 
-// Attach listeners to main fields
 ['Name', 'Category', 'Price', 'Offer', 'Desc'].forEach(idSuffix => {
     const el = document.getElementById(`prod${idSuffix}`);
     if (el) {
@@ -517,74 +487,38 @@ function clearFieldError(id) {
             const map = { 'prodName': 'name', 'prodCategory': 'category', 'prodPrice': 'price', 'prodOffer': 'offer', 'prodDesc': 'description' };
             clearFieldError(map[el.id]);
         });
-        if (el.tagName === 'SELECT') {
-            el.addEventListener('change', () => clearFieldError('category'));
-        }
+        if (el.tagName === 'SELECT') { el.addEventListener('change', () => clearFieldError('category')); }
     }
-});
-
-// Initial listeners for existing variants
-document.querySelectorAll('.variant-row').forEach(row => {
-    row.querySelectorAll('input').forEach(input => {
-        input.addEventListener('input', () => {
-            row.querySelector('.error-variant').style.display = 'none';
-        });
-    });
 });
 
 document.getElementById('editProductForm').onsubmit = async function(e) {
     e.preventDefault();
-
-    // Reset errors
     ['name', 'category', 'price', 'offer', 'description'].forEach(clearFieldError);
     document.querySelectorAll('.error-variant').forEach(el => el.style.display = 'none');
-
-    // Show spinner
     document.getElementById('submitSpinner').classList.remove('d-none');
     const submitBtn = this.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
 
     try {
         const formData = new FormData(this);
-        
-        // Handle Base Images
         formData.delete('images');
         formData.delete('existingImages');
         baseExistingImages.forEach(url => { if(url) formData.append('existingImages', url); });
         baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
 
-        // Handle Variant Images
         const rows = document.querySelectorAll('.variant-row');
         rows.forEach((row, i) => {
             const vIdx = row.getAttribute('data-index');
             const data = variantImagesData[vIdx];
-            
-            // Add existing variant images
-            data.existing.forEach(url => {
-                if(url) formData.append(`existingVariantImages_${i}`, url);
-            });
-            
-            // Add new variant blobs
-            data.newBlobs.forEach((blob, bIdx) => {
-                if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
-            });
+            data.existing.forEach(url => { if(url) formData.append(`existingVariantImages_${i}`, url); });
+            data.newBlobs.forEach((blob, bIdx) => { if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`); });
         });
 
-        const response = await fetch('/admin/products/edit/<%= product._id %>', {
-            method: 'POST',
-            body: formData
-        });
-
+        const response = await fetch(`/admin/products/edit/${productId}`, { method: 'POST', body: formData });
         const result = await response.json();
         if (result.success) {
-            Swal.fire({
-                icon: 'success',
-                title: 'Updated!',
-                text: result.message,
-                confirmButtonColor: '#ca8a04'
-            }).then(() => {
-                window.location.href = result.redirectUrl || '/admin/products';
-            });
+            Swal.fire({ icon: 'success', title: 'Updated!', text: result.message, confirmButtonColor: '#ca8a04' })
+            .then(() => { window.location.href = result.redirectUrl || '/admin/products'; });
         } else {
             if (result.errors) {
                 for (const [key, msg] of Object.entries(result.errors)) {
@@ -596,32 +530,22 @@ document.getElementById('editProductForm').onsubmit = async function(e) {
                             err.innerText = msg;
                             err.style.display = 'block';
                         }
-                    } else if (key === 'images') {
-                         Swal.fire('Wait!', msg, 'warning');
-                    } else {
-                        setFieldError(key, msg);
-                    }
+                    } else if (key === 'images') { Swal.fire('Wait!', msg, 'warning');
+                    } else { setFieldError(key, msg); }
                 }
             } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: result.message || 'Update failed',
-                    confirmButtonColor: '#ca8a04'
-                });
+                Swal.fire({ icon: 'error', title: 'Oops...', text: result.message || 'Update failed', confirmButtonColor: '#ca8a04' });
             }
         }
     } catch (err) {
         console.error(err);
-        Swal.fire('Error', 'Server communication failed. Please try again later.', 'error');
+        Swal.fire('Error', 'Server communication failed.', 'error');
     } finally {
         document.getElementById('submitSpinner').classList.add('d-none');
         submitBtn.disabled = false;
     }
 };
-
 </script>
 
 </body>
-</html>
 </html>

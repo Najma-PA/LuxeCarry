@@ -26,11 +26,11 @@
   <div class="d-flex w-100 justify-content-end">
     <form method="GET" class="d-flex gap-2">
       <!-- Search -->
-      <input type="text" name="search" value="<%= search || '' %>"
+      <input type="text" name="search" id="searchInput" value="<%= search || '' %>"
         class="form-control" placeholder="Search users by name or email...">
       
       <!-- Filter -->
-      <select name="status" class="form-select" style="width:150px;" onchange="this.form.submit()">
+      <select name="status" id="statusFilter" class="form-select" style="width:150px;">
         <option value="All Statuses" <%= status === 'All Statuses' ? 'selected' : '' %>>All Statuses</option>
         <option value="Active" <%= status === 'Active' ? 'selected' : '' %>>Active</option>
         <option value="Blocked" <%= status === 'Blocked' ? 'selected' : '' %>>Blocked</option>
@@ -60,59 +60,16 @@
       </tr>
     </thead>
 
-    <tbody>
-      <% users.forEach(user => { %>
-        <tr>
-
-          <!-- USER -->
-          <td>
-            <div class="d-flex align-items-center gap-2">
-              <div>
-                <strong><%= user.name %></strong><br>
-                <small class="text-muted">ID: <%= user._id %></small>
-              </div>
-            </div>
-          </td>
-
-          <!-- EMAIL -->
-          <td><%= user.email %></td>
-
-          <!-- ORDERS -->
-          <td><%= user.ordersCount || 0 %></td>
-
-          <!-- JOINED -->
-          <td>
-            <%= new Date(user.createdAt).toDateString() %>
-          </td>
-
-          <!-- STATUS -->
-          <td id="status-cell-<%= user._id %>">
-            <% if(user.isBlocked){ %>
-              <span class="pill-badge status-inactive">Inactive</span>
-            <% } else { %>
-              <span class="pill-badge status-active">Active</span>
-            <% } %>
-          </td>
-
-          <!-- ACTION -->
-          <td>
-            <button class="btn-pill <%= user.isBlocked ? 'btn-unblock-pill' : 'btn-block-pill' %>"
-              id="toggle-btn-<%= user._id %>"
-              onclick="toggleUser('<%= user._id %>')">
-              <%= user.isBlocked ? "Unblock" : "Block" %>
-            </button>
-          </td>
-
-        </tr>
-      <% }) %>
+    <tbody id="user-table-body">
+      <%- include('../partials/admin/user-table') %>
     </tbody>
   </table>
 
   <!-- Pagination -->
-  <div class="d-flex justify-content-center mt-3">
+  <div class="d-flex justify-content-center mt-3" id="pagination-container">
     <% for(let i=1; i<=totalPages; i++){ %>
       <a href="?page=<%= i %>&search=<%= search %>&status=<%= status %>"
-        class="page-btn <%= currentPage === i ? 'active' : '' %>">
+        class="page-btn pagination-link <%= currentPage === i ? 'active' : '' %>" data-page="<%= i %>">
         <%= i %>
       </a>
     <% } %>
@@ -124,57 +81,89 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-  function toggleUser(userId) {
-    Swal.fire({
-      title: 'Are you sure?',
-      text: "Do you want to change this user's status?",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Yes, change it!'
-    }).then(async (result) => {
-      if (result.isConfirmed) {
-        try {
-          const response = await fetch(`/admin/users/toggle/${userId}`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' }
-          });
-          
-          const data = await response.json();
-          
-          if (data.success) {
-            Swal.fire({
-                title: 'Success!',
-                text: 'User status has been toggled.',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const tableBody = document.getElementById('user-table-body');
+    const paginationContainer = document.getElementById('pagination-container');
 
-            // Update DOM
-            const statusCell = document.getElementById(`status-cell-${userId}`);
-            const toggleBtn = document.getElementById(`toggle-btn-${userId}`);
-            
-            if (data.isBlocked) {
-                statusCell.innerHTML = '<span class="pill-badge status-inactive">Inactive</span>';
-                toggleBtn.innerText = 'Unblock';
-                toggleBtn.className = 'btn-pill btn-unblock-pill';
-            } else {
-                statusCell.innerHTML = '<span class="pill-badge status-active">Active</span>';
-                toggleBtn.innerText = 'Block';
-                toggleBtn.className = 'btn-pill btn-block-pill';
+    if (searchInput) {
+        let timeout = null;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => updateTable(), 500);
+        });
+    }
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', () => updateTable());
+    }
+
+    if (paginationContainer) {
+        paginationContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('.pagination-link');
+            if (link) {
+                e.preventDefault();
+                updateTable(link.dataset.page);
             }
-          } else {
-            Swal.fire('Error', 'Failed to toggle user status', 'error');
-          }
-        } catch (error) {
-          console.error(error);
-          Swal.fire('Error', 'An error occurred', 'error');
+        });
+    }
+
+    async function updateTable(page = 1) {
+        if (!tableBody) return;
+        const url = new URL(window.location.href);
+        if (searchInput) url.searchParams.set('search', searchInput.value);
+        if (statusFilter) url.searchParams.set('status', statusFilter.value);
+        url.searchParams.set('page', page);
+
+        tableBody.style.opacity = '0.5';
+        try {
+            const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            if (data.success) {
+                tableBody.innerHTML = data.tableHtml;
+                if (paginationContainer) paginationContainer.innerHTML = data.paginationHtml;
+                window.history.pushState({ path: url.toString() }, '', url.toString());
+            }
+        } catch (err) {
+            console.error('Table update failed:', err);
+        } finally {
+            tableBody.style.opacity = '1';
         }
-      }
-    });
-  }
+    }
+
+    window.toggleUser = async function(userId) {
+        const result = await Swal.fire({
+            title: 'Change user status?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#c26a00',
+            cancelButtonColor: '#64748b'
+        });
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/admin/users/toggle/${userId}`, { method: 'PATCH' });
+                const data = await res.json();
+                if (data?.success) {
+                    const statusCell = document.getElementById(`status-cell-${userId}`);
+                    const toggleBtn = document.getElementById(`toggle-btn-${userId}`);
+                    if (data.isBlocked) {
+                        statusCell.innerHTML = '<span class="pill-badge status-inactive">Inactive</span>';
+                        toggleBtn.innerText = 'Unblock';
+                        toggleBtn.className = 'btn-pill btn-unblock-pill';
+                    } else {
+                        statusCell.innerHTML = '<span class="pill-badge status-active">Active</span>';
+                        toggleBtn.innerText = 'Block';
+                        toggleBtn.className = 'btn-pill btn-block-pill';
+                    }
+                    Swal.fire({ icon: 'success', title: 'Status updated', timer: 1500, showConfirmButton: false });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Action failed' });
+            }
+        }
+    };
+});
 </script>
 </body>
 </html>

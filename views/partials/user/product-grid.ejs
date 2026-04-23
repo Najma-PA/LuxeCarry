@@ -1,0 +1,67 @@
+<% if(typeof products !== 'undefined' && products && products.length > 0){ %>
+  <% products.forEach(p => { %>
+  <div class="col-md-4 mb-4">
+    <div class="card border-0 shadow-sm product-card h-100" style="border-radius: 16px; overflow: hidden; background-color: #ffffff;">
+      <a href="/user/product/<%= p._id %>" class="position-relative bg-light d-block" style="padding: 20px; border-radius: 16px 16px 0 0; text-align: center; min-height: 220px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
+        <span class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm wishlist-toggle" 
+              style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; color: #6b7280; transition: color 0.2s; z-index: 2; cursor: pointer;" 
+              data-id="<%= p._id %>">
+          <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
+        </span>
+        <img src="<%= p.images[0] %>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
+      </a>
+      <div class="card-body p-4 d-flex flex-column">
+        <div class="d-flex align-items-center mb-2">
+          <% 
+            let pOffer = p.offer || 0;
+            let cOffer = (p.category && typeof p.category === 'object') ? (p.category.offer || 0) : 0;
+            let bestOffer = Math.max(pOffer, cOffer);
+          %>
+          <% if(bestOffer > 0) { %>
+            <span class="badge text-white pb-1" style="background-color: #e53e3e; font-size: 9px; letter-spacing: 1px; border-radius: 4px;"><%= bestOffer %>% OFF</span>
+          <% } %>
+        </div>
+        <h6 class="fw-bold mb-2" style="font-size: 15px; color: #111827; font-family: 'Times New Roman', Times, serif;"><%= p.name %></h6>
+        <div class="mb-1">
+          <span class="fw-bold" style="font-size: 16px; color: #1f2937;">₹<%= (p.finalPrice || 0).toLocaleString() %></span>
+          <% if(bestOffer > 0) { %>
+            <small class="text-muted text-decoration-line-through ms-1" style="font-size: 13px;">
+              ₹<%= (p.price || 0).toLocaleString() %>
+            </small>
+          <% } %>
+        </div>
+        <div class="mb-3">
+          <span style="color: #c98a2c; font-size: 10px;">
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-solid fa-star"></i>
+            <i class="fa-regular fa-star"></i>
+          </span>
+        </div>
+        <% if(p.stock === 0){ %>
+          <span class="text-danger fw-bold mb-3 d-block" style="font-size: 12px;">Out of Stock</span>
+        <% } %>
+        <div class="d-flex gap-2 mt-auto">
+          <button class="btn btn-sm w-50 fw-bold add-to-cart-btn"
+            data-id="<%= p._id %>"
+            style="border: 1px solid #c98a2c; color: #b76e10; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px; padding: 8px 0; background: transparent; transition: all 0.2s;">
+            ADD TO CART
+          </button>
+          <a href="/user/product/<%= p._id %>"
+            class="btn btn-sm w-50 fw-bold d-flex justify-content-center align-items-center"
+            style="background-color: #b76e10; color: #000000; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px;text-decoration: none; border: none; padding: 8px 0; transition: background 0.2s;">
+            BUY NOW
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <% }) %>
+<% } else { %>
+  <div class="col-12 text-center py-5">
+      <i class="fa-solid fa-magnifying-glass mb-3 text-muted" style="font-size: 48px;"></i>
+      <h5 class="text-muted">No products found for this selection</h5>
+      <p class="text-muted small">Try adjusting your filters or search criteria.</p>
+  </div>
+<% } %>

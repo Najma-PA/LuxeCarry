@@ -30,7 +30,7 @@
         <form method="GET" class="search-bar-wrapper position-relative">
           <i class="fa-solid fa-magnifying-glass" style="color: #94a3b8; font-size: 14px;"></i>
           <input type="hidden" name="status" value="<%= typeof status !== 'undefined' ? status : 'active' %>">
-          <input type="text" name="search" value="<%= search || '' %>" placeholder="Search" class="ms-2 pe-4" onchange="this.form.submit()">
+          <input type="text" name="search" id="adminSearchInput" value="<%= search || '' %>" placeholder="Search" class="ms-2 pe-4">
           <% if (search) { %>
             <a href="/admin/categories?status=<%= typeof status !== 'undefined' ? status : 'active' %>" class="position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); color: #dc2626; text-decoration: none;" title="Clear Search">
               <i class="fa-solid fa-circle-xmark fs-6"></i>
@@ -53,8 +53,8 @@
       <!-- Tabs -->
       <div class="d-flex justify-content-between align-items-center px-4 pt-3 pb-0 border-bottom" style="border-color: #f1f5f9 !important;">
         <div class="tab-nav d-flex gap-4">
-          <a href="?status=active&search=<%= search %>" class="pb-2 text-decoration-none <%= currentStatus === 'active' ? 'active-tab' : 'text-muted' %>" style="<%= currentStatus === 'active' ? 'border-bottom: 2px solid #c26a00; color: #c26a00 !important; font-weight: 600;' : '' %>">Active Categories</a>
-          <a href="?status=archived&search=<%= search %>" class="pb-2 text-decoration-none <%= currentStatus === 'archived' ? 'active-tab' : 'text-muted' %>" style="<%= currentStatus === 'archived' ? 'border-bottom: 2px solid #c26a00; color: #c26a00 !important; font-weight: 600;' : '' %>">Archived</a>
+          <a href="?status=active" class="tab-link pb-2 text-decoration-none <%= currentStatus === 'active' ? 'active-tab' : 'text-muted' %>" data-status="active" style="<%= currentStatus === 'active' ? 'border-bottom: 2px solid #c26a00; color: #c26a00 !important; font-weight: 600;' : '' %>">Active Categories</a>
+          <a href="?status=archived" class="tab-link pb-2 text-decoration-none <%= currentStatus === 'archived' ? 'active-tab' : 'text-muted' %>" data-status="archived" style="<%= currentStatus === 'archived' ? 'border-bottom: 2px solid #c26a00; color: #c26a00 !important; font-weight: 600;' : '' %>">Archived</a>
         </div>
       </div>
 
@@ -68,63 +68,23 @@
             <th>ACTIONS</th>
           </tr>
         </thead>
-        <tbody>
-          <% if(categories && categories.length > 0) { %>
-            <% categories.forEach(cat => { %>
-              <tr id="row-<%= cat._id %>">
-                <td><span class="fw-bold" style="color: #1e293b;"><%= cat.name %></span></td>
-                <td><span style="color: #475569; font-weight: 500;"><%= cat.offer || 0 %>%</span></td>
-                <td><span style="color: #475569;"><%= cat.productCount || 0 %></span></td>
-                <td>
-                  <span id="badge-<%= cat._id %>" class="pill-badge <%= cat.isActive ? 'status-active' : 'status-inactive' %> px-3 py-1">
-                    <%= cat.isActive ? 'Active' : 'Inactive' %>
-                  </span>
-                </td>
-                <td>
-                  <% if (currentStatus !== 'archived') { %>
-                    <a href="/admin/categories/edit/<%= cat._id %>" class="btn-action" title="Edit">
-                      <i class="fa-solid fa-pen" style="font-size: 14px;"></i>
-                    </a>
-                    <span id="toggle-container-<%= cat._id %>">
-                      <% if (cat.isActive) { %>
-                        <button onclick="toggleStatus('<%= cat._id %>', 'unlist')" class="btn-action" title="Unlist">
-                          <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
-                        </button>
-                      <% } else { %>
-                        <button onclick="toggleStatus('<%= cat._id %>', 'list')" class="btn-action" title="List">
-                          <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
-                        </button>
-                      <% } %>
-                    </span>
-                    <button onclick="deleteCategory('<%= cat._id %>')" class="btn-action" title="Delete">
-                      <i class="fa-solid fa-trash" style="font-size: 14px; color: #64748b;"></i>
-                    </button>
-                  <% } else { %>
-                    <button onclick="restoreCategory('<%= cat._id %>')" class="btn-action" title="Restore" style="color: #16a34a;">
-                      <i class="fa-solid fa-trash-arrow-up" style="font-size: 14px;"></i> Restore
-                    </button>
-                  <% } %>
-                </td>
-              </tr>
-            <% }) %>
-          <% } else { %>
-            <tr><td colspan="5" class="text-center py-5 text-muted">No categories found.</td></tr>
-          <% } %>
+        <tbody id="category-table-body">
+          <%- include('../partials/admin/category-table') %>
         </tbody>
       </table>
 
       <!-- Pagination -->
-      <div class="pagination-wrapper">
+      <div class="pagination-wrapper" id="pagination-container">
         <% if(currentPage > 1) { %>
-          <a href="?page=<%= currentPage - 1 %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn"><i class="fa-solid fa-chevron-left" style="font-size: 12px;"></i></a>
+          <a href="?page=<%= currentPage - 1 %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn pagination-link" data-page="<%= currentPage - 1 %>"><i class="fa-solid fa-chevron-left" style="font-size: 12px;"></i></a>
         <% } %>
         
         <% for(let i=1; i<=totalPages; i++){ %>
-          <a href="?page=<%= i %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn <%= currentPage === i ? 'active' : '' %>"><%= i %></a>
+          <a href="?page=<%= i %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn pagination-link <%= currentPage === i ? 'active' : '' %>" data-page="<%= i %>"><%= i %></a>
         <% } %>
 
         <% if(currentPage < totalPages) { %>
-          <a href="?page=<%= currentPage + 1 %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn"><i class="fa-solid fa-chevron-right" style="font-size: 12px;"></i></a>
+          <a href="?page=<%= currentPage + 1 %>&search=<%= search %>&status=<%= currentStatus %>" class="page-btn pagination-link" data-page="<%= currentPage + 1 %>"><i class="fa-solid fa-chevron-right" style="font-size: 12px;"></i></a>
         <% } %>
       </div>
 
@@ -137,164 +97,119 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-function toggleStatus(id, action) {
-  const isUnlisting = action === 'unlist';
-  Swal.fire({
-    title: isUnlisting ? 'Unlist Category?' : 'List Category?',
-    text: isUnlisting 
-      ? "Unlisting this category will hide it and its products from customers." 
-      : "Listing this category will make it and its products visible to customers.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: isUnlisting ? '#dc2626' : '#16a34a',
-    cancelButtonColor: '#64748b',
-    confirmButtonText: isUnlisting ? 'Yes, unlist it!' : 'Yes, list it!'
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        console.log('Toggling status for ID:', id);
-        const res = await fetch(`/admin/categories/toggle/${id}`, {
-          method: 'PATCH'
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('adminSearchInput');
+    const tableBody = document.getElementById('category-table-body');
+    const paginationContainer = document.getElementById('pagination-container');
+    const tabLinks = document.querySelectorAll('.tab-link');
+
+    if (searchInput) {
+        let timeout = null;
+        searchInput.addEventListener('input', () => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => updateTable(), 500);
         });
+    }
 
-        if (!res.ok) {
-          const contentType = res.headers.get('content-type');
-          if (contentType && contentType.includes('application/json')) {
-            const errorData = await res.json();
-            throw new Error(errorData.message || `Server returned ${res.status}`);
-          } else {
-            const errorText = await res.text();
-            console.error('Non-JSON Error Response:', errorText);
-            throw new Error(`Server returned ${res.status}`);
-          }
-        }
+    if (tabLinks) {
+        tabLinks.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                e.preventDefault();
+                const status = tab.dataset.status;
+                tabLinks.forEach(t => {
+                    t.classList.remove('active-tab');
+                    t.style.borderBottom = 'none';
+                    t.style.color = '#64748b';
+                });
+                tab.classList.add('active-tab');
+                tab.style.borderBottom = '2px solid #c26a00';
+                tab.style.color = '#c26a00';
+                updateTable(1, status);
+            });
+        });
+    }
 
-        const data = await res.json();
-        if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: isUnlisting ? 'Unlisted!' : 'Listed!',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
-          });
-          
-          // Update Badge
-          const badge = document.getElementById(`badge-${id}`);
-          if (badge) {
-            badge.className = `pill-badge ${isUnlisting ? 'status-inactive' : 'status-active'} px-3 py-1`;
-            badge.innerText = isUnlisting ? 'Inactive' : 'Active';
-          }
-
-          // Update Toggle Button
-          const container = document.getElementById(`toggle-container-${id}`);
-          if (container) {
-            if (isUnlisting) {
-              container.innerHTML = `
-                <button onclick="toggleStatus('${id}', 'list')" class="btn-action" title="List">
-                  <i class="fa-solid fa-eye" style="font-size: 14px; color: #16a34a;"></i>
-                </button>`;
-            } else {
-              container.innerHTML = `
-                <button onclick="toggleStatus('${id}', 'unlist')" class="btn-action" title="Unlist">
-                  <i class="fa-solid fa-eye-slash" style="font-size: 14px; color: #dc2626;"></i>
-                </button>`;
+    if (paginationContainer) {
+        paginationContainer.addEventListener('click', (e) => {
+            const link = e.target.closest('.pagination-link');
+            if (link) {
+                e.preventDefault();
+                updateTable(link.dataset.page);
             }
-          }
-        } else {
-          Swal.fire('Error', data.message || 'Action failed', 'error');
-        }
-      } catch (err) {
-        console.error('Toggle Status Error:', err);
-        Swal.fire('Error', err.message || 'Something went wrong', 'error');
-      }
-    }
-  });
-}
-
-async function deleteCategory(id) {
-  Swal.fire({
-    title: 'Archive Category?',
-    text: "This category will be moved to the archived list.",
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonColor: '#dc2626',
-    cancelButtonColor: '#64748b',
-    confirmButtonText: 'Yes, archive it!'
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        const res = await fetch(`/admin/categories/${id}`, {
-          method: 'DELETE'
         });
-        const data = await res.json();
-        if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Archived!',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
-          });
-          const row = document.getElementById(`row-${id}`);
-          if (row) row.remove();
-
-          // Check if table is empty
-          const tbody = document.querySelector('table tbody');
-          if (tbody.children.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No categories found.</td></tr>';
-          }
-        } else {
-          Swal.fire('Error', data.message || 'Action failed', 'error');
-        }
-      } catch (err) {
-        Swal.fire('Error', 'Something went wrong', 'error');
-      }
     }
-  });
-}
 
-async function restoreCategory(id) {
-  Swal.fire({
-    title: 'Restore Category?',
-    text: "This category will be moved back to the active list.",
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonColor: '#16a34a',
-    cancelButtonColor: '#64748b',
-    confirmButtonText: 'Yes, restore it!'
-  }).then(async (result) => {
-    if (result.isConfirmed) {
-      try {
-        const res = await fetch(`/admin/categories/restore/${id}`, {
-          method: 'PATCH'
+    async function updateTable(page = 1, forceStatus = null) {
+        if (!tableBody) return;
+        const url = new URL(window.location.href);
+        if (searchInput) url.searchParams.set('search', searchInput.value);
+        if (forceStatus) url.searchParams.set('status', forceStatus);
+        url.searchParams.set('page', page);
+
+        tableBody.style.opacity = '0.5';
+        try {
+            const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } });
+            const data = await res.json();
+            if (data.success) {
+                tableBody.innerHTML = data.tableHtml;
+                if (paginationContainer) paginationContainer.innerHTML = data.paginationHtml;
+                window.history.pushState({ path: url.toString() }, '', url.toString());
+            }
+        } catch (err) {
+            console.error('Table update failed:', err);
+        } finally {
+            tableBody.style.opacity = '1';
+        }
+    }
+
+    window.toggleStatus = async function(id) {
+        try {
+            const res = await fetch(`/admin/categories/toggle/${id}`, { method: 'PATCH' });
+            const data = await res.json();
+            if (data?.success) {
+                updateTable();
+                Swal.fire({ icon: 'success', title: 'Visibility updated', timer: 1500, showConfirmButton: false });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Action failed' });
+        }
+    };
+
+    window.deleteCategory = async function(id) {
+        const result = await Swal.fire({
+            title: 'Archive this category?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#c26a00',
+            cancelButtonColor: '#64748b'
         });
-        const data = await res.json();
-        if (data.success) {
-          Swal.fire({
-            icon: 'success',
-            title: 'Restored!',
-            text: data.message,
-            timer: 1500,
-            showConfirmButton: false
-          });
-          const row = document.getElementById(`row-${id}`);
-          if (row) row.remove();
-
-          // Check if table is empty
-          const tbody = document.querySelector('table tbody');
-          if (tbody.children.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">No categories found.</td></tr>';
-          }
-        } else {
-          Swal.fire('Error', data.message || 'Action failed', 'error');
+        if (result.isConfirmed) {
+            try {
+                const res = await fetch(`/admin/categories/${id}`, { method: 'DELETE' });
+                const data = await res.json();
+                if (data?.success) {
+                    document.getElementById(`row-${id}`)?.remove();
+                    Swal.fire({ icon: 'success', title: 'Category archived', timer: 1500, showConfirmButton: false });
+                }
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Action failed' });
+            }
         }
-      } catch (err) {
-        Swal.fire('Error', 'Something went wrong', 'error');
-      }
-    }
-  });
-}
+    };
+
+    window.restoreCategory = async function(id) {
+        try {
+            const res = await fetch(`/admin/categories/restore/${id}`, { method: 'PATCH' });
+            const data = await res.json();
+            if (data?.success) {
+                document.getElementById(`row-${id}`)?.remove();
+                Swal.fire({ icon: 'success', title: 'Category restored', timer: 1500, showConfirmButton: false });
+            }
+        } catch (err) {
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Action failed' });
+        }
+    };
+});
 </script>
 
 </body>

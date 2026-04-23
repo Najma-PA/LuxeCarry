@@ -1,0 +1,32 @@
+<% users.forEach(user => { %>
+  <tr id="row-<%= user._id %>">
+    <td>
+      <div class="d-flex align-items-center gap-2">
+        <div>
+          <strong><%= user.name %></strong><br>
+          <small class="text-muted">ID: <%= user._id %></small>
+        </div>
+      </div>
+    </td>
+    <td><%= user.email %></td>
+    <td><%= user.ordersCount || 0 %></td>
+    <td><%= new Date(user.createdAt).toDateString() %></td>
+    <td id="status-cell-<%= user._id %>">
+      <% if(user.isBlocked){ %>
+        <span class="pill-badge status-inactive">Inactive</span>
+      <% } else { %>
+        <span class="pill-badge status-active">Active</span>
+      <% } %>
+    </td>
+    <td>
+      <button class="btn-pill <%= user.isBlocked ? 'btn-unblock-pill' : 'btn-block-pill' %>"
+        id="toggle-btn-<%= user._id %>"
+        onclick="toggleUser('<%= user._id %>')">
+        <%= user.isBlocked ? "Unblock" : "Block" %>
+      </button>
+    </td>
+  </tr>
+<% }) %>
+<% if(users.length === 0) { %>
+  <tr><td colspan="6" class="text-center py-4 text-muted">No users found.</td></tr>
+<% } %>
