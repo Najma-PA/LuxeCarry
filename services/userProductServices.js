@@ -16,8 +16,13 @@ exports.getShopProducts = async (query) => {
   const limit = 6;
   const skip = (page - 1) * limit;
 
+  const Category = require('../models/categoryModel');
+  const activeCategories = await Category.find({ isActive: true, isDeleted: { $ne: true } }).select('_id');
+  const activeCategoryIds = activeCategories.map(c => c._id);
+
   let filter = {
-    isActive: true //hide blocked products
+    isActive: true,
+    category: { $in: activeCategoryIds }
   };
 
   // 🔍 SEARCH
@@ -26,8 +31,11 @@ exports.getShopProducts = async (query) => {
   }
 
   //CATEGORY
-  if (category) {
+  if (category && activeCategoryIds.some(id => id.toString() === category)) {
     filter.category = category;
+  } else if (category) {
+    // If category is provided but not in active list, show no products
+    filter.category = null;
   }
 
   //PRICE

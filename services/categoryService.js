@@ -21,8 +21,6 @@ exports.getCategories = async (query) => {
     filter.isActive = true;
   }
 
-  console.log('Category Service - Final Filter:', JSON.stringify(filter, null, 2));
-
   const categoriesQuery = await Category.aggregate([
     { $match: filter },
     { $sort: { createdAt: -1 } },

@@ -41,7 +41,7 @@ exports.getProducts = async (query) => {
     filter.isActive = false;
   } else if (status === 'low') {
     filter.isActive = true; // Still want only active ones for low stock
-    filter.stock = { $lt: 10 };
+    filter.stock = { $lt: 5 };
   }
 
   const products = await Product.find(filter)
@@ -52,12 +52,38 @@ exports.getProducts = async (query) => {
 
   const total = await Product.countDocuments(filter);
 
+  // 🔹 DASHBOARD STATS CALCULATION
+  const allActiveProducts = await Product.find({ isActive: true });
+  
+  let totalSKUs = 0;
+  let lowStockCount = 0;
+  let inventoryValue = 0;
+
+  allActiveProducts.forEach(p => {
+    if (p.variants && p.variants.length > 0) {
+      // If product has variants, count each as an SKU
+      totalSKUs += p.variants.length;
+      p.variants.forEach(v => {
+        if (v.stock < 5) lowStockCount++;
+        inventoryValue += (p.price * v.stock);
+      });
+    } else {
+      // Base product as 1 SKU
+      totalSKUs += 1;
+      if (p.stock < 5) lowStockCount++;
+      inventoryValue += (p.price * p.stock);
+    }
+  });
+
   return {
     products,
     currentPage: page,
     totalPages: Math.ceil(total / limit),
     search,
-    status
+    status,
+    totalSKUs,
+    lowStockCount,
+    inventoryValue
   };
 };
 
