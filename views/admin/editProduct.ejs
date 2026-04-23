@@ -344,6 +344,19 @@ function handleFileSelect(event, slot, isVariant = false) {
   const file = event.target.files[0];
   if (!file) return;
 
+  // IMMEDIATE VALIDATION
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid File Type',
+      text: 'Please select a valid image (jpg, jpeg, png, or webp)',
+      confirmButtonColor: '#ca8a04'
+    });
+    event.target.value = ''; // Clear selection
+    return;
+  }
+
   currentSlot = slot;
   const reader = new FileReader();
   reader.onload = (e) => {

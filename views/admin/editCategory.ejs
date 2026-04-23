@@ -127,6 +127,23 @@ document.querySelectorAll('input, textarea').forEach(el => {
   });
 });
 
+// IMMEDIATE IMAGE VALIDATION
+document.getElementById('catImage').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Invalid File Type',
+        text: 'Please select a valid image (jpg, jpeg, png, or webp)',
+        confirmButtonColor: '#000'
+      });
+      this.value = ''; // Clear selection
+    }
+  }
+});
+
 document.getElementById('editCategoryForm').onsubmit = async function(e) {
   e.preventDefault();
 
