@@ -613,7 +613,13 @@ text-align:center;
 
 }
 .custom-navbar {
-  background-color: #f8e8d8; /* change to any color you like */
+  background-color: #f8e8d8; 
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(8px); /* Added blur for a premium glassmorphism effect */
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .filters{
