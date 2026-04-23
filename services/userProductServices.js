@@ -25,7 +25,7 @@ exports.getShopProducts = async (query) => {
     category: { $in: activeCategoryIds }
   };
 
-  // 🔍 SEARCH
+  // SEARCH
   if (search) {
     filter.name = { $regex: search, $options: 'i' };
   }

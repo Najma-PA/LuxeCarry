@@ -52,7 +52,7 @@ exports.getProducts = async (query) => {
 
   const total = await Product.countDocuments(filter);
 
-  // 🔹 DASHBOARD STATS CALCULATION
+  // DASHBOARD STATS CALCULATION
   const allActiveProducts = await Product.find({ isActive: true });
   
   let totalSKUs = 0;
