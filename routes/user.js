@@ -54,7 +54,7 @@ router.get('/home', userController.userHome);
 router.get('/shop', userProductController.loadShop);
 
 // Product Details
-router.get('/product/:id', userProductController.loadProductDetails);
+router.get('/product/:id',userProductController.loadProductDetails);
 
 // Wishlist
 router.get('/wishlist', isUserAuth, wishlistController.showWishlist);
