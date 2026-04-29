@@ -30,6 +30,7 @@ app.use(express.json());
 
 // app.use(noCache);
 
+app.use('/admin', adminSession);
 /* USER SESSION (GLOBAL for passport) */
 app.use(userSession);
 
@@ -41,9 +42,9 @@ const cartService = require('./services/cartService');
 /* GLOBAL LOCALS */
 app.use(async (req, res, next) => {
   try {
-    const user = req.user || (req.session && req.session.user ? req.session.user : null);
+    const user = req.user || (req.session?.user || null);
     res.locals.user = user;
-    res.locals.admin = req.session && req.session.admin ? req.session.admin : null;
+    res.locals.admin =req.session?.admin || null;
     
     // Support both Passport (_id) and Custom Session (id)
     const userId = user ? (user._id || user.id) : null;
@@ -56,10 +57,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-/* ADMIN SESSION (separate) */
-app.use('/admin', adminSession, adminRoutes);
-
-/* USER ROUTES */
+app.use('/admin', adminRoutes);
 app.use('/user', noCache, userRoutes);
 
 /* ROOT */
