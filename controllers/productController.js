@@ -15,9 +15,16 @@ exports.getProducts = async (req, res) => {
         });
       });
 
+      const paginationHtml = await new Promise((resolve, reject) => {
+        res.render('partials/admin/pagination', { ...data }, (err, html) => {
+          if (err) reject(err); else resolve(html);
+        });
+      });
+
       return res.json({
         success: true,
         tableHtml,
+        paginationHtml,
         currentPage: data.currentPage,
         totalPages: data.totalPages
       });
@@ -58,6 +65,7 @@ exports.addProduct = async (req, res) => {
 
     if (req.body.variantType) {
       variants = req.body.variantType.map((type, i) => ({
+        //_id:new 
         type,
         value: req.body.variantValue[i],
         stock: req.body.variantStock[i]
@@ -70,7 +78,7 @@ exports.addProduct = async (req, res) => {
   } catch (err) {
     console.error(err);
     if (err.isValidationError) {
-      return res.status(400).json({ success: false, errors: err.errors });
+      return res.json({ success: false, errors: err.errors });
     }
     res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
   }
@@ -109,11 +117,18 @@ exports.updateProduct = async (req, res) => {
     let variants = [];
 
     if (req.body.variantType) {
-      variants = req.body.variantType.map((type, i) => ({
-        type,
-        value: req.body.variantValue[i],
-        stock: req.body.variantStock[i]
-      }));
+      variants = req.body.variantType.map((type, i) => {
+        const variantObj = {
+          type,
+          value: req.body.variantValue[i],
+          stock: req.body.variantStock[i]
+        };
+        // Preserve existing _id so it doesn't get orphaned in user carts
+        if (req.body.variantId && req.body.variantId[i]) {
+          variantObj._id = req.body.variantId[i];
+        }
+        return variantObj;
+      });
     }
 
     await productService.updateProduct(

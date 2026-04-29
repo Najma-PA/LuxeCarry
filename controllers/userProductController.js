@@ -70,6 +70,7 @@ exports.loadShop = async (req, res) => {
 // LOAD PRODUCT DETAILS PAGE
 exports.loadProductDetails = async (req, res) => {
   try {
+    
     const product = await Product.findById(req.params.id).populate('category');
 
     if (!product || !product.isActive || !product.category || !product.category.isActive || product.category.isDeleted) {
@@ -81,7 +82,7 @@ exports.loadProductDetails = async (req, res) => {
       _id: { $ne: product._id },
       isActive: true
     }).limit(4);
-
+ 
     res.render('user/product', {
       product,
       relatedProducts

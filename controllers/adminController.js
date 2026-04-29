@@ -61,12 +61,12 @@ exports.adminLogin = async (req, res) => {
   }
 };
 
+
+
 exports.adminLogout = (req, res) => {
-  req.session.destroy(err => {
-    if (err) return res.redirect('/admin/dashboard');
-    res.clearCookie('admin_session');
-    res.redirect('/admin/login');
-  });
+ req.session.admin= null;
+ res.clearCookie('admin_session');
+ res.redirect('/admin/login');
 };
 
 /*DASHBOARD*/

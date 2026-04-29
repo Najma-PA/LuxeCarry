@@ -15,13 +15,9 @@ exports.getCheckoutPage = async (req, res) => {
             return res.redirect('/user/cart');
         }
 
-        // Check for out of stock items
-        const hasOutOfStock = cart.items.some(item => {
-            const stock = item.variantDetail ? item.variantDetail.stock : (item.product ? item.product.stock : 0);
-            return stock === 0;
-        });
-
-        if (hasOutOfStock) {
+        // Check for out of stock or insufficient stock items
+        const validation = await cartService.validateCart(userId);
+        if (!validation.success) {
             return res.redirect('/user/cart');
         }
 

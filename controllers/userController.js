@@ -680,8 +680,26 @@ exports.deleteAddress = async (req, res) => {
 
 
 //LOGOUT
+/*exports.userLogout = (req, res) => {
+  req.session.user= null;
+  req.logout(()=>{
+    res.clearCookie('user_session');
+    res.redirect('/');
+
+  })
+
+}; 
+*/
 exports.userLogout = (req, res) => {
-  req.session.destroy(() => { 
+  req.logout((err) => {
+    if (err) {
+      console.error(err);
+      return res.redirect('/');
+    }
+
+    req.session.user = null; 
+
+    res.clearCookie('user_session');
     res.redirect('/');
   });
-}; 
+};
