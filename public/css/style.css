@@ -388,7 +388,15 @@ font-size:13px;
     transform: translateY(-2px);
 }
 
-.btn-checkout-premium:disabled {
+.btn-checkout-premium:disabled,
+.btn-checkout-premium.disabled {
+    background: #e5e7eb !important;
+    color: #9ca3af !important;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+/*.btn-checkout-premium:disabled {
     background: #eee;
     color: #999;
     transform: none;
@@ -414,7 +422,7 @@ font-size:13px;
   cursor: not-allowed;
 }
 
-
+*/
 
 /* offer */
 
@@ -685,13 +693,7 @@ text-align:center;
             --text-dark: #1a1a1a;
             --text-muted: #718096;
         }
-/*
-        body {
-            background-color: var(--bg-neutral);
-            font-family: 'Inter', sans-serif;
-            color: var(--text-dark);
-        }
-*/
+
         .heading-serif {
             font-family: 'Playfair Display', serif;
         }
@@ -892,3 +894,33 @@ text-align:center;
             font-weight: 600;
             transition: 0.3s;
         }
+
+
+
+  /* DISABLED BUTTON STYLE*/
+.btn:disabled,
+.btn.disabled,
+.cart-action-btn:disabled {
+  color: #9ca3af !important; 
+  cursor: not-allowed !important;
+  opacity: 1 !important; 
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* Remove hover effects */
+.btn:disabled:hover,
+.cart-action-btn:disabled:hover {
+  background-color: #e5e7eb !important;
+  transform: none !important;
+}      
+
+.qty-pill button:disabled,
+.qty-pill button.disabled {
+  color: #cbd5e1 !important;
+  cursor: not-allowed;
+}
+
+.qty-pill button:disabled:hover {
+  background: transparent !important;
+}
