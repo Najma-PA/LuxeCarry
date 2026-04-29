@@ -1,166 +1,192 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Users</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Category</title>
 
-<link rel="stylesheet"href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-<link rel="stylesheet" href="/css/admin.css">
-
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/admin.css">
 </head>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <body>
-  <div class="main-content p-4">
 
-  <h4 class="fw-bold mb-3">Add Category</h4>
+<div class="d-flex">
 
-  <div class="card p-4">
+  <!-- Sidebar -->
+  <%- include('../partials/admin/sidebar', { active: 'categories' }) %>
 
-    <form id="addCategoryForm" enctype="multipart/form-data">
+  <!-- MAIN -->
+  <div class="flex-grow-1 main-content p-4">
 
-      <div class="mb-3">
-        <label class="form-label">Category Name</label>
-        <input type="text" name="name" class="form-control" id="catName">
-        <div id="nameError" class="text-danger small mt-1 d-none"></div>
-      </div>
+    <!-- Header -->
+    <div class="d-flex align-items-center mb-4">
+      <a href="/admin/categories" class="me-2 text-dark">
+        <i class="fa-solid fa-arrow-left"></i>
+      </a>
+      <h5 class="fw-bold m-0">Add Category</h5>
+    </div>
 
-      <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea name="description" class="form-control" id="catDesc"></textarea>
-      </div>
+    <!-- CARD -->
+    <div class="category-card">
 
-      <div class="mb-3">
-        <label class="form-label">Offer (%)</label>
-        <input type="number" name="offer" class="form-control" id="catOffer" min="0" max="99">
-        <div id="offerError" class="text-danger small mt-1 d-none"></div>
-      </div>
+      <h6 class="fw-bold">Category Information</h6>
+      <p class="text-muted small mb-4">
+        Provide the details for your product category.
+      </p>
 
-      <div class="mb-3">
-        <label class="form-label">Category Image</label>
-        <input type="file" name="image" class="form-control" accept="image/*" id="catImage">
-      </div>
+      <form id="addCategoryForm" enctype="multipart/form-data">
 
-      <button type="submit" class="btn btn-gold text-white w-100" id="submitBtn">
-        <span id="btnText">Save Category</span>
-        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
-      </button>
+        <!-- Name -->
+        <div class="mb-3">
+          <label class="form-label-custom">Category Name</label>
+          <input type="text" name="name" class="form-control-custom" id="catName">
+          <div id="nameError" class="text-danger small mt-1 d-none"></div>
+        </div>
 
-    </form>
+        <!-- Description -->
+        <div class="mb-3">
+          <label class="form-label-custom">Description</label>
+          <textarea name="description" class="form-control-custom" rows="4" id="catDesc"></textarea>
+        </div>
+
+        <!-- Upload -->
+        <div class="mb-3">
+          <label class="form-label-custom">Category Image</label>
+
+          <div class="upload-area" onclick="this.querySelector('input').click()">
+
+            <div class="text-center" id="uploadPlaceholder">
+              <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+              <p class="mb-1">Click to upload or drag and drop</p>
+              <small class="text-muted">PNG, JPG (Max. 2MB)</small>
+            </div>
+
+            <input type="file" name="image" hidden id="catImage">
+
+          </div>
+
+          <!-- Preview -->
+          <div class="mt-2 d-none" id="previewContainer">
+            <img id="previewImg" class="preview-img">
+          </div>
+        </div>
+
+        <!-- Offer -->
+        <div class="mb-4">
+          <label class="form-label-custom">Category Offer (%)</label>
+          <input type="number" name="offer" class="form-control-custom" id="catOffer">
+          <div id="offerError" class="text-danger small mt-1 d-none"></div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-end gap-2">
+          <a href="/admin/categories" class="btn btn-light">Cancel</a>
+          <button type="submit" class="btn-primary-custom" id="submitBtn">
+            <span id="btnText">💾 Save Category</span>
+            <span id="btnSpinner" class="spinner-border spinner-border-sm d-none"></span>
+          </button>
+        </div>
+
+      </form>
+
+    </div>
 
   </div>
+
 </div>
-  
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
 
 <script>
-// Helper to show error
+// Error helpers
 function setFieldError(id, msg) {
-  const errEl = document.getElementById(id);
-  if (errEl) {
-    errEl.innerText = msg;
-    errEl.classList.remove('d-none');
+  const el = document.getElementById(id);
+  if (el) {
+    el.innerText = msg;
+    el.classList.remove('d-none');
   }
 }
 
-// Helper to clear error
 function clearFieldError(id) {
-  const errEl = document.getElementById(id);
-  if (errEl) {
-    errEl.classList.add('d-none');
-  }
+  const el = document.getElementById(id);
+  if (el) el.classList.add('d-none');
 }
 
-// Attach listeners to clear errors on input
+// Clear errors
 document.querySelectorAll('input, textarea').forEach(el => {
   el.addEventListener('input', () => {
-    const errorId = el.id === 'catName' ? 'nameError' : (el.id === 'catOffer' ? 'offerError' : '');
-    if (errorId) clearFieldError(errorId);
+    if (el.id === 'catName') clearFieldError('nameError');
+    if (el.id === 'catOffer') clearFieldError('offerError');
   });
 });
 
-// IMMEDIATE IMAGE VALIDATION
+// Image preview
 document.getElementById('catImage').addEventListener('change', function(e) {
   const file = e.target.files[0];
-  if (file) {
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Invalid File Type',
-        text: 'Please select a valid image (jpg, jpeg, png, or webp)',
-        confirmButtonColor: '#ca8a04'
-      });
-      this.value = ''; // Clear selection
-    }
+  if (!file) return;
+
+  const allowedTypes = ['image/jpeg','image/jpg','image/png','image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    Swal.fire('Error','Invalid image format','error');
+    this.value = '';
+    return;
   }
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('previewImg').src = ev.target.result;
+    document.getElementById('previewContainer').classList.remove('d-none');
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
 });
 
+// Submit
 document.getElementById('addCategoryForm').onsubmit = async function(e) {
   e.preventDefault();
 
-  // Reset errors
   clearFieldError('nameError');
   clearFieldError('offerError');
 
-  // Show loading
-  const btnText = document.getElementById('btnText');
-  const btnSpinner = document.getElementById('btnSpinner');
-  const submitBtn = document.getElementById('submitBtn');
-  
-  submitBtn.disabled = true;
-  btnText.classList.add('d-none');
-  btnSpinner.classList.remove('d-none');
+  const btn = document.getElementById('submitBtn');
+  const text = document.getElementById('btnText');
+  const spinner = document.getElementById('btnSpinner');
+
+  btn.disabled = true;
+  text.classList.add('d-none');
+  spinner.classList.remove('d-none');
 
   const formData = new FormData(this);
 
   try {
-    const response = await fetch('/admin/categories/add', {
+    const res = await fetch('/admin/categories/add', {
       method: 'POST',
       body: formData
     });
 
-    const result = await response.json();
+    const result = await res.json();
 
     if (result.success) {
-      Swal.fire({
-        icon: 'success',
-        title: 'Success!',
-        text: result.message,
-        confirmButtonColor: '#ca8a04'
-      }).then(() => {
-        window.location.href = result.redirectUrl || '/admin/categories';
-      });
+      Swal.fire('Success', result.message, 'success')
+        .then(() => window.location.href = '/admin/categories');
     } else {
       if (result.errors) {
-        // Backend returned field-specific errors
         if (result.errors.name) setFieldError('nameError', result.errors.name);
         if (result.errors.offer) setFieldError('offerError', result.errors.offer);
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Oops...',
-          text: result.message || 'Something went wrong',
-          confirmButtonColor: '#ca8a04'
-        });
+        Swal.fire('Error', result.message, 'error');
       }
     }
+
   } catch (err) {
-    console.error(err);
-    Swal.fire({
-      icon: 'error',
-      title: 'Error',
-      text: 'Server communication failed',
-      confirmButtonColor: '#ca8a04'
-    });
+    Swal.fire('Error','Server error','error');
   } finally {
-    submitBtn.disabled = false;
-    btnText.classList.remove('d-none');
-    btnSpinner.classList.add('d-none');
+    btn.disabled = false;
+    text.classList.remove('d-none');
+    spinner.classList.add('d-none');
   }
 };
 </script>

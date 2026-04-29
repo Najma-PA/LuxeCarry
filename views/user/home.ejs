@@ -146,7 +146,7 @@ Explore our premium collection of bags and accessories
     <div class="mt-auto d-flex gap-2">
         <button class="btn btn-dark w-50 rounded-pill py-1 add-to-cart-btn" style="font-size: 11px; font-weight: 600; 
         background-color: #1a1a1a; border: none; letter-spacing: 0.3px;" data-id="<%= p._id %>">
-            Add to Cart
+            View
         </button>
         <a href="/user/product/<%= p._id %>" class="btn w-50 rounded-pill py-1" style="font-size: 11px; 
           font-weight: 600; background: transparent; color: #c26a00; border: 1px solid #dfc3a3; text-decoration: none; 
@@ -213,7 +213,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const addToCartBtn = e.target.closest('.add-to-cart-btn');
         if (addToCartBtn) {
-            handleAddToCart(addToCartBtn.dataset.id);
+            const productId =addToCartBtn.dataset.id;
+            window.location.href =`/user/product/${productId}`;
+            
         }
     });
 
@@ -236,22 +238,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon.classList.replace('fas', 'far');
                     icon.style.color = '#a0aec0';
                 }
-            }
-        } catch (err) { console.error(err); }
-    }
-
-    async function handleAddToCart(productId) {
-        try {
-            const res = await fetch('/user/cart/add/' + productId, {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (res.status === 401) { window.location.href = '/user/login'; return; }
-            const data = await res.json();
-            if (data.success) {
-                showToast('Added to cart!');
-                updateCartBadge(data.cartCount);
-            } else {
-                showToast(data.message || 'Out of stock', 'error');
             }
         } catch (err) { console.error(err); }
     }

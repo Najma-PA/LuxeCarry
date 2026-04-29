@@ -99,23 +99,6 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
     <% } %>
   </div>
 
-  <!-- RATING 
-  <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Rating</h6>
-  <div class="mb-4">
-    <div class="form-check mb-2 d-flex align-items-center">
-      <input class="form-check-input mt-0"
-        type="radio"
-        name="rating"
-        id="rating4"
-        value="4"
-        <%= query.rating == '4' ? 'checked' : '' %>
-        style="width: 18px; height: 18px; border: 1px solid #d1d5db; box-shadow: none; cursor: pointer; accent-color: #c98a2c; margin-right: 8px;">
-      <label class="form-check-label pt-1" for="rating4" style="color: #798b9e; font-size: 14px; cursor: pointer;">
-         <span style="color: #c98a2c; font-size: 14px;"><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i><i class="fa-regular fa-star"></i></span> & Up
-      </label>
-    </div>
-  </div>
--->
   <!-- SORT -->
   <h6 class="mb-3 text-uppercase fw-bold text-muted" style="font-size: 12px; letter-spacing: 1.5px; color: #798b9e !important;">Sort</h6>
   <select name="sort" class="form-select mb-4" style="border-radius: 8px; border: 1px solid #e5e7eb; padding: 10px; font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); color: #374151;">
@@ -223,7 +206,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const addToCartBtn = e.target.closest('.add-to-cart-btn');
         if (addToCartBtn) {
-            handleAddToCart(addToCartBtn.dataset.id);
+           const productId =addToCartBtn.dataset.id;
+           window.location.href = `/user/product/${productId}`;
         }
     });
 
@@ -246,22 +230,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     icon.classList.replace('fa-solid', 'fa-regular');
                     icon.style.color = '#6b7280';
                 }
-            }
-        } catch (err) { console.error(err); }
-    }
-
-    async function handleAddToCart(productId) {
-        try {
-            const res = await fetch('/user/cart/add/' + productId, {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (res.status === 401) { window.location.href = '/user/login'; return; }
-            const data = await res.json();
-            if (data.success) {
-                showToast('Added to cart!');
-                updateCartBadge(data.cartCount);
-            } else {
-                showToast(data.message || 'Out of stock', 'error');
             }
         } catch (err) { console.error(err); }
     }

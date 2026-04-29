@@ -8,7 +8,7 @@
               data-id="<%= p._id %>">
           <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
         </span>
-        <img src="<%= p.images[0] %>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
+        <img src="<%= p.images[0]  || p.variants?.[0]?.images?.[0] ||'images/placeholder.jpg'%>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
       </a>
       <div class="card-body p-4 d-flex flex-column">
         <div class="d-flex align-items-center mb-2">
@@ -46,7 +46,7 @@
           <button class="btn btn-sm w-50 fw-bold add-to-cart-btn"
             data-id="<%= p._id %>"
             style="border: 1px solid #c98a2c; color: #b76e10; border-radius: 20px; font-size: 10px; letter-spacing: 0.5px; padding: 8px 0; background: transparent; transition: all 0.2s;">
-            ADD TO CART
+            VIEW
           </button>
           <a href="/user/product/<%= p._id %>"
             class="btn btn-sm w-50 fw-bold d-flex justify-content-center align-items-center"

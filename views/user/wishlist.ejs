@@ -38,10 +38,15 @@
         <div class="row g-4">
             <% wishlist.items.forEach(item => { %>
                 <% if(item.product) { %>
+                    <% 
+                        const isAvailable = item.product.isActive && item.product.category && item.product.category.isActive && !item.product.category.isDeleted;
+                        const linkHref = isAvailable ? `/user/product/${item.product._id}` : 'javascript:void(0)';
+                        const linkClass = isAvailable ? '' : 'unavailable-link';
+                    %>
                     <div class="col-md-6 col-lg-4" id="item-<%= item.product._id %>">
                         <div class="wishlist-card">
                             <div class="img-wrapper">
-                                <a href="/user/product/<%= item.product._id %>">
+                                <a href="<%= linkHref %>" class="<%= linkClass %>" data-id="<%= item.product._id %>">
                                     <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>">
                                 </a>
                                 <div class="remove-icon wishlist-action-btn" data-action="remove" data-id="<%= item.product._id %>">
@@ -54,7 +59,11 @@
                             
                             <div class="card-body p-0">
                                 <span class="brand-label"><%= (item.product.category && typeof item.product.category === 'object' && item.product.category.name) ? item.product.category.name : 'LuxeCarry' %></span>
-                                <h3 class="product-name"><%= item.product.name %></h3>
+                                <h3 class="product-name">
+                                    <a href="<%= linkHref %>" class="text-dark text-decoration-none <%= linkClass %>" data-id="<%= item.product._id %>">
+                                        <%= item.product.name %>
+                                    </a>
+                                </h3>
                                 
                                 <div class="price-section">
                                     <% 
@@ -66,9 +75,11 @@
                                     <% } %>
                                 </div>
 
+                                <div id="wishlist-error-<%= item.product._id %>" class="text-danger mb-3" style="font-size: 12px; font-weight: 600; display: none;"></div>
+
                                 <div class="card-actions">
-                                    <button class="btn-add-cart wishlist-action-btn" data-action="move-to-cart" data-id="<%= item.product._id %>">Add to Cart</button>
-                                    <a href="/user/product/<%= item.product._id %>" class="btn btn-buy-now text-center text-white text-decoration-none">Buy Now</a>
+                                    <button class="btn-add-cart wishlist-action-btn <%= linkClass %>" data-action="move-to-cart" data-id="<%= item.product._id %>">Add to Cart</button>
+                                    <a href="<%= linkHref %>" class="btn btn-buy-now text-center text-white text-decoration-none <%= linkClass %>" data-id="<%= item.product._id %>">Buy Now</a>
                                 </div>
                             </div>
                         </div>
@@ -89,6 +100,20 @@
 document.addEventListener('DOMContentLoaded', () => {
     // Shared functionality for Shop and Wishlist
     document.addEventListener('click', async (e) => {
+        // Handle unavailable links first
+        const unavailableLink = e.target.closest('.unavailable-link');
+        if (unavailableLink) {
+            e.preventDefault();
+            e.stopPropagation();
+            const productId = unavailableLink.dataset.id;
+            const errorBox = document.getElementById(`wishlist-error-${productId}`);
+            if (errorBox) {
+                errorBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> Product is currently unavailable`;
+                errorBox.style.display = 'block';
+            }
+            return;
+        }
+
         // Toggle Wishlist (Shop/Product Page)
         const wishlistToggle = e.target.closest('.wishlist-toggle');
         if (wishlistToggle) {
@@ -191,7 +216,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (result.isConfirmed) window.location.href = '/user/cart';
                 });
             } else {
-                showToast(data.message || 'Error moving to cart', 'error');
+                if (data.message === "Please select a variant" || data.message === "Please select a product option") {
+                    // Redirect to product page so they can choose their size/color
+                    window.location.href = `/user/product/${productId}`;
+                    return;
+                }
+                
+                const errorBox = document.getElementById(`wishlist-error-${productId}`);
+                if (errorBox) {
+                    errorBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${data.message || 'Out of stock'}`;
+                    errorBox.style.display = 'block';
+                } else {
+                    showToast(data.message || 'Error moving to cart', 'error');
+                }
             }
         } catch (err) {
             console.error(err);

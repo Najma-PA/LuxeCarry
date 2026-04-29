@@ -347,34 +347,12 @@
           </div>
         <% } %>
 
-        <!-- Size Selection -->
-        <% if(sizes.length > 0) { %>
-          <div class="variant-section">
-            <span class="variant-label">Size</span>
-            <div class="size-chips">
-              <% sizes.forEach((size, i) => { %>
-                <div class="size-chip <%= i===0 ? 'active' : '' %>" 
-                     data-size="<%= size %>" 
-                     onclick="selectSize(this, '<%= size %>')">
-                  <%= size %>
-                </div>
-              <% }) %>
-            </div>
-          </div>
-        <% } %>
-
         <!-- Stock Status -->
         <div id="stockInfo" class="stock-status in-stock">
           <!-- Dynamically filled -->
         </div>
 
         <div class="action-wrap">
-          <div class="qty-selector">
-            <button type="button" class="qty-btn" onclick="updateQty(-1)">-</button>
-            <span id="qtyVal" style="font-weight: 700; min-width: 15px; text-align: center;">1</span>
-            <button type="button" class="qty-btn" onclick="updateQty(1)">+</button>
-          </div>
-          
           <button type="button" onclick="handleBuyNow()" class="btn-buy-now">BUY NOW</button>
           <button type="button" onclick="handleAddToCart()" class="btn-add-cart">ADD TO CART</button>
           
@@ -440,8 +418,55 @@
 
 <script>
   const product = <%- JSON.stringify(product) %>;
-  let selectedColor = '<%= colors[0] || "" %>';
-  let selectedSize = '<%= sizes[0] || "" %>';
+
+   function autoSelectVariant() {
+  if (!product.variants || product.variants.length === 0) return;
+
+  let firstAvailable = product.variants.find(v => v.stock > 0);
+  if (!firstAvailable) {
+      firstAvailable = product.variants[0]; // fallback to first variant if all are out of stock
+  }
+
+  if (firstAvailable.type === 'Color') {
+      selectedColor = firstAvailable.value;
+  } else {
+      selectedSize = firstAvailable.value;
+  }
+
+  // clear old active
+  document.querySelectorAll('.color-swatch, .size-chip').forEach(el => {
+    el.classList.remove('active');
+  });
+
+  // activate correct UI
+  const el = document.querySelector(`[data-color="${firstAvailable.value}"], [data-size="${firstAvailable.value}"]`);
+  if (el) el.classList.add('active');
+
+  // update images
+  if (firstAvailable.images && firstAvailable.images.length > 0) {
+    swapGallery(firstAvailable.images);
+  } else {
+    swapGallery(product.images);
+  }
+
+  updateStockDisplay();
+}
+
+function disableOutOfStockVariants() {
+  if (!product.variants) return;
+
+  product.variants.forEach(v => {
+    if (v.stock <= 0) {
+      const el = document.querySelector(`[data-color="${v.value}"], [data-size="${v.value}"]`);
+      if (el) {
+        el.classList.add('disabled');
+        el.style.opacity = '0.4';
+      }
+    }
+  });
+}
+  let selectedColor = '';
+  let selectedSize = '';
   let quantity = 1;
 
   function updateCartBadge(count) {
@@ -452,16 +477,13 @@
       }
   }
 
-  // Initialize
-  window.onload = () => {
+   window.onload = ()=>{
+    disableOutOfStockVariants();
+    autoSelectVariant();
     updateStockDisplay();
-    // If first color has specific images, load them
-    const colVariant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
-    if(colVariant && colVariant.images && colVariant.images.length > 0) {
-        swapGallery(colVariant.images);
-    }
     initZoom();
-  };
+   }
+  
 
   function initZoom() {
     const container = document.getElementById('mainImgContainer');
@@ -535,38 +557,62 @@
     thumbContainer.innerHTML = html;
   }
 
-  function getSelectedVariant() {
-    if (!product.variants || product.variants.length === 0) return null;
-
-    // Prioritize specific selection. If multiple exist, we pick the one matching current state.
-    // In this model, we'll favor Color if both are present, or whichever matches.
-    let variant = null;
-    if (selectedColor) {
-      variant = product.variants.find(v => v.type === 'Color' && v.value === selectedColor);
-    }
-    
-    // If not found by color or color not selected, try size
-    if (!variant && selectedSize) {
-      variant = product.variants.find(v => (v.type === 'Size' || v.type === 'Storage') && v.value === selectedSize);
-    }
-    
-    return variant;
-  }
+  function getSelectedVariant(){
+    if(!product.variants || product.variants.length === 0) return null;
+    // Match either the selected color or the selected size (since a product uses one or the other as variants here)
+    return product.variants.find(v => v.value === selectedColor || v.value === selectedSize);
+  }  
 
   function updateStockDisplay() {
     const variant = getSelectedVariant();
     const stockInfo = document.getElementById('stockInfo');
     const stock = variant ? variant.stock : product.stock;
 
+    const buyNowBtn = document.querySelector('.btn-buy-now');
+    const addCartBtn = document.querySelector('.btn-add-cart');
+
     if(stock <= 0) {
       stockInfo.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> OUT OF STOCK';
       stockInfo.className = 'stock-status out-stock';
+      
+      if (buyNowBtn) {
+        buyNowBtn.disabled = true;
+        buyNowBtn.style.opacity = '0.5';
+        buyNowBtn.style.cursor = 'not-allowed';
+      }
+      if (addCartBtn) {
+        addCartBtn.disabled = true;
+        addCartBtn.style.opacity = '0.5';
+        addCartBtn.style.cursor = 'not-allowed';
+      }
     } else if(stock < 5) {
       stockInfo.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ONLY ${stock} LEFT IN STOCK`;
       stockInfo.className = 'stock-status low-stock';
+
+      if (buyNowBtn) {
+        buyNowBtn.disabled = false;
+        buyNowBtn.style.opacity = '1';
+        buyNowBtn.style.cursor = 'pointer';
+      }
+      if (addCartBtn) {
+        addCartBtn.disabled = false;
+        addCartBtn.style.opacity = '1';
+        addCartBtn.style.cursor = 'pointer';
+      }
     } else {
       stockInfo.innerHTML = '<i class="fa-solid fa-circle-check"></i> IN STOCK';
       stockInfo.className = 'stock-status in-stock';
+
+      if (buyNowBtn) {
+        buyNowBtn.disabled = false;
+        buyNowBtn.style.opacity = '1';
+        buyNowBtn.style.cursor = 'pointer';
+      }
+      if (addCartBtn) {
+        addCartBtn.disabled = false;
+        addCartBtn.style.opacity = '1';
+        addCartBtn.style.cursor = 'pointer';
+      }
     }
   }
 
@@ -603,7 +649,7 @@
             timer: 3000,
             background: '#ffffff',
             color: '#1a1a1a',
-            iconColor: '#c26a00' // Gold icon instead of default green/blue
+            iconColor: '#c26a00' 
           });
       } else {
         if (data.message === 'Please log in to continue.') {
@@ -627,9 +673,18 @@
     document.getElementById('qtyVal').innerText = quantity;
   }
 
-  async function handleAddToCart() {
+  async function handleAddToCart(isBuyNow = false) {
     try {
       const variant = getSelectedVariant();
+      if(!variant){
+        Swal.fire({
+          icon:'warning',
+          title:'Select option',
+          text:' Please select a variant'
+        });
+        return;
+      }
+
       const variantId = variant ? variant._id : null;
 
       const url = `/user/cart/add/${product._id}?qty=${quantity}${variantId ? '&variantId=' + variantId : ''}`;
@@ -646,6 +701,11 @@
       if(data.success) {
         // Update global cart badge
         updateCartBadge(data.cartCount);
+
+        if (isBuyNow) {
+            window.location.href = '/user/checkout';
+            return;
+        }
 
         Swal.fire({
           title: 'Added to Cart!',
@@ -684,7 +744,7 @@
   }
 
   function handleBuyNow() {
-    handleAddToCart();
+    handleAddToCart(true);
   }
 
 </script>

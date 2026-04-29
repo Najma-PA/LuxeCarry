@@ -185,6 +185,7 @@
         <div id="variantContainer">
           <% product.variants.forEach((v, vIdx) => { %>
             <div class="row mb-3 align-items-center variant-row" data-index="<%= vIdx %>">
+              <input type="hidden" name="variantId[]" value="<%= v._id %>">
               <div class="col-md-2">
                 <input name="variantType[]" class="form-control form-control-sm" value="<%= v.type %>">
                 <div class="error-variant text-danger" style="font-size: 10px; display:none;"></div>
@@ -453,6 +454,7 @@ function addVariant() {
   variantImagesData.push({ existing: ["", "", "", ""], newBlobs: [null, null, null, null] });
   const row = `
     <div class="row mb-3 align-items-center variant-row" data-index="${vIdx}">
+      <input type="hidden" name="variantId[]" value="">
       <div class="col-md-2">
         <input name="variantType[]" class="form-control form-control-sm" value="Color">
         <div class="error-variant text-danger" style="font-size: 10px; display:none;"></div>

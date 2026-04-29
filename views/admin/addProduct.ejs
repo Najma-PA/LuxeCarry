@@ -8,74 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css"/>
     <link rel="stylesheet" href="/css/admin.css">
-    <style>
-        .image-slot {
-            width: 100%;
-            aspect-ratio: 4/5;
-            border: 2px dashed #ddd;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            overflow: hidden;
-            background: #fff;
-            position: relative;
-            transition: all 0.3s ease;
-        }
-        .image-slot:hover {
-            border-color: #ca8a04;
-            background: #fffbeb;
-        }
-        .image-slot img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: none;
-        }
-        .image-slot .slot-placeholder {
-            text-align: center;
-            color: #94a3b8;
-        }
-        .image-slot .slot-placeholder i {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        .image-slot.has-image .slot-placeholder {
-            display: none;
-        }
-        .image-slot.has-image img {
-            display: block;
-        }
-        .remove-img-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            color: #dc3545;
-            border: 1px solid #dc3545;
-            font-size: 12px;
-            z-index: 10;
-        }
-        .image-slot.has-image:hover .remove-img-btn {
-            display: flex;
-        }
-        .variant-img-preview {
-            width: 40px;
-            height: 50px;
-            object-fit: cover;
-            border-radius: 4px;
-            margin-right: 5px;
-            background: #eee;
-        }
-    </style>
+
 </head>
 
 <body>
@@ -208,9 +141,14 @@
                         </div>
                     </div>
 
-                    <div id="imageError" class="text-danger small mt-2 d-none">Please upload at least 3 images.</div>
+                   <div id="imageError" class="text-danger small mt-2 d-none">Please upload at least 3 images</div>
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-4">
+                        <a href="/admin/products" class="btn btn-sm btn-outline-secondary">Cancel</a>
 
-                    <button type="submit" class="btn btn-gold w-100 mt-4 py-2 fw-bold">SAVE PRODUCT</button>
+                        <button type="submit" class="btn btn-gold w-50 py-2 fw-bold">
+                            SAVE PRODUCT
+                        </button>
+                    </div>
                     <div id="submitSpinner" class="text-center mt-2 d-none">
                         <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
                         <span class="small ms-1">Saving...</span>
@@ -274,6 +212,21 @@ let currentSlot = null;
 let currentVariantIndex = null;
 let baseNewBlobs = [null, null, null, null];
 let variantImagesData = [];
+
+function updateImagePreview(slot, blob, isVariant = false) {
+    const url = URL.createObjectURL(blob);
+
+    if (isVariant) {
+        variantImagesData[currentVariantIndex].newBlobs[slot - 1] = blob;
+        document.getElementById(`vImg_${slot}`).src = url;
+        document.getElementById(`vSlot_${slot}`).classList.add('has-image');
+        updateVariantPreviews(currentVariantIndex);
+    } else {
+        baseNewBlobs[slot - 1] = blob;
+        document.getElementById(`img${slot}`).src = url;
+        document.getElementById(`slot${slot}`).classList.add('has-image');
+    }
+}
 
 const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
 const variantImageModal = new bootstrap.Modal(document.getElementById('variantImageModal'));
@@ -371,10 +324,12 @@ document.getElementById('cropModal').addEventListener('shown.bs.modal', function
 });
 
 document.getElementById('cropModal').addEventListener('hidden.bs.modal', function () {
+    
     if (cropper) {
         cropper.destroy();
         cropper = null;
     }
+    
     if (currentVariantIndex !== null) {
         const input = document.getElementById(`vInput_${currentSlot}`);
         if(input) input.value = "";
@@ -383,21 +338,11 @@ document.getElementById('cropModal').addEventListener('hidden.bs.modal', functio
     }
 });
 
+currentVariantIndex = null;
 document.getElementById('cropButton').onclick = function () {
     if (!cropper) return;
     cropper.getCroppedCanvas({ width: 800, height: 1000 }).toBlob((blob) => {
-        if (currentVariantIndex !== null) {
-            variantImagesData[currentVariantIndex].newBlobs[currentSlot - 1] = blob;
-            const previewImg = document.getElementById(`vImg_${currentSlot}`);
-            previewImg.src = URL.createObjectURL(blob);
-            document.getElementById(`vSlot_${currentSlot}`).classList.add('has-image');
-            updateVariantPreviews(currentVariantIndex);
-        } else {
-            baseNewBlobs[currentSlot - 1] = blob;
-            const previewImg = document.getElementById(`img${currentSlot}`);
-            previewImg.src = URL.createObjectURL(blob);
-            document.getElementById(`slot${currentSlot}`).classList.add('has-image');
-        }
+       updateImagePreview(currentSlot, blob, currentVariantIndex !== null);
         cropModal.hide();
     }, 'image/jpeg', 0.9);
 };
@@ -469,6 +414,7 @@ document.getElementById('productForm').onsubmit = async function(e) {
     e.preventDefault();
     ['name', 'category', 'price', 'offer', 'description'].forEach(clearFieldError);
     document.querySelectorAll('.error-variant').forEach(el => el.style.display = 'none');
+    document.getElementById('imageError').classList.add('d-none');
     document.getElementById('submitSpinner').classList.remove('d-none');
     const submitBtn = this.querySelector('button[type="submit"]');
     submitBtn.disabled = true;
@@ -501,7 +447,11 @@ document.getElementById('productForm').onsubmit = async function(e) {
                             err.innerText = msg;
                             err.style.display = 'block';
                         }
-                    } else if (key === 'images') { Swal.fire('Wait!', msg, 'warning');
+                    }else if(key === 'images'){
+                        const imgErr= document.getElementById('imageError');
+                        imgErr.innerText =msg;
+                        imgErr.classList.remove('d-none');
+
                     } else { setFieldError(key, msg); }
                 }
             } else {
