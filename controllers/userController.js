@@ -247,13 +247,7 @@ exports.registerUser = async (req, res) => {
   
    name = name?.trim();
    email = email?.trim();
-/*
-  if (!name || !email || !password || !confirmPassword) {
-    return res.render('user/signup', {
-      error: "Please fill all required fields", errors: {}, formData: req.body
-    });
-  }
-  */
+
    // Regex patterns
   const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -303,37 +297,7 @@ exports.registerUser = async (req, res) => {
       formData:req.body
     });
   }
-/*
-  // Name validation
-  if (!nameRegex.test(name)) {
-    return res.render('user/signup', {
-      error: "Name should contain only letters and spaces", errors: {}, formData: req.body
-    });
-  }
 
-  // Email validation
-  if (!emailRegex.test(email)) {
-    return res.render('user/signup', {
-      error: "Invalid email format", errors: {}, formData: req.body
-    });
-  }
-
-  // Password validation
-  if (!passwordRegex.test(password)) {
-    return res.render('user/signup', {
-      error: "Password must be at least 6 characters and include uppercase, lowercase, and a special character", errors: {}, formData: req.body
-    });
-  }
-  if (password !== confirmPassword) {
-    return res.render('user/signup', { error: "Passwords do not match", errors: {}, formData: req.body });
-  }
-
-  const existingUser = await userService.findUserByEmail(email);
-
-  if (existingUser) {
-    return res.render('user/signup', { error: "Email exists", errors: {}, formData: req.body });
-  }
-*/
   const otp = generateOtp();
 
   req.session.signupData = { name, email, password };
