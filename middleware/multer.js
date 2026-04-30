@@ -5,7 +5,7 @@ const path = require('path');
 // STORAGE CONFIG (temporary storage)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/temp'); // temp folder 
+    cb(null, 'public/temp'); 
   },
 
   filename: function (req, file, cb) {
@@ -35,7 +35,7 @@ const fileFilter = (req, file, cb) => {
 const limits = {
   fileSize: 10 * 1024 * 1024,
   files: 50,                  // Allow up to 50 files
-  fields: 500                 // Allow up to 500 text fields (important for variants)
+  fields: 500                 // Allow up to 500 text fields
 };
 
 
