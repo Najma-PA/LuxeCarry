@@ -324,7 +324,7 @@ const validateCart = async (userId) => {
   for (const item of cart.items) {
     const product = item.product;
 
-    // ✅ Product availability
+    // Product availability
     const isAvailable = product &&
       product.isActive &&
       product.category &&
@@ -342,7 +342,7 @@ const validateCart = async (userId) => {
     let availableStock = product.stock;
 
     if (product.variants && product.variants.length > 0) {
-      // ✅ Must have variant
+      // Must have variant
       if (!item.variant) {
         errors.push({
           id: item._id.toString(),
@@ -351,7 +351,7 @@ const validateCart = async (userId) => {
         continue;
       }
 
-      // ✅ Get variant FIRST
+      // Get variant FIRST
       const variant = product.variants.id(item.variant);
 
       if (!variant) {
@@ -362,11 +362,11 @@ const validateCart = async (userId) => {
         continue;
       }
 
-      // ✅ ONLY variant stock
+      // ONLY variant stock
       availableStock = variant.stock;
     }
 
-    // ✅ Stock validation
+    //Stock validation
     if (availableStock <= 0) {
       errors.push({
         id: item._id.toString(),
