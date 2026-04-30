@@ -74,7 +74,11 @@ exports.loadProductDetails = async (req, res) => {
     const product = await Product.findById(req.params.id).populate('category');
 
     if (!product || !product.isActive || !product.category || !product.category.isActive || product.category.isDeleted) {
-      return res.redirect('/user/shop');
+      return res.status(404).render('user/product',{
+        product :null,
+        unavailable:true,
+        relatedProducts:[]
+      });
     }
 
     const relatedProducts = await Product.find({
@@ -91,5 +95,28 @@ exports.loadProductDetails = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).send('Server Error');
+  }
+};
+
+exports.checkProductAvailability = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (
+      !product ||
+      !product.isActive ||
+      product.isDeleted
+    ) {
+      return res.json({ available: false });
+    }
+
+    return res.json({
+      available: true,
+      stock: product.stock,
+      variants: product.variants
+    });
+
+  } catch (err) {
+    res.json({ available: false });
   }
 };

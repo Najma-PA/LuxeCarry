@@ -243,19 +243,67 @@ exports.showRegister = (req, res) => {
 };
 
 exports.registerUser = async (req, res) => {
-  const { name, email, password, confirmPassword } = req.body;
+  let { name, email, password, confirmPassword } = req.body;
   
+   name = name?.trim();
+   email = email?.trim();
+/*
   if (!name || !email || !password || !confirmPassword) {
     return res.render('user/signup', {
       error: "Please fill all required fields", errors: {}, formData: req.body
     });
   }
-  
+  */
    // Regex patterns
-  const nameRegex = /^[A-Za-z\s]+$/;
+  const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,}$/;
 
+
+  let errors ={};
+
+  //Name validation 
+  if(!name){
+    errors.name ="Name is required";
+  }else if(!nameRegex.test(name)){
+    errors.name = "Only letters and spaces allowed";
+  }
+
+  //email validation
+  if(!email){
+    errors.email = "Email is required";
+  }else if(!emailRegex.test(email)){
+    errors.email ="Invalid email format";
+  }else{
+    const existingUser = await userService.findUserByEmail(email);
+    if(existingUser){
+      errors.email= "Email already exists";
+    }
+  }
+
+  // password validation
+  if(!password){
+    errors.password = "Password required";
+
+  }else if(!passwordRegex.test(password)){
+    errors.password="week password";
+  }
+
+  //confirm password
+  if(!confirmPassword){
+    errors.confirmPassword ="confirm your password";
+  }else if(password !==confirmPassword){
+    errors.confirmPassword ="Password do not match";
+  }
+
+  if(Object.keys(errors).length>0){
+    return res.render('user/signup',{
+      error:null,
+      errors,
+      formData:req.body
+    });
+  }
+/*
   // Name validation
   if (!nameRegex.test(name)) {
     return res.render('user/signup', {
@@ -285,7 +333,7 @@ exports.registerUser = async (req, res) => {
   if (existingUser) {
     return res.render('user/signup', { error: "Email exists", errors: {}, formData: req.body });
   }
-
+*/
   const otp = generateOtp();
 
   req.session.signupData = { name, email, password };
@@ -680,16 +728,6 @@ exports.deleteAddress = async (req, res) => {
 
 
 //LOGOUT
-/*exports.userLogout = (req, res) => {
-  req.session.user= null;
-  req.logout(()=>{
-    res.clearCookie('user_session');
-    res.redirect('/');
-
-  })
-
-}; 
-*/
 exports.userLogout = (req, res) => {
   req.logout((err) => {
     if (err) {
