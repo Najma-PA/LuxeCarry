@@ -349,8 +349,9 @@
 
         <!-- Stock Status -->
         <div id="stockInfo" class="stock-status in-stock">
-          <!-- Dynamically filled -->
+   
         </div>
+        
 
         <div class="action-wrap">
           <button type="button" onclick="handleBuyNow()" class="btn-buy-now">BUY NOW</button>
@@ -418,6 +419,7 @@
 
 <script>
   const product = <%- JSON.stringify(product) %>;
+  let isProductAvailable = true;
 
    function autoSelectVariant() {
   if (!product.variants || product.variants.length === 0) return;
@@ -448,8 +450,7 @@
   } else {
     swapGallery(product.images);
   }
-
-  updateStockDisplay();
+  renderProductState();
 }
 
 function disableOutOfStockVariants() {
@@ -480,10 +481,12 @@ function disableOutOfStockVariants() {
    window.onload = ()=>{
     disableOutOfStockVariants();
     autoSelectVariant();
-    updateStockDisplay();
+    renderProductState();
     initZoom();
+    
+    setInterval(checkAvailabilityLive,5000);
    }
-  
+   
 
   function initZoom() {
     const container = document.getElementById('mainImgContainer');
@@ -509,6 +512,7 @@ function disableOutOfStockVariants() {
   }
 
   function selectColor(el, color) {
+    if (!isProductAvailable) return;
     selectedColor = color;
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
@@ -521,16 +525,17 @@ function disableOutOfStockVariants() {
       // Fallback to base product images
       swapGallery(product.images);
     }
-    
-    updateStockDisplay();
+    renderProductState();
     updateTitle();
   }
 
   function selectSize(el, size) {
+    if (!isProductAvailable) return;
     selectedSize = size;
     document.querySelectorAll('.size-chip').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
-    updateStockDisplay();
+    
+    renderProductState();
     updateTitle();
   }
 
@@ -563,7 +568,39 @@ function disableOutOfStockVariants() {
     return product.variants.find(v => v.value === selectedColor || v.value === selectedSize);
   }  
 
-  function updateStockDisplay() {
+  function showUnavailableUI() {
+    const stockInfo = document.getElementById('stockInfo');
+    const buyNowBtn = document.querySelector('.btn-buy-now');
+    const addCartBtn = document.querySelector('.btn-add-cart');
+
+    stockInfo.innerHTML = `
+      <i class="fa-solid fa-circle-xmark"></i>
+      This product is currently unavailable
+    `;
+    stockInfo.className = 'stock-status out-stock';
+
+    if (buyNowBtn) {
+      buyNowBtn.disabled = true;
+      buyNowBtn.style.opacity = '0.5';
+      buyNowBtn.style.cursor = 'not-allowed';
+    }
+    if (addCartBtn) {
+      addCartBtn.disabled = true;
+      addCartBtn.style.opacity = '0.5';
+      addCartBtn.style.cursor = 'not-allowed';
+    }
+  }
+
+  function showAvailableUI() {
+    renderProductState();
+  }
+
+  function renderProductState() {
+    if (!isProductAvailable) {
+      showUnavailableUI();
+      return;
+    }
+
     const variant = getSelectedVariant();
     const stockInfo = document.getElementById('stockInfo');
     const stock = variant ? variant.stock : product.stock;
@@ -725,12 +762,11 @@ function disableOutOfStockVariants() {
         if (data.message === 'Please log in to continue.') {
           window.location.href = '/user/login';
         } else {
-          Swal.fire({
-            title: 'Error',
-            text: data.message || 'Could not add product to cart',
-            icon: 'error',
-            confirmButtonColor: '#c26a00'
-          });
+          if(data.message && data.message.toLowerCase().includes('unavailable')){
+            isProductAvailable = false;
+            showUnavailableUI();
+          }
+         
         }
       }
     } catch (err) {
@@ -740,6 +776,47 @@ function disableOutOfStockVariants() {
         icon: 'warning',
         confirmButtonColor: '#c26a00'
       });
+      
+    }
+  }
+
+  async function checkAvailabilityLive() {
+    try {
+      const res = await fetch(`/user/product/check/${product._id}`);
+      const data = await res.json();
+
+      if (!data.available) {
+        isProductAvailable = false;
+        showUnavailableUI();
+      } else {
+        isProductAvailable = true;
+        
+        if (data.stock !== undefined) {
+          product.stock = data.stock;
+        }
+        if (data.variants && Array.isArray(data.variants)) {
+          product.variants = data.variants;
+          
+          // Update variant chip visual states
+          product.variants.forEach(v => {
+            const el = document.querySelector(`[data-color="${v.value}"], [data-size="${v.value}"]`);
+            if (el) {
+              if (v.stock <= 0) {
+                el.classList.add('disabled');
+                el.style.opacity = '0.4';
+              } else {
+                el.classList.remove('disabled');
+                el.style.opacity = '1';
+              }
+            }
+          });
+        }
+
+        autoSelectVariant();
+        showAvailableUI();
+      }
+    } catch (err) {
+      console.log("Availability check failed");
     }
   }
 

@@ -42,35 +42,49 @@
 
 <div class="mb-3">
 <label class="form-label">FULL NAME</label>
-<input type="text" class="form-control" name="name" placeholder="Enter your name" value="<%= typeof formData !== 'undefined' && formData.name ? formData.name : '' %>">
+<input type="text" class="form-control <%=errors.name ? 'is-invalid' : '' %>"  name="name" placeholder="Enter your name" value="<%= typeof formData !== 'undefined' && formData.name ? formData.name : '' %>">
+<% if(errors.name){%>
+  <small class="text-danger"><%= errors.name %></small>
+<%} %>
 </div>
 
 <div class="mb-3">
 <label class="form-label">EMAIL ADDRESS</label>
-<input type="email" class="form-control" name="email" placeholder="Enter your email" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
+<input type="email" class="form-control <%= errors.email ? 'is-invalid':''  %>" name="email" placeholder="Enter your email" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
+<% if(errors.email){%>
+  <small class="text-danger"><%= errors.email %></small>
+<%} %>
 </div>
 
 <div class="mb-3">
 <label class="form-label">PASSWORD</label>
 
 <div class="input-group">
-<input type="password" class="form-control" name="password" placeholder="Enter password" value="<%= typeof formData !== 'undefined' && formData.password ? formData.password : '' %>">
+<input type="password" class="form-control <%= errors.password ? 'is-invalid':''  %>" name="password" placeholder="Enter password" value="<%= typeof formData !== 'undefined' && formData.password ? formData.password : '' %>">
 
 <span class="input-group-text" style="cursor: pointer;">
 <i class="fa-regular fa-eye toggle-password"></i>
 </span>
 </div>
-
+<% if(errors.password){%>
+  <small class="text-danger"><%= errors.password %></small>
+<%} %>
 </div>
 
 <div class="mb-3">
 <label class="form-label">CONFIRM PASSWORD</label>
 <div class="input-group">
-<input type="password" class="form-control" name="confirmPassword" placeholder="Confirm password" value="<%= typeof formData !== 'undefined' && formData.confirmPassword ? formData.confirmPassword : '' %>">
+<input type="password" class="form-control <%= errors.confirmPassword ? 'is-invalid':''  %>" 
+name="confirmPassword" 
+placeholder="Confirm password" 
+value="<%= typeof formData !== 'undefined' && formData.confirmPassword ? formData.confirmPassword : '' %>">
 <span class="input-group-text" style="cursor: pointer;">
 <i class="fa-regular fa-eye toggle-password"></i>
 </span>
 </div>
+<% if(errors.confirmPassword){%>
+  <small class="text-danger"><%= errors.confirmPassword %></small>
+<%} %>
 </div>
 
 <div class="mb-3">
@@ -120,6 +134,22 @@ Already have an account?
       window.history.replaceState(null, null, window.location.href);
     }
   })();
+
+  
+  document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", function () {
+
+      const field = this.closest(".mb-3");
+
+      // Remove error text
+       field.querySelectorAll(".text-danger").forEach(e=>e.remove());
+      
+
+      // Remove red border
+      this.classList.remove("is-invalid");
+    });
+  });
+
 
 </script>
 
