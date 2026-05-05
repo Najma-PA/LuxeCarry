@@ -47,7 +47,7 @@
                         <div class="wishlist-card">
                             <div class="img-wrapper">
                                 <a href="<%= linkHref %>" class="<%= linkClass %>" data-id="<%= item.product._id %>">
-                                    <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>">
+                                    <img src="<%= item.product.thumbnail || 'images/placeholder.jpg' %>" alt="<%= item.product.name %>">
                                 </a>
                                 <div class="remove-icon wishlist-action-btn" data-action="remove" data-id="<%= item.product._id %>">
                                     <i class="fa-solid fa-heart"></i>

@@ -294,8 +294,29 @@
     <!-- Gallery -->
     <div class="col-md-6">
       <div class="product-gallery">
+
+        <% 
+           const firstVariantImages = product.variants?.[0]?.images || [];          
+        %>
+
         <div class="main-img-container" id="mainImgContainer">
-          <img src="<%= (product.images && product.images[0]) || '/img/placeholder.jpg' %>" id="mainDisplayImg" alt="<%= product.name %>">
+          <img src="<%= firstVariantImages[0] || product.thumbnail || '/img/placeholder.jpg' %>" id="mainDisplayImg" alt="<%= product.name %>">
+
+        </div>
+
+        <div class="thumbnails-container" id="thumbContainer">
+          <% firstVariantImages.forEach((img,idx) => {%>
+            <div class="thumbnail-item <%= idx===0 ? 'active' :'' %>" 
+              onclick="updateMainImage(this,'<%= img %>')">
+              <img src="<%= img  %>" alt="Thumbnail">
+
+            </div>
+            
+          <% }) %>
+
+        </div>
+        <!--<div class="main-img-container" id="mainImgContainer">
+          <img src="<%= product.thumbnail || '/images/placeholder.jpg' %>" id="mainDisplayImg" alt="<%= product.name %>">
         </div>
         
         <div class="thumbnails-container" id="thumbContainer">
@@ -304,7 +325,9 @@
               <img src="<%= img %>" alt="Thumbnail">
             </div>
           <% }) %>
-        </div>
+        </div>-->
+
+
       </div>
     </div>
 
@@ -382,7 +405,7 @@
               transition: transform 0.3s ease; background: #fff;">
                 <div class="position-relative bg-light p-3 text-center" style="min-height: 200px; display: flex;
                  align-items: center; justify-content: center;">
-                  <img src="<%= (rel.images && rel.images[0]) || '/img/placeholder.jpg' %>" class="img-fluid" style="max-height: 160px; 
+                  <img src="<%= rel.thumbnail || '/img/placeholder.jpg' %>" class="img-fluid" style="max-height: 160px; 
                   object-fit: contain;">
                   <% if(rel.offer > 0) { %>
                     <span class="badge position-absolute" style="top: 15px; left: 15px; background-color: #b78846; 
@@ -446,11 +469,15 @@
   if (el) el.classList.add('active');
 
   // update images
-  if (firstAvailable.images && firstAvailable.images.length > 0) {
+  const fallbackImages = product.variants?.[0]?.images || 
+                       (product.thumbnail ? [product.thumbnail] : []);
+
+swapGallery(fallbackImages);
+  /*if (firstAvailable.images && firstAvailable.images.length > 0) {
     swapGallery(firstAvailable.images);
   } else {
-    swapGallery(product.images);
-  }
+    swapGallery(product.thumbnail ?[product.thumbnail] :[]);
+  }*/
   if (isProductAvailable) {
   updateStockDisplay();
 }
@@ -516,6 +543,32 @@ function disableOutOfStockVariants() {
   }
 
   function selectColor(el, color) {
+  selectedColor = color;
+
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+  el.classList.add('active');
+
+  const variant = product.variants.find(
+    v => v.type === 'Color' && v.value === color
+  );
+
+  if (variant && variant.images && variant.images.length > 0) {
+    swapGallery(variant.images);
+  } else {
+    const fallbackImages = product.variants?.[0]?.images || 
+      (product.thumbnail ? [product.thumbnail] : []);
+
+    swapGallery(fallbackImages);
+  }
+
+  if (isProductAvailable) {
+    updateStockDisplay();
+  }
+
+  updateTitle();
+}
+
+  /*function selectColor(el, color) {
     selectedColor = color;
     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
@@ -526,7 +579,11 @@ function disableOutOfStockVariants() {
       swapGallery(variant.images);
     } else {
       // Fallback to base product images
-      swapGallery(product.images);
+      const fallbackImages = product.variants?.[0]?.images || 
+                       (product.thumbnail ? [product.thumbnail] : []);
+
+swapGallery(fallbackImages);
+      //swapGallery(product.images);
     }
     if (isProductAvailable) {
   updateStockDisplay();
@@ -534,8 +591,8 @@ function disableOutOfStockVariants() {
     //updateStockDisplay();
     updateTitle();
   }
-
-  function selectSize(el, size) {
+*/
+ /* function selectSize(el, size) {
     selectedSize = size;
     document.querySelectorAll('.size-chip').forEach(s => s.classList.remove('active'));
     el.classList.add('active');
@@ -545,7 +602,7 @@ function disableOutOfStockVariants() {
     //updateStockDisplay();
     updateTitle();
   }
-
+*/
   function updateMainImage(el, src) {
     document.getElementById('mainDisplayImg').src = src;
     document.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
@@ -553,6 +610,31 @@ function disableOutOfStockVariants() {
   }
 
   function swapGallery(images) {
+  const mainImg = document.getElementById('mainDisplayImg');
+  const thumbContainer = document.getElementById('thumbContainer');
+
+  if (!images || images.length === 0) {
+    mainImg.src = product.thumbnail || '/img/placeholder.jpg';
+    thumbContainer.innerHTML = '';
+    return;
+  }
+
+  mainImg.src = images[0];
+
+  let html = '';
+  images.forEach((img, idx) => {
+    html += `
+      <div class="thumbnail-item ${idx === 0 ? 'active' : ''}" 
+           onclick="updateMainImage(this, '${img}')">
+        <img src="${img}" alt="Thumbnail">
+      </div>
+    `;
+  });
+
+  thumbContainer.innerHTML = html;
+}
+
+  /*function swapGallery(images) {
     const mainImg = document.getElementById('mainDisplayImg');
     const thumbContainer = document.getElementById('thumbContainer');
     
@@ -568,7 +650,7 @@ function disableOutOfStockVariants() {
     });
     thumbContainer.innerHTML = html;
   }
-
+*/
   function getSelectedVariant(){
     if(!product.variants || product.variants.length === 0) return null;
     // Match either the selected color or the selected size (since a product uses one or the other as variants here)
@@ -764,7 +846,7 @@ function disableOutOfStockVariants() {
               `;
               stockInfo.className = 'stock-status out-stock';
               
-  */
+             */
             }
 
          

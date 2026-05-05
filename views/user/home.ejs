@@ -105,7 +105,7 @@ Explore our premium collection of bags and accessories
       data-id="<%= p._id %>">
           <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
       </div>
-      <img src="<%= p.images[0] %>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+      <img src="<%= p.thumbnail || '/images/placeholder.jpg'%>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
   </a>
 
   <div class="card-body p-4 d-flex flex-column">

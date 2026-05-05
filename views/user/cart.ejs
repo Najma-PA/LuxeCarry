@@ -46,7 +46,7 @@
                     </button>
 
                     <!-- Image -->
-                    <img src="<%= item.product?.images?.[0] || '/images/placeholder.jpg' %>"
+                    <img src="<%= item.product?.thumbnail || '/images/placeholder.jpg' %>"
                          class="cart-item-img">
 
                     <!-- Info -->
@@ -149,7 +149,7 @@
                     </span>
                 </div>
 
-                <!-- ✅ SIMPLE BUTTON (JS CONTROLS DISABLE) -->
+                <!--SIMPLE BUTTON (JS CONTROLS DISABLE) -->
                 <button id="proceed-checkout-btn"
                         class="btn-checkout-premium mt-4 border-0 w-100">
                     Proceed to Checkout
@@ -241,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const data = await res.json();
 
-            if (!data.success) {
+          if (!data.success) {
                 if (data.message) {
                     const msgBox = document.getElementById(`availability-msg-${itemId}`);
                     if (msgBox) {
@@ -266,13 +266,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const plusBtn = document.querySelector(`[data-action="qty-plus"][data-id="${itemId}"]`);
 
                 qtyEl.innerText =data.newQty;
-
-                if(data.newQty >=data.availableStock || data.newQty>=5){
+                //const msgBox = document.getElementById(`availability-msg-${itemId}`);
+                if ( data.newQty >=data.availableStock || data.newQty>=5){
                     plusBtn.disabled =true;
                     plusBtn.classList.add('disabled');
-                }else{
+                }
+                else{
                     plusBtn.disabled =false;
                     plusBtn.classList.remove('disabled');
+                   // if(msgBox)msgBox.innerHTML='';
                 }
                // document.getElementById(`qty-${itemId}`).innerText = data.newQty;
                 document.getElementById(`subtotal-${itemId}`).innerText =
@@ -426,12 +428,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // PLUS button
             if (plusBtn) {
-                if (item.quantity >= item.stock || item.quantity >= 5) {
+              //  const msgBox = document.getElementById(`availability-msg-${item.id}`); 
+                if (item.quantity >= item.stock || item.quantity>=5) {
                     plusBtn.disabled = true;
                     plusBtn.classList.add('disabled');
-                } else {
+                    
+                    /*if(msgBox){
+                        msgBox.innerHTML =`
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        Only ${item.stock}units available`;
+                    }
+
+                } 
+                else if(item.quantity >= 5){
+                    plusBtn.disabled=true;
+                    plusBtn.classList.add('disabled');
+                    if(msgBox){
+                        msgBox.innerHTML=`Item Limit is 5 `
+                    }
+                */
+                }else {
                     plusBtn.disabled = false;
                     plusBtn.classList.remove('disabled');
+                   // if(msgBox) msgBox.innerHTML='';
                 }
             }
 
@@ -458,7 +477,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (totalEl) totalEl.innerText = `₹${data.cartTotal.toLocaleString()}.00`;
 
         // validate checkout again
+       //if (data.items.some(item => !item.isActive || item.isDeleted)) {
         await validateCartState();
+
 
     } catch (err) {
         console.error('syncCartUI error:', err);

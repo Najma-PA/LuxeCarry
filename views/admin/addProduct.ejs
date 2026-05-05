@@ -12,9 +12,12 @@
 </head>
 
 <body>
-<div class="main-content p-4">
+    <div class="d-flex">
+        <%- include('../partials/admin/sidebar', { active: 'inventory' }) %>
+<div class="flex-grow-1 p-4 main-content">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
+        
         <h4 class="fw-bold m-0">Add Product</h4>
         <a href="/admin/products" class="btn btn-outline-secondary btn-sm">Back to List</a>
     </div>
@@ -52,7 +55,7 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label text-muted small fw-bold">Discount (%)</label>
-                            <input type="number" name="offer" class="form-control" id="prodOffer" placeholder="0" min="0" max="99">
+                            <input type="number" name="offer" class="form-control" id="prodOffer" placeholder="0">
                             <div id="error-offer" class="text-danger small d-none"></div>
                         </div>
                     </div>
@@ -64,10 +67,38 @@
                     </div>
                 </div>
 
-                <!-- VARIANTS -->
+                
+            </div>
+    
+             <!-- RIGHT: Images -->
+            <div class="col-md-5">
                 <div class="card p-4 shadow-sm border-0">
+                    <h6 class="fw-bold mb-3 border-bottom pb-2">Product Thumbnail</h6>
+                    <p class="text-muted small mb-3">Upload Thumbnail image.</p>
+                    <div class="row ">
+                         
+                        <div class="col-7">
+                            <div class="image-slot" id="slot1" onclick="triggerFileInput(1,true)">
+                                <div class="slot-placeholder">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                    <div class="small">Thumbnail</div>
+                                </div>
+                                <img id="img1" src="" alt="">
+                                <input type="file" id="input1" accept="image/*" hidden onchange="handleFileSelect(event, 1)">
+                            </div>
+                        </div>
+                    </div>
+                
+                   <div id="imageError" class="text-danger small mt-2 d-none">Please upload at least 3 images</div>
+                    
+                </div>
+            </div>
+        </div>
+            <!-- VARIANTS -->
+                <div class="card p-4 shadow-sm border-0 ">
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <h6 class="fw-bold m-0 border-bottom pb-2 flex-grow-1">Product Variants</h6>
+                        <div id="error-variants" class="text-danger small mb-2 d-none"></div>
                         <button type="button" onclick="addVariant()" class="btn btn-gold btn-sm ms-3">+ Add</button>
                     </div>
 
@@ -85,63 +116,6 @@
                             <tbody id="variantTable"></tbody>
                         </table>
                     </div>
-                </div>
-            </div>
-
-            <!-- RIGHT: Images -->
-            <div class="col-md-5">
-                <div class="card p-4 shadow-sm border-0">
-                    <h6 class="fw-bold mb-3 border-bottom pb-2">Product Images</h6>
-                    <p class="text-muted small mb-3">Upload at least 3 high-quality images.</p>
-                    
-                    <div class="row g-3">
-                        <!-- Slot 1 -->
-                        <div class="col-6">
-                            <div class="image-slot" id="slot1" onclick="triggerFileInput(1)">
-                                <div class="slot-placeholder">
-                                    <i class="fas fa-cloud-upload-alt"></i>
-                                    <div class="small">Main Image</div>
-                                </div>
-                                <img id="img1" src="" alt="">
-                                <input type="file" id="input1" accept="image/*" hidden onchange="handleFileSelect(event, 1)">
-                            </div>
-                        </div>
-                        <!-- Slot 2 -->
-                        <div class="col-6">
-                            <div class="image-slot" id="slot2" onclick="triggerFileInput(2)">
-                                <div class="slot-placeholder">
-                                    <i class="fas fa-plus"></i>
-                                    <div class="small">Image 2</div>
-                                </div>
-                                <img id="img2" src="" alt="">
-                                <input type="file" id="input2" accept="image/*" hidden onchange="handleFileSelect(event, 2)">
-                            </div>
-                        </div>
-                        <!-- Slot 3 -->
-                        <div class="col-6">
-                            <div class="image-slot" id="slot3" onclick="triggerFileInput(3)">
-                                <div class="slot-placeholder">
-                                    <i class="fas fa-plus"></i>
-                                    <div class="small">Image 3</div>
-                                </div>
-                                <img id="img3" src="" alt="">
-                                <input type="file" id="input3" accept="image/*" hidden onchange="handleFileSelect(event, 3)">
-                            </div>
-                        </div>
-                        <!-- Slot 4 -->
-                        <div class="col-6">
-                            <div class="image-slot" id="slot4" onclick="triggerFileInput(4)">
-                                <div class="slot-placeholder">
-                                    <i class="fas fa-plus"></i>
-                                    <div class="small">Image 4</div>
-                                </div>
-                                <img id="img4" src="" alt="">
-                                <input type="file" id="input4" accept="image/*" hidden onchange="handleFileSelect(event, 4)">
-                            </div>
-                        </div>
-                    </div>
-
-                   <div id="imageError" class="text-danger small mt-2 d-none">Please upload at least 3 images</div>
                     <div class="d-flex justify-content-center align-items-center gap-2 mt-4">
                         <a href="/admin/products" class="btn btn-sm btn-outline-secondary">Cancel</a>
 
@@ -154,12 +128,10 @@
                         <span class="small ms-1">Saving...</span>
                     </div>
                 </div>
-            </div>
-        </div>
 
     </form>
 </div>
-
+</div>
 <!-- VARIANT IMAGE MODAL -->
 <div class="modal fade" id="variantImageModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -169,7 +141,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <p class="text-muted small">Select up to 4 images for this specific variant.</p>
+                <p class="text-muted small">Select at least 3 images (max 4)for this variant.</p>
                 <div class="row g-3" id="variantModalSlots">
                     <!-- Slots injected via JS -->
                 </div>
@@ -210,23 +182,26 @@
 let cropper;
 let currentSlot = null;
 let currentVariantIndex = null;
-let baseNewBlobs = [null, null, null, null];
+let thumbnailBlob =null;
 let variantImagesData = [];
 
-function updateImagePreview(slot, blob, isVariant = false) {
+function updateImagePreview(slot, blob) {
     const url = URL.createObjectURL(blob);
 
-    if (isVariant) {
+   if (currentVariantIndex !==null) {
         variantImagesData[currentVariantIndex].newBlobs[slot - 1] = blob;
         document.getElementById(`vImg_${slot}`).src = url;
         document.getElementById(`vSlot_${slot}`).classList.add('has-image');
         updateVariantPreviews(currentVariantIndex);
-    } else {
-        baseNewBlobs[slot - 1] = blob;
+    }
+     else {
+        thumbnailBlob = blob;
         document.getElementById(`img${slot}`).src = url;
         document.getElementById(`slot${slot}`).classList.add('has-image');
     }
+    
 }
+
 
 const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
 const variantImageModal = new bootstrap.Modal(document.getElementById('variantImageModal'));
@@ -267,29 +242,25 @@ function addVariant() {
 // Initial variant
 addVariant();
 
-function triggerFileInput(slot, isVariant = false) {
-    if (isVariant) {
-        document.getElementById(`vInput_${slot}`).click();
-    } else {
-        document.getElementById(`input${slot}`).click();
-    }
+function triggerFileInput(slot,isThumbnail =false) {
+   if (isThumbnail) {
+    currentVariantIndex =null;
+    document.getElementById(`input${slot}`).click();
+   }else{
+    document.getElementById(`vInput_${slot}`).click();
+   }
 }
 
-function removeImage(event, slot, isVariant = false) {
+function removeImage(event, slot) {
     event.stopPropagation();
-    if (isVariant) {
         variantImagesData[currentVariantIndex].newBlobs[slot-1] = null;
         document.getElementById(`vImg_${slot}`).src = "";
         document.getElementById(`vSlot_${slot}`).classList.remove('has-image');
         updateVariantPreviews(currentVariantIndex);
-    } else {
-        baseNewBlobs[slot-1] = null;
-        document.getElementById(`img${slot}`).src = "";
-        document.getElementById(`slot${slot}`).classList.remove('has-image');
-    }
+
 }
 
-function handleFileSelect(event, slot, isVariant = false) {
+function handleFileSelect(event, slot) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -342,7 +313,7 @@ currentVariantIndex = null;
 document.getElementById('cropButton').onclick = function () {
     if (!cropper) return;
     cropper.getCroppedCanvas({ width: 800, height: 1000 }).toBlob((blob) => {
-       updateImagePreview(currentSlot, blob, currentVariantIndex !== null);
+       updateImagePreview(currentSlot, blob);
         cropModal.hide();
     }, 'image/jpeg', 0.9);
 };
@@ -358,14 +329,14 @@ function openVariantImageModal(vIdx) {
         const hasImg = src !== "";
         const slotHtml = `
             <div class="col-6">
-                <div class="image-slot ${hasImg ? 'has-image' : ''}" id="vSlot_${i}" onclick="triggerFileInput(${i}, true)">
+                <div class="image-slot ${hasImg ? 'has-image' : ''}" id="vSlot_${i}" onclick="triggerFileInput(${i})">
                     <div class="slot-placeholder">
                         <i class="fas fa-plus mb-2"></i>
                         <div class="small">Image ${i}</div>
                     </div>
                     <img id="vImg_${i}" src="${src}" alt="" style="${hasImg ? 'display:block' : ''}">
-                    <input type="file" id="vInput_${i}" accept="image/*" hidden onchange="handleFileSelect(event, ${i}, true)">
-                    <button type="button" class="remove-img-btn" style="${hasImg ? 'display:flex' : ''}" onclick="removeImage(event, ${i}, true)">
+                    <input type="file" id="vInput_${i}" accept="image/*" hidden onchange="handleFileSelect(event, ${i})">
+                    <button type="button" class="remove-img-btn" style="${hasImg ? 'display:flex' : ''}" onclick="removeImage(event, ${i})">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -410,6 +381,141 @@ function clearFieldError(id) {
     }
 });
 
+document.getElementById('productForm').onsubmit = async function (e){
+    e.preventDefault();
+    //clear errors
+    ['name','category','price','offer','description'].forEach(clearFieldError);
+document.querySelectorAll('.error-variant').forEach(el=>el.style.display ='none');
+
+const submitBtn =this.querySelector('button[type="submit"]');
+const spinner =document.getElementById('submitSpinner');
+
+spinner.classList.remove('d-none');
+submitBtn.disabled =true;
+
+try{
+    const formData =new FormData(this);
+
+    const  variantRows =document.querySelectorAll('.variant-row');
+    const variantError =document.getElementById('error-variants');
+    if(variantError){
+        variantError.innerText='';
+        variantError.classList.add('d-none')
+    }
+
+    let hasError =false;
+
+    if(!formData.get('name')){
+        setFieldError('name','Product name required');
+        hasError = true;
+    }
+    //category
+    if(!formData.get('category')){
+        setFieldError('category','Select category')
+        hasError =true;
+    }
+
+    if(!formData.get('price') || formData.get('price') <= 0){
+        setFieldError('price','Valid price required');
+        hasError = true;
+    }
+    //validate variants
+if(variantRows.length===0){
+    if(variantError){
+        variantError.innerText='Please add at least one variant';
+        variantError.classList.remove('d-none');
+    }
+    hasError=true;
+}
+
+    variantRows.forEach((row,i)=>{
+        const vIdx = row.getAttribute('data-index');
+
+        const images =variantImagesData[vIdx].newBlobs.filter(b=>b !==null);
+
+        if(images.length< 3){
+            const err =row.querySelector('.error-variant');
+            err.innerText ='Minimum 3 images are required';
+            err.style.display ='block';
+            hasError= true;
+        }
+    });
+
+    //Stop if validation fails
+    if(hasError){
+        spinner.classList.add('d-none');
+    submitBtn.disabled=false;
+    return;
+        //console.log("Frontend validation failed")
+    }
+    
+
+    if(thumbnailBlob){
+        formData.append('thumbnail',thumbnailBlob,'thumbnail.jpg');
+    }
+    //Append variant images
+    variantRows.forEach((row,i)=>{
+        const vIdx = row.getAttribute('data-index');
+        variantImagesData[vIdx].newBlobs.forEach((blob,bIdx)=>{
+            if(blob){
+                formData.append(`variantImages_${i}`,blob, `variant-${i}-${bIdx}.jpg`);
+            }
+        });
+    });
+
+    const response =await fetch('/admin/products/add',{
+        method:'POST',
+        body:formData    
+    });
+
+    const result =await response.json();
+
+    if(result.success){
+        Swal.fire({
+            icon :'success',
+            title: 'Success!',
+            text:result.message,
+            confirmButtonColor:'#ca8a04'
+        }).then(()=>{
+            window.location.href = result.redirectUrl || '/admin/products';
+        });
+    }else{
+        if(result.errors){
+            for(const [key,msg] of Object.entries(result.errors)){
+                if(key.startsWith('variant_')){
+                    const idx = key.split('_')[1];
+                    const row= document.querySelectorAll('.variant-row')[idx];
+
+                    if(row){
+                        const err = row.querySelector('.error-variant');
+                        err.innerText = msg;
+                        err.style.display ='block';
+                    }
+                } else{
+                    setFieldError(key,msg);
+                }
+            }
+        } else{
+            Swal.fire({
+                icon:'error',
+                title:'Oops...',
+                text:result.message || 'something went wrong',
+                confirmButtonColor:'#ca8a04'
+            });
+        }
+    }
+}catch(err){
+    console.error(err);
+    Swal.fire('Error','Server communication failed.','error');
+}finally{
+    spinner.classList.add('d-none');
+    submitBtn.disabled =false;
+}
+
+
+}
+
+/*
 document.getElementById('productForm').onsubmit = async function(e) {
     e.preventDefault();
     ['name', 'category', 'price', 'offer', 'description'].forEach(clearFieldError);
@@ -421,11 +527,15 @@ document.getElementById('productForm').onsubmit = async function(e) {
 
     try {
         const formData = new FormData(this);
-        formData.delete('images');
+     formData.delete('images');
         baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
-        const variantRows = document.querySelectorAll('.variant-row');
+    
+       // const variantRows = document.querySelectorAll('.variant-row');
         variantRows.forEach((row, i) => {
             const vIdx = row.getAttribute('data-index');
+           // const images = variantImagesData[vIdx].newBlobs.filter(b=>b !==null);
+
+
             variantImagesData[vIdx].newBlobs.forEach((blob, bIdx) => {
                 if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
             });
@@ -465,7 +575,7 @@ document.getElementById('productForm').onsubmit = async function(e) {
         document.getElementById('submitSpinner').classList.add('d-none');
         submitBtn.disabled = false;
     }
-};
+};*/
 </script>
 
 </body>
