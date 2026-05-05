@@ -30,7 +30,12 @@ const getCart = async (userId) => {
   let totalDiscount = 0;
 
   cart.items.forEach(item => {
-    const originalPrice = item.product.price;
+    if(!item.product){
+      item.isAvailable =false;
+      return;
+    }
+    const originalPrice = typeof item.product.price==='number' ? item.product.price : 0;
+
     const productOffer = item.product.offer || 0;
     const categoryOffer = (item.product.category && item.product.category.offer) ? item.product.category.offer : 0;
     const bestOffer = Math.max(productOffer, categoryOffer);
@@ -323,7 +328,14 @@ const validateCart = async (userId) => {
 
   for (const item of cart.items) {
     const product = item.product;
-
+    if(!product){
+      errors.push({
+        id:item._id.toString(),
+        message: "Product no longer exists"
+        
+      });
+      continue;
+    }
     // Product availability
     const isAvailable = product &&
       product.isActive &&

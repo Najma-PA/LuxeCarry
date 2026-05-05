@@ -1,6 +1,7 @@
 const Product = require('../models/productModel');
 const path = require('path');
 const fs = require('fs');
+//const { Promise } = require('mongoose');
 
 //calculate total stock
 function calculateTotalStock(variants){
@@ -45,7 +46,7 @@ exports.getProducts = async (query) => {
     filter.isActive = false;
   } else if (status === 'low') {
     filter.isActive = true;
-    // Check both variant stock and base product stock (for legacy products without variants)
+    
     // Use $and to prevent overwriting the search $or filter
     filter.$and = filter.$and || [];
     filter.$and.push({
@@ -72,28 +73,21 @@ exports.getProducts = async (query) => {
   let inventoryValue = 0;
 
   allActiveProducts.forEach(p => {
-    totalSKUs += p.variants.length;
+    if(!p)return;
+    const variants =Array.isArray(p.variants)? p.variants :[];
 
-    p.variants.forEach(v =>{
+    totalSKUs += variants.length;
+
+    variants.forEach(v =>{
+      if(!v || typeof v.stock !== 'number') return;
       if(v.stock < 5) lowStockCount++;
-      inventoryValue += (p.price * v.stock);
+      
+      const price = typeof p.price === 'number' ? p.price :0;
+      inventoryValue += (price * v.stock);
+
     });
   });
-    /*if (p.variants && p.variants.length > 0) {
-      // If product has variants, count each as an SKU
-     // totalSKUs += p.variants.length;
-      //p.variants.forEach(v => {
-        //if (v.stock < 5) lowStockCount++;
-        //inventoryValue += (p.price * v.stock);
-      });
-    } else {
-      // Base product as 1 SKU
-      totalSKUs += 1;
-      if (p.stock < 5) lowStockCount++;
-      inventoryValue += (p.price * p.stock);
-    }
-  });
-*/
+   
   return {
     products,
     currentPage: page,
@@ -128,71 +122,67 @@ const saveFile = async (file) => {
 };
 
 exports.addProduct = async (data, files, variants) => {
-  const baseImagePaths = [];
-  
+  variants = variants || [];
   // save files
-  if(files && files.length > 0){
-    const savePromises = files.map(async(file)=> {
-      if(file.fieldname.startsWith('variantImages_')){
-        const vIdx = parseInt(file.fieldname.split('_')[1]);
+  let thumbnail = null;
+  let allFiles = [];
+
+  if (files) {
+    if (Array.isArray(files)) {
+    allFiles = files;
+    } else {
+      // multer object format → convert to array
+     allFiles = Object.values(files).flat();
+    }
+  }
+  if (allFiles.length > 0) {
+  const savePromises = allFiles.map(async (file) => {
+    if (file.fieldname === 'thumbnail') {
+      thumbnail = await saveFile(file);
+    } else if (file.fieldname.startsWith('variantImages_')) {
+      const vIdx = parseInt(file.fieldname.split('_')[1]);
+
+      if (variants && variants[vIdx]) {
+        if (!variants[vIdx].images) variants[vIdx].images = [];
+
+        const savedPath = await saveFile(file);
+        variants[vIdx].images.push(savedPath);
+      }
+    }
+  });
+
+  await Promise.all(savePromises);
+}
+  /*if(files && files.length >0){
+    const savePromises = files.map(async(file)=>{
+      //thumbnail
+      if(file.fieldname ==='thumbnail'){
+        thumbnail = await saveFile(file);
+      } else if(file.fieldname.startsWith('variantImages_')){
+        const vIdx =parseInt(file.fieldname.split('_')[1]);
+
         if(variants[vIdx]){
-          if(!variants[vIdx].images) variants[vIdx].images = [];
+          if(!variants[vIdx].images)variants[vIdx].images =[];
+
           const savedPath = await saveFile(file);
           variants[vIdx].images.push(savedPath);
         }
-      }else{
-        const savedPath = await saveFile(file);
-        baseImagePaths.push(savedPath);
       }
     });
     await Promise.all(savePromises);
-  }
-
- /* if (baseImagePaths.length === 0 && variants.length > 0) {
-  baseImagePaths.push(...(variants[0].images || []));
-}
-*/
-  //ensuse at leasrt one variant
+  }*/
+  //ensure at least one variant
   if(!variants || variants.length ===0){
     variants =[{
       type:"Default",
       value:"Default",
       stock:parseInt(data.stock || 0),
-      images: baseImagePaths
+      images: []
+      //baseImagePaths
     }];
   }
 
-  /*if (files && files.length > 0) {
-    const savePromises = files.map(async (file) => {
-      if (file.fieldname.startsWith('variantImages_')) {
-        
-        const savedPath = await saveFile(file);
-        baseImagePaths.push(savedPath);
-      } else if (file.fieldname.startsWith('variantImages_')) {
-        const vIdx = parseInt(file.fieldname.split('_')[1]);
-        if (variants[vIdx]) {
-          if (!variants[vIdx].images) variants[vIdx].images = [];
-          const savedPath = await saveFile(file);
-          variants[vIdx].images.push(savedPath);
-        }
-      }
-    });
-    await Promise.all(savePromises);
-  }
-*/
   const errors = {};
-
-  const totalImages = baseImagePaths.length + variants.reduce((sum, v) => {
-  return sum + (v.images ? v.images.length : 0);
-}, 0);
-
-if (totalImages < 3) {
-  errors.images = "Minimum 3 images required";
-}
-  /*if (baseImagePaths.length < 3) {
-    errors.images = "Minimum 3 base images required";
-  }
-*/
   // VALIDATE DATA
   if (!data.name || data.name.trim() === '') errors.name = 'Product name is required';
   if (!data.price || data.price <= 0) errors.price = 'Price must be a positive number';
@@ -207,197 +197,207 @@ if (totalImages < 3) {
     if (existing) errors.name = 'Product with this name already exists';
   }
 
-  // VALIDATE VARIANTS
-  if(variants && variants.length >0){
+
+   // VALIDATE VARIANTS
+  const seen =new Set();
      variants.forEach((v,idx) =>{
     if(!v.type || !v.value || v.stock === undefined || v.stock ===""){
       errors[`variant_${idx}`] = 'variant fields required';
     } else if (v.stock < 0){
       errors[`variant_${idx}`] ='Stock cannot be negative';
     }
+
+    if(!v.images || v.images.length <3){
+      errors[`variant_image_${idx}`]= 'Each variant must have at least 3 images '
+    }
+
+    const key =`${v.type}-${v.value}`;
+    if(seen.has(key)){
+      errors[`variant_duplicate_${idx}`]= `Duplicate variant:${key}`;
+    }
+    seen.add(key);
   });
 
-  }
- 
-  /*if (variants && variants.length > 0) {
-    variants.forEach((v, idx) => {
-      if (!v.type || !v.value || v.stock === undefined || v.stock === "") {
-        errors[`variant_${idx}`] = 'All variant fields are required';
-      } else if (v.stock < 0) {
-        errors[`variant_${idx}`] = 'Variant stock cannot be negative';
-      }
-    });
-  }
-*/
-  if (Object.keys(errors).length > 0) {
+    if (Object.keys(errors).length > 0) {
     throw { isValidationError: true, errors };
   }
 
-  // Create Product
-   const totalStock = calculateTotalStock(variants);  
-  return Product.create({
-    name: data.name.trim(),
-    category: data.category,
-    price: data.price,
-    offer: data.offer || 0,
-    description: data.description,
-    stock: totalStock,
-    variants,
-    images: baseImagePaths,
-    isActive: true
-  });
-};
-
-//update product
-
-exports.updateProduct = async (id, data, files, variants) => {
-  const product = await Product.findById(id);
-  if (!product) throw new Error("Product not found");
-
-  let updatedBaseImages = [];
-
-  // Handle Existing Base Images
-  if (data.existingImages) {
-    updatedBaseImages = Array.isArray(data.existingImages) ? data.existingImages : [data.existingImages];
-  }
-
-  // save file
-   if (files && files.length > 0) {
-    const savePromises = files.map(async (file) => {
-      if (file.fieldname.startsWith('variantImages_')) {
-        const vIdx = parseInt(file.fieldname.split('_')[1]);
-        if (variants[vIdx]) {
-          if (!variants[vIdx].images) variants[vIdx].images = [];
-          const savedPath = await saveFile(file);
-          variants[vIdx].images.push(savedPath);
-        }
-      } else {
-        const savedPath = await saveFile(file);
-        updatedBaseImages.push(savedPath);
-      }
-    });
-    await Promise.all(savePromises);
-  }
-  /*if (files && files.length > 0) {
-    const savePromises = files.map(async (file) => {
-      if (file.fieldname === 'images' || file.fieldname.startsWith('baseImage_')) {
-        const savedPath = await saveFile(file);
-        updatedBaseImages.push(savedPath);
-      } else if (file.fieldname.startsWith('variantImages_')) {
-        const vIdx = parseInt(file.fieldname.split('_')[1]);
-        if (variants[vIdx]) {
-          if (!variants[vIdx].images) variants[vIdx].images = [];
-          const savedPath = await saveFile(file);
-          variants[vIdx].images.push(savedPath);
-        }
-      }
-    });
-    await Promise.all(savePromises);
-  }
-*/
-  // 3. Handle Existing Variant Images (passed as strings/arrays per variant)
-  // We expect data.existingVariantImages_N in the request
- /* variants.forEach((v, i) => {
-    const key = `existingVariantImages_${i}`;
-    let existingVImages = [];
-    if (data[key]) {
-      existingVImages = Array.isArray(data[key]) ? data[key] : [data[key]];
-    }
-    v.images = [...(v.images || []), ...existingVImages];
-  });
-*/
-  const errors = {};
-
-//existing variant images
-if(variants && variants.length > 0){
-  variants.forEach((v,i)=>{
-    const key = `existingVariantImages_${i}`;
-    if(data[key]){
-      const existing =Array.isArray(data[key]) ? data[key]:[data[key]];
-      v.images =[...(v.images || []), ...existing];
-    }
-  });
-
-}
-
-if (updatedBaseImages.length === 0 && variants && variants.length > 0) {
-  updatedBaseImages.push(...(variants[0].images || []));
-}
-
-//ensure variant
-if(!variants || variants.length ===0){
-  variants =[{
-    type: "Default",
-    value: "Default",
-    stock:parseInt(data.stock || 0),
-    images: updatedBaseImages
-  }]
-}
-
-const totalImages = updatedBaseImages.length + variants.reduce((sum, v) => {
-  return sum + (v.images ? v.images.length : 0);
-}, 0);
-
-if (totalImages < 3) {
-  errors.images = "Minimum 3 images required";
-}
-/*
-  if (updatedBaseImages.length < 3) {
-    errors.images = "Minimum 3 base images required";
-  }
-*/
-  // VALIDATE DATA
-  if (!data.name || data.name.trim() === '') errors.name = 'Product name is required';
-  if (!data.price || data.price <= 0) errors.price = 'Price must be a positive number';
-  if (data.offer && (data.offer < 0 || data.offer > 99)) errors.offer = 'Offer must be between 0 and 99';
-  if (!data.category) errors.category = 'Category is required';
-
-  // CHECK DUPLICATE (exclude current product)
-  if (data.name && data.name.trim() !== '') {
-    const existing = await Product.findOne({
-      _id: { $ne: id },
-      name: { $regex: `^${data.name.trim()}$`, $options: 'i' }
-    });
-    if (existing) errors.name = 'Product with this name already exists';
-  }
-
-  // VALIDATE VARIANTS
-  if(variants && variants.length >0){
-    variants.forEach((v, idx) => {
-    if (!v.type || !v.value || v.stock === undefined || v.stock === "") {
-      errors[`variant_${idx}`] = 'Variant fields required';
-    } else if (v.stock < 0) {
-      errors[`variant_${idx}`] = 'Stock cannot be negative';
-    }
-  });
-  }
-   
-  /*if (variants && variants.length > 0) {
-    variants.forEach((v, idx) => {
-      if (!v.type || !v.value || v.stock === undefined || v.stock === "") {
-        errors[`variant_${idx}`] = 'All variant fields are required';
-      } else if (v.stock < 0) {
-        errors[`variant_${idx}`] = 'Variant stock cannot be negative';
-      }
-    });
-  }
-*/
-  if (Object.keys(errors).length > 0) {
-    throw { isValidationError: true, errors };
-  }
+   if(!thumbnail && variants.length >0 && variants[0].images.length > 0){
+    thumbnail = variants[0].images[0];
+   }
 
   const totalStock = calculateTotalStock(variants);
 
-  return Product.findByIdAndUpdate(id, {
-    name: data.name.trim(),
-    category: data.category,
-    price: data.price,
-    offer: data.offer || 0,
+  //create product
+  return Product.create({
+    name :data.name.trim(),
+    category :data.category,
+    price:Number(data.price) || 0,
+    offer:data.offer || 0,
     description: data.description,
-    stock: totalStock,
+    stock:totalStock,
     variants,
-    images: updatedBaseImages
+    thumbnail,
+    isActive:true
   });
+};
+
+//updateProduct
+
+exports.updateProduct =async (id,data,files,variants)=>{
+  const product = await Product.findById(id);
+  if(!product)throw new Error("Product not found");
+
+  let newThumbnail = null;
+
+  //save files
+  let allFiles = [];
+
+  if (files) {
+    if (Array.isArray(files)) {
+      allFiles = files;
+    } else {
+      // multer object format → convert to array
+      allFiles = Object.values(files).flat();
+    }
+  }
+  if (allFiles.length > 0) {
+  const savePromises = allFiles.map(async (file) => {
+    if (file.fieldname === 'thumbnail') {
+      newThumbnail= await saveFile(file);
+    } else if (file.fieldname.startsWith('variantImages_')) {
+      const vIdx = parseInt(file.fieldname.split('_')[1]);
+
+      if (variants && variants[vIdx]) {
+        if (!variants[vIdx].images) variants[vIdx].images = [];
+
+        const savedPath = await saveFile(file);
+        variants[vIdx].images.push(savedPath);
+      }
+    }
+  });
+
+  await Promise.all(savePromises);
+}
+/*if(files && files.length  >0){
+  const savePromises =files. map(async(file)=>{
+    if(file.fieldname==='thumbnail'){
+      newThumbnail =await saveFile(file);
+    }else if(file.fieldname.startsWith('variantImages_')){
+      const vIdx =parseInt(file.fieldname.split('_')[1]);
+
+      if(variants[vIdx]){
+        if(!variants[vIdx].images)variants[vIdx].images =[];
+
+        const savedPath =await saveFile(file);
+        variants[vIdx].images.push(savedPath);
+      }
+    }
+  });
+  await Promise.all(savePromises);
+}*/
+//merge existing images
+
+if(variants && variants.length >0){
+  variants.forEach((v,i)=>{
+    const key = `existingVariantImages_${i}`;
+    if(data[key]){
+      const existing = Array.isArray(data[key]) ? data[key] : [data[key]];
+      v.images =[...(v.images || []),...existing];
+    }
+  });
+}
+
+//ensure at least one variant
+
+if(!variants || variants.length ===0){
+  inventoryValue += (p.price * v.stock);
+  /*variants =[{
+    type:"Default",
+    value:"Default",
+    stock:Number(data.stock) || 0,
+    images :[]
+  }];*/
+}
+
+const errors={};
+
+//Data validation
+if(!data.name || data.name.trim() ===''){
+  errors.name = 'Product name is required';
+}
+if(!data.price || data.price <= 0){
+  errors.price ='Price must be a positive number';
+}
+if(data.offer && (data.offer < 0 || data.offer >99)){
+  errors.offer ='Offer must be between 0 and 99';
+}
+if(!data.category){
+  errors.category ='Category is required';
+}
+
+if(data.name && data.name.trim() !==''){
+  const existing = await Product.findOne({
+    _id:{$ne :id},
+    name:{$regex:`^${data.name.trim()}$`,$options: 'i'}
+  });
+
+  if(existing){
+    errors.name = 'Product with this name already exists'
+  }
+}
+
+//validate variants
+const seen =new Set();
+
+variants.forEach((v,idx)=>{
+  if(!v.type || !v.value || v.stock === undefined || v.stock ===""){
+    errors[`variant_${idx}`] ='variant fields required';
+  }else if(v.stock <0){
+    errors[`variant_${idx}`] ='Stock cannot be negative';
+  }
+  if(!v.images || v.images.length <3 ){
+    errors[`variant_image_${idx}`]='Each variant must have at least 3 images ';
+  }
+
+  const key =`${v.type}-${v.value}`;
+  if(seen.has(key)){
+    errors[`variant_duplicate_${idx}`]=`Duplicate variant:${key}`;
+  }
+  seen.add(key);
+});
+
+//\Stops if validation fails
+if(Object.keys(errors).length >0){
+  throw {isValidationError:true,errors};
+}
+
+//handle thumbnail
+
+let thumbnail = product.thumbnail;
+if(newThumbnail)thumbnail =newThumbnail;
+//fallback if no thumbnail
+if(!thumbnail && variants.length >0 && variants[0].images.length>0){
+  thumbnail =variants[0].images[0];
+}
+
+const totalStock =calculateTotalStock(variants);
+
+return Product.findByIdAndUpdate(
+  id,
+  {
+    name:data.name.trim(),
+    category:data.category,
+    price:Number(data.price) || 0,
+    offer:data.offer || 0,
+    description :data.description,
+    stock:totalStock,
+    variants,
+    thumbnail
+  },
+  {new:true}
+);
+
 };
 
 //get product
@@ -426,5 +426,5 @@ exports.restoreProduct = async (id) => {
     throw err;
   }
 };
-
   
+ 
