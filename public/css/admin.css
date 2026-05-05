@@ -15,8 +15,7 @@ body {
 }
 
 /* ===============================
-   SIDEBAR
-================================ */
+   SIDEBAR*/
 .admin-sidebar {
   width: 240px;
   height: 100vh;
@@ -496,4 +495,8 @@ body {
             margin-right: 5px;
             background: #eee;
         }
-  
+  #prodDesc {
+  height: 70px;      
+  resize: none;      
+  overflow-y: auto;     
+}
