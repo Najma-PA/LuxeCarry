@@ -61,12 +61,10 @@ const productSchema = new mongoose.Schema({
 
   variants: [variantSchema],
 
-  images: [
-    {
-      type: String 
-    }
-  ],
-
+  thumbnail: {
+      type: String,
+      default:null
+    },
   isActive: {
     type: Boolean,
     default: true
@@ -86,6 +84,19 @@ productSchema.virtual('finalPrice').get(function () {
   return Math.round(price - (price * bestOffer / 100));
 });
 
+
+productSchema.virtual('displayImage').get(function () {
+  if (this.thumbnail) return this.thumbnail;
+
+  if (this.variants?.length > 0) {
+    const firstVariant = this.variants[0];
+    if (firstVariant.images?.length > 0) {
+      return firstVariant.images[0];
+    }
+  }
+
+  return '/images/placeholder.jpg';
+});
 
 // Ensure virtuals show in JSON
 productSchema.set('toJSON', { virtuals: true });
