@@ -39,7 +39,7 @@
             <i class="fa-regular fa-star"></i>
           </span>
         </div>
-        <% if(p.stock === 0){ %>
+         <% if(p.stock<=0){ %>
           <span class="text-danger fw-bold mb-3 d-block" style="font-size: 12px;">Out of Stock</span>
         <% } %>
         <div class="d-flex gap-2 mt-auto">
@@ -54,6 +54,7 @@
             BUY NOW
           </a>
         </div>
+        
       </div>
     </div>
   </div>

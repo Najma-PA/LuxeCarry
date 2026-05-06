@@ -398,7 +398,7 @@
                     <div class="summary-item-list">
                         <% cart.items.forEach(item => { %>
                             <div class="summary-item-row">
-                                <img src="<%= item.product.images[0] %>" alt="<%= item.product.name %>">
+                                <img src="<%=item.product?.thumbnail || '/images/placeholder.jpg' %>" alt="<%= item.product.name %>">
                                 <div class="summary-item-details">
                                     <div class="name"><%= item.product.name %></div>
                                     <div class="attr">

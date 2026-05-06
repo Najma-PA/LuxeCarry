@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><%= product.name %> - LuxeCarry</title>
+<title>
+  <%= product ? product.name : 'Product Unavailable' %> - LuxeCarry
+</title>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <!-- Modern Fonts -->
@@ -25,231 +27,7 @@
     color: var(--text-main);
   }
   
-  .heading-serif {
-    font-family: 'Playfair Display', serif;
-  }
   
-  /* Image Gallery */
-  .product-gallery {
-    position: relative;
-  }
-  .main-img-container {
-    background: #fff;
-    border-radius: 24px;
-    overflow: hidden;
-    height: 550px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.03);
-    cursor: zoom-in;
-  }
-  .main-img-container img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    transition: transform 0.2s ease-out;
-    pointer-events: none; /* Let container handle events */
-  }
-  .main-img-container.zoomed img {
-    transform: scale(2.5);
-  }
-  
-  .thumbnails-container {
-    display: flex;
-    gap: 12px;
-    justify-content: flex-start;
-    overflow-x: auto;
-    padding-bottom: 10px;
-  }
-  .thumbnail-item {
-    width: 90px;
-    height: 90px;
-    border-radius: 12px;
-    background: #fff;
-    padding: 8px;
-    cursor: pointer;
-    border: 2px solid transparent;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-  }
-  .thumbnail-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  .thumbnail-item.active {
-    border-color: var(--gold-primary);
-  }
-
-  /* Product Info */
-  .product-title {
-    font-size: 42px;
-    font-weight: 700;
-    margin-bottom: 10px;
-    color: #1a1a1a;
-  }
-  .product-price {
-    font-size: 28px;
-    color: var(--gold-primary);
-    font-weight: 600;
-    margin-bottom: 25px;
-  }
-  .product-desc {
-    color: var(--text-muted);
-    line-height: 1.8;
-    font-size: 15px;
-    margin-bottom: 35px;
-  }
-
-  /* Variants */
-  .variant-section {
-    margin-bottom: 30px;
-  }
-  .variant-label {
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-    display: block;
-  }
-  
-  .color-swatches {
-    display: flex;
-    gap: 12px;
-  }
-  .color-swatch {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    padding: 2px;
-    transition: 0.2s;
-    position: relative;
-  }
-  .color-swatch.active {
-    border-color: var(--gold-primary);
-  }
-  .color-inner {
-    width: 100%;
-    height: 100%;
-    border-radius: 50%;
-    display: block;
-  }
-  
-  .size-chips {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .size-chip {
-    padding: 8px 18px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: #fff;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: 0.2s;
-  }
-  .size-chip:hover {
-    border-color: var(--gold-primary);
-  }
-  .size-chip.active {
-    background: #fff8ee;
-    border-color: var(--gold-primary);
-    color: var(--gold-primary);
-  }
-  .size-chip.disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-    text-decoration: line-through;
-  }
-
-  /* Action Buttons */
-  .action-wrap {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-top: 40px;
-  }
-  .qty-selector {
-    display: flex;
-    align-items: center;
-    border: 1px solid #ddd;
-    border-radius: 30px;
-    padding: 8px 15px;
-    background: #fff;
-    gap: 15px;
-  }
-  .qty-btn {
-    border: none;
-    background: none;
-    color: #888;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 5px;
-  }
-  .btn-buy-now {
-    background: var(--gold-primary);
-    color: #fff;
-    border: none;
-    border-radius: 30px;
-    padding: 12px 35px;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: 0.3s;
-  }
-  .btn-buy-now:hover {
-    background: var(--gold-dark);
-    transform: translateY(-2px);
-  }
-  .btn-add-cart {
-    background: transparent;
-    color: var(--gold-primary);
-    border: 1.5px solid var(--gold-primary);
-    border-radius: 30px;
-    padding: 12px 35px;
-    font-weight: 700;
-    font-size: 13px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    transition: 0.3s;
-  }
-  .btn-add-cart:hover {
-    background: var(--gold-primary);
-    color: #fff;
-  }
-  .btn-heart {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid #ddd;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    background: #fff;
-    transition: 0.3s;
-  }
-  .btn-heart:hover {
-    color: #ef4444;
-    border-color: #ef4444;
-  }
-
-  .stock-status {
-    font-size: 12px;
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-  .stock-status.in-stock { color: #10b981; }
-  .stock-status.out-stock { color: #ef4444; }
-  .stock-status.low-stock { color: #f59e0b; }
 
 </style>
 </head>
@@ -315,17 +93,7 @@
           <% }) %>
 
         </div>
-        <!--<div class="main-img-container" id="mainImgContainer">
-          <img src="<%= product.thumbnail || '/images/placeholder.jpg' %>" id="mainDisplayImg" alt="<%= product.name %>">
-        </div>
         
-        <div class="thumbnails-container" id="thumbContainer">
-          <% (product.images || []).forEach((img, idx) => { %>
-            <div class="thumbnail-item <%= idx===0 ? 'active' : '' %>" onclick="updateMainImage(this, '<%= img %>')">
-              <img src="<%= img %>" alt="Thumbnail">
-            </div>
-          <% }) %>
-        </div>-->
 
 
       </div>
@@ -473,11 +241,7 @@
                        (product.thumbnail ? [product.thumbnail] : []);
 
 swapGallery(fallbackImages);
-  /*if (firstAvailable.images && firstAvailable.images.length > 0) {
-    swapGallery(firstAvailable.images);
-  } else {
-    swapGallery(product.thumbnail ?[product.thumbnail] :[]);
-  }*/
+ 
   if (isProductAvailable) {
   updateStockDisplay();
 }
@@ -515,7 +279,7 @@ function disableOutOfStockVariants() {
     updateStockDisplay();
     initZoom();
     
-    setInterval(checkAvailabilityLive,5000);
+    setInterval(checkAvailabilityLive,3000);
    }
    
 
@@ -568,41 +332,7 @@ function disableOutOfStockVariants() {
   updateTitle();
 }
 
-  /*function selectColor(el, color) {
-    selectedColor = color;
-    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
-    
-    // Find variant with these images
-    const variant = product.variants.find(v => v.type === 'Color' && v.value === color);
-    if(variant && variant.images && variant.images.length > 0) {
-      swapGallery(variant.images);
-    } else {
-      // Fallback to base product images
-      const fallbackImages = product.variants?.[0]?.images || 
-                       (product.thumbnail ? [product.thumbnail] : []);
 
-swapGallery(fallbackImages);
-      //swapGallery(product.images);
-    }
-    if (isProductAvailable) {
-  updateStockDisplay();
-}
-    //updateStockDisplay();
-    updateTitle();
-  }
-*/
- /* function selectSize(el, size) {
-    selectedSize = size;
-    document.querySelectorAll('.size-chip').forEach(s => s.classList.remove('active'));
-    el.classList.add('active');
-    if (isProductAvailable) {
-     updateStockDisplay();
-      }
-    //updateStockDisplay();
-    updateTitle();
-  }
-*/
   function updateMainImage(el, src) {
     document.getElementById('mainDisplayImg').src = src;
     document.querySelectorAll('.thumbnail-item').forEach(t => t.classList.remove('active'));
@@ -634,26 +364,9 @@ swapGallery(fallbackImages);
   thumbContainer.innerHTML = html;
 }
 
-  /*function swapGallery(images) {
-    const mainImg = document.getElementById('mainDisplayImg');
-    const thumbContainer = document.getElementById('thumbContainer');
-    
-    mainImg.src = images[0];
-    
-    let html = '';
-    images.forEach((img, idx) => {
-      html += `
-        <div class="thumbnail-item ${idx===0 ? 'active' : ''}" onclick="updateMainImage(this, '${img}')">
-          <img src="${img}" alt="Thumbnail">
-        </div>
-      `;
-    });
-    thumbContainer.innerHTML = html;
-  }
-*/
   function getSelectedVariant(){
     if(!product.variants || product.variants.length === 0) return null;
-    // Match either the selected color or the selected size (since a product uses one or the other as variants here)
+    
     return product.variants.find(v => v.value === selectedColor || v.value === selectedSize);
   }  
 
@@ -840,13 +553,7 @@ swapGallery(fallbackImages);
                 showConfirmButton:false,
                 timer:2500
               });
-             /* stockInfo.innerHTML = `
-              <i class="fa-solid fa-circle-xmark"></i>
-              ${data.message}
-              `;
-              stockInfo.className = 'stock-status out-stock';
-              
-             */
+           
             }
 
          
@@ -882,7 +589,11 @@ swapGallery(fallbackImages);
   stockInfo.className = 'stock-status out-stock';
 
   buyNowBtn.disabled = true;
+  buyNowBtn.style.opacity='0.5';
+  buyNowBtn.style.cursor='not-allowed';
   addCartBtn.disabled = true;
+  addCartBtn.style.opacity='0.5';
+  addCartBtn.style.cursor='not-allowed';
 
 } else {
   isProductAvailable=true;
@@ -942,6 +653,5 @@ swapGallery(fallbackImages);
   }
 
 </script>
-
 </body>
 </html>

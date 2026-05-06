@@ -446,7 +446,7 @@ if(variantRows.length===0){
         spinner.classList.add('d-none');
     submitBtn.disabled=false;
     return;
-        //console.log("Frontend validation failed")
+
     }
     
 
@@ -483,7 +483,8 @@ if(variantRows.length===0){
         if(result.errors){
             for(const [key,msg] of Object.entries(result.errors)){
                 if(key.startsWith('variant_')){
-                    const idx = key.split('_')[1];
+                    const parts = key.split('_');
+                    const idx =parts[parts.length -1];
                     const row= document.querySelectorAll('.variant-row')[idx];
 
                     if(row){
@@ -515,67 +516,6 @@ if(variantRows.length===0){
 
 }
 
-/*
-document.getElementById('productForm').onsubmit = async function(e) {
-    e.preventDefault();
-    ['name', 'category', 'price', 'offer', 'description'].forEach(clearFieldError);
-    document.querySelectorAll('.error-variant').forEach(el => el.style.display = 'none');
-    document.getElementById('imageError').classList.add('d-none');
-    document.getElementById('submitSpinner').classList.remove('d-none');
-    const submitBtn = this.querySelector('button[type="submit"]');
-    submitBtn.disabled = true;
-
-    try {
-        const formData = new FormData(this);
-     formData.delete('images');
-        baseNewBlobs.forEach((blob, idx) => { if(blob) formData.append(`baseImage_${idx}`, blob, `base-${idx}.jpg`); });
-    
-       // const variantRows = document.querySelectorAll('.variant-row');
-        variantRows.forEach((row, i) => {
-            const vIdx = row.getAttribute('data-index');
-           // const images = variantImagesData[vIdx].newBlobs.filter(b=>b !==null);
-
-
-            variantImagesData[vIdx].newBlobs.forEach((blob, bIdx) => {
-                if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
-            });
-        });
-
-        const response = await fetch('/admin/products/add', { method: 'POST', body: formData });
-        const result = await response.json();
-        if (result.success) {
-            Swal.fire({ icon: 'success', title: 'Success!', text: result.message, confirmButtonColor: '#ca8a04' })
-            .then(() => { window.location.href = result.redirectUrl || '/admin/products'; });
-        } else {
-            if (result.errors) {
-                for (const [key, msg] of Object.entries(result.errors)) {
-                    if (key.startsWith('variant_')) {
-                        const idx = key.split('_')[1];
-                        const row = document.querySelectorAll('.variant-row')[idx];
-                        if (row) {
-                            const err = row.querySelector('.error-variant');
-                            err.innerText = msg;
-                            err.style.display = 'block';
-                        }
-                    }else if(key === 'images'){
-                        const imgErr= document.getElementById('imageError');
-                        imgErr.innerText =msg;
-                        imgErr.classList.remove('d-none');
-
-                    } else { setFieldError(key, msg); }
-                }
-            } else {
-                Swal.fire({ icon: 'error', title: 'Oops...', text: result.message || 'Something went wrong', confirmButtonColor: '#ca8a04' });
-            }
-        }
-    } catch (err) {
-        console.error(err);
-        Swal.fire('Error', 'Server communication failed.', 'error');
-    } finally {
-        document.getElementById('submitSpinner').classList.add('d-none');
-        submitBtn.disabled = false;
-    }
-};*/
 </script>
 
 </body>
