@@ -32,7 +32,7 @@ exports.loadShop = async (req, res) => {
 
 
     // Detect AJAX request
-    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+    if (req.xhr || req.headers.accept ?.includes('application/json')) {
       const gridHtml = await new Promise((resolve, reject) => {
         res.render('partials/user/product-grid', { ...data }, (err, html) => {
           if (err) reject(err); else resolve(html);
@@ -73,12 +73,12 @@ exports.loadProductDetails = async (req, res) => {
     
     const product = await Product.findById(req.params.id).populate('category');
 
-    if (!product || !product.isActive || !product.category || !product.category.isActive || product.category.isDeleted) {
-      return res.status(404).render('user/product',{
-        product :null,
-        unavailable:true,
-        relatedProducts:[]
-      });
+    if (!product || 
+      !product.isActive || 
+      !product.category || 
+      !product.category.isActive || 
+      product.category.isDeleted) {
+      return res.status(404).render('user/product-not-found');
     }
 
     const relatedProducts = await Product.find({
@@ -89,7 +89,7 @@ exports.loadProductDetails = async (req, res) => {
  
     res.render('user/product', {
       product,
-      relatedProducts
+      relatedProducts,
     });
 
   } catch (err) {
@@ -100,13 +100,18 @@ exports.loadProductDetails = async (req, res) => {
 
 exports.checkProductAvailability = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
 
-    if (
+    const product = await Product.findById(req.params.id)
+      .populate('category');
+
+    const isUnavailable =
       !product ||
-      !product.isActive ||
-      product.isDeleted
-    ) {
+      product.isActive !== true ||
+      !product.category ||
+      product.category.isActive !== true ||
+      product.category.isDeleted === true;
+
+    if (isUnavailable) {
       return res.json({ available: false });
     }
 
@@ -117,6 +122,8 @@ exports.checkProductAvailability = async (req, res) => {
     });
 
   } catch (err) {
-    res.json({ available: false });
+    console.error(err);
+
+    return res.json({ available: false });
   }
 };
