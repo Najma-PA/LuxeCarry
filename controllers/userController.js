@@ -340,11 +340,7 @@ exports.userHome = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
-/*
-exports.userHome = (req, res) => {
-  res.render('user/home', { title: 'Home', user: req.session.user });
-};
-*/
+
 /* PROFILE*/
 exports.profilePage = async (req, res) => {
   const user = await userService.findUserById(req.session.user.id);
