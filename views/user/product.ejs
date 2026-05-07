@@ -245,7 +245,7 @@ swapGallery(fallbackImages);
   if (isProductAvailable) {
   updateStockDisplay();
 }
- // updateStockDisplay();
+ 
 }
 
 function disableOutOfStockVariants() {
@@ -599,50 +599,7 @@ function disableOutOfStockVariants() {
   isProductAvailable=true;
   updateStockDisplay(); // restore stock logic
 }
-    /*if (!data.available) {
-      stockInfo.innerHTML = `
-        <i class="fa-solid fa-circle-xmark"></i>
-        This product is currently unavailable
-      `;
-      stockInfo.className = 'stock-status out-stock';
-
-      if (buyNowBtn) {
-        buyNowBtn.disabled = true;
-        buyNowBtn.style.opacity = '0.5';
-        buyNowBtn.style.cursor = 'not-allowed';
-      }
-      if (addCartBtn) {
-        addCartBtn.disabled = true;
-        addCartBtn.style.opacity = '0.5';
-        addCartBtn.style.cursor = 'not-allowed';
-      }
-
-    } else {
-      if (data.stock !== undefined) {
-        product.stock = data.stock;
-      }
-      if (data.variants && Array.isArray(data.variants)) {
-        product.variants = data.variants;
-        
-        // Update variant chip visual states
-        product.variants.forEach(v => {
-          const el = document.querySelector(`[data-color="${v.value}"], [data-size="${v.value}"]`);
-          if (el) {
-            if (v.stock <= 0) {
-              el.classList.add('disabled');
-              el.style.opacity = '0.4';
-            } else {
-              el.classList.remove('disabled');
-              el.style.opacity = '1';
-            }
-          }
-        });
-      }
-
-      // Re-evaluate stock display (which also resets text and button states)
-      updateStockDisplay();
-    }
-*/
+    
   } catch (err) {
     console.log("Availability check failed");
   }
