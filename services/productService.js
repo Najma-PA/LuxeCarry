@@ -38,6 +38,7 @@ exports.getProducts = async (query) => {
       { category: { $in: categoryIds } }
     ];
   }
+    
 
   // Status Tabs
   if (status === 'active') {
@@ -64,6 +65,7 @@ exports.getProducts = async (query) => {
     .limit(limit);
 
   const total = await Product.countDocuments(filter);
+   
 
   // DASHBOARD STATS CALCULATION
   const allActiveProducts = await Product.find({ isActive: true });
@@ -153,24 +155,7 @@ exports.addProduct = async (data, files, variants) => {
 
   await Promise.all(savePromises);
 }
-  /*if(files && files.length >0){
-    const savePromises = files.map(async(file)=>{
-      //thumbnail
-      if(file.fieldname ==='thumbnail'){
-        thumbnail = await saveFile(file);
-      } else if(file.fieldname.startsWith('variantImages_')){
-        const vIdx =parseInt(file.fieldname.split('_')[1]);
-
-        if(variants[vIdx]){
-          if(!variants[vIdx].images)variants[vIdx].images =[];
-
-          const savedPath = await saveFile(file);
-          variants[vIdx].images.push(savedPath);
-        }
-      }
-    });
-    await Promise.all(savePromises);
-  }*/
+ 
   //ensure at least one variant
   if(!variants || variants.length ===0){
     variants =[{
@@ -178,7 +163,6 @@ exports.addProduct = async (data, files, variants) => {
       value:"Default",
       stock:parseInt(data.stock || 0),
       images: []
-      //baseImagePaths
     }];
   }
 
@@ -279,23 +263,7 @@ exports.updateProduct =async (id,data,files,variants)=>{
 
   await Promise.all(savePromises);
 }
-/*if(files && files.length  >0){
-  const savePromises =files. map(async(file)=>{
-    if(file.fieldname==='thumbnail'){
-      newThumbnail =await saveFile(file);
-    }else if(file.fieldname.startsWith('variantImages_')){
-      const vIdx =parseInt(file.fieldname.split('_')[1]);
 
-      if(variants[vIdx]){
-        if(!variants[vIdx].images)variants[vIdx].images =[];
-
-        const savedPath =await saveFile(file);
-        variants[vIdx].images.push(savedPath);
-      }
-    }
-  });
-  await Promise.all(savePromises);
-}*/
 //merge existing images
 
 if(variants && variants.length >0){
