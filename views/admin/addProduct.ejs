@@ -433,9 +433,9 @@ if(variantRows.length===0){
 
         const images =variantImagesData[vIdx].newBlobs.filter(b=>b !==null);
 
-        if(images.length< 3){
+        if(images.length< 4){
             const err =row.querySelector('.error-variant');
-            err.innerText ='Minimum 3 images are required';
+            err.innerText ='Minimum 4 images are required';
             err.style.display ='block';
             hasError= true;
         }

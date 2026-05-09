@@ -48,6 +48,7 @@
         <div class="mb-3">
           <label class="form-label-custom">Description</label>
           <textarea name="description" class="form-control-custom" rows="4" id="catDesc"></textarea>
+          <div id="descriptionError" class="text-danger small mt-1 d-none"></div>
         </div>
 
         <!-- Upload -->
@@ -75,7 +76,7 @@
         <!-- Offer -->
         <div class="mb-4">
           <label class="form-label-custom">Category Offer (%)</label>
-          <input type="number" name="offer" class="form-control-custom" id="catOffer">
+          <input type="number" name="offer" class="form-control-custom" id="catOffer" >
           <div id="offerError" class="text-danger small mt-1 d-none"></div>
         </div>
 
@@ -120,6 +121,7 @@ document.querySelectorAll('input, textarea').forEach(el => {
   el.addEventListener('input', () => {
     if (el.id === 'catName') clearFieldError('nameError');
     if (el.id === 'catOffer') clearFieldError('offerError');
+    if(el.id ==='catDesc')clearFieldError('descriptionError');
   });
 });
 
@@ -151,6 +153,7 @@ document.getElementById('addCategoryForm').onsubmit = async function(e) {
   clearFieldError('nameError');
   clearFieldError('offerError');
 
+
   const btn = document.getElementById('submitBtn');
   const text = document.getElementById('btnText');
   const spinner = document.getElementById('btnSpinner');
@@ -176,6 +179,7 @@ document.getElementById('addCategoryForm').onsubmit = async function(e) {
       if (result.errors) {
         if (result.errors.name) setFieldError('nameError', result.errors.name);
         if (result.errors.offer) setFieldError('offerError', result.errors.offer);
+        if(result.errors.description)setFieldError('descriptionError',result.errors.description);
       } else {
         Swal.fire('Error', result.message, 'error');
       }
