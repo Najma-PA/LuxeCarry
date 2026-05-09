@@ -191,7 +191,7 @@ exports.addProduct = async (data, files, variants) => {
       errors[`variant_${idx}`] ='Stock cannot be negative';
     }
 
-    if(!v.images || v.images.length <3){
+    if(!v.images || v.images.length <4){
       errors[`variant_image_${idx}`]= 'Each variant must have at least 3 images '
     }
 

@@ -63,7 +63,9 @@ exports.addCategory = async (data, file) => {
   if (!data.name || data.name.trim() === '') {
     errors.name = 'Category name is required';
   }
-
+ if(! data.description || dataa.description.trim()===''){
+  errors.description ='Description is required';
+ }
   if (data.offer && (data.offer < 0 || data.offer > 99)) {
     errors.offer = 'Offer must be between 0 and 99';
   }

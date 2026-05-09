@@ -18,7 +18,7 @@ const toggleWishlist = async (userId, productId) => {
   if (!wishlist) {
     wishlist = new Wishlist({ user: userId, items: [] });
   }
-
+  
   const existingIdx = wishlist.items.findIndex(item => item.product.toString() === productId);
 
   if (existingIdx > -1) {
