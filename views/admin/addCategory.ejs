@@ -6,7 +6,18 @@
   <title>Add Category</title>
 
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
   <link rel="stylesheet" href="/css/admin.css">
+  <style>
+    .cropper-container {
+      max-height: 400px;
+      overflow: hidden;
+    }
+    #cropperImage {
+      max-width: 100%;
+      display: block;
+    }
+  </style>
 </head>
 
 <body>
@@ -55,7 +66,7 @@
         <div class="mb-3">
           <label class="form-label-custom">Category Image</label>
 
-          <div class="upload-area" onclick="this.querySelector('input').click()">
+          <div class="upload-area" onclick="document.getElementById('catImage').click()">
 
             <div class="text-center" id="uploadPlaceholder">
               <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
@@ -63,13 +74,14 @@
               <small class="text-muted">PNG, JPG (Max. 2MB)</small>
             </div>
 
-            <input type="file" name="image" hidden id="catImage">
+            <input type="file" name="image" hidden id="catImage" accept="image/*">
 
           </div>
 
           <!-- Preview -->
           <div class="mt-2 d-none" id="previewContainer">
             <img id="previewImg" class="preview-img">
+            <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">Remove</button>
           </div>
         </div>
 
@@ -97,11 +109,38 @@
 
 </div>
 
+<!-- Cropper Modal -->
+<div class="modal fade" id="cropperModal" tabindex="-1" aria-labelledby="cropperModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="cropperModalLabel">Crop Category Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="cropper-container">
+          <img id="cropperImage" src="" alt="Image to crop">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="cropButton">Crop & Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
 <script>
+let cropper;
+let croppedBlob;
+const cropperModal = new bootstrap.Modal(document.getElementById('cropperModal'));
+const cropperImage = document.getElementById('cropperImage');
+
 // Error helpers
 function setFieldError(id, msg) {
   const el = document.getElementById(id);
@@ -125,7 +164,7 @@ document.querySelectorAll('input, textarea').forEach(el => {
   });
 });
 
-// Image preview
+// Image selection
 document.getElementById('catImage').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -139,12 +178,54 @@ document.getElementById('catImage').addEventListener('change', function(e) {
 
   const reader = new FileReader();
   reader.onload = function(ev) {
-    document.getElementById('previewImg').src = ev.target.result;
-    document.getElementById('previewContainer').classList.remove('d-none');
-    document.getElementById('uploadPlaceholder').style.display = 'none';
+    cropperImage.src = ev.target.result;
+    cropperModal.show();
   };
   reader.readAsDataURL(file);
 });
+
+// Initialize Cropper when modal opens
+document.getElementById('cropperModal').addEventListener('shown.bs.modal', function () {
+  cropper = new Cropper(cropperImage, {
+    aspectRatio: 1, // Square for categories
+    viewMode: 2,
+    autoCropArea: 1,
+  });
+});
+
+// Destroy Cropper when modal closes
+document.getElementById('cropperModal').addEventListener('hidden.bs.modal', function () {
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+});
+
+// Handle Crop Button
+document.getElementById('cropButton').addEventListener('click', function() {
+  const canvas = cropper.getCroppedCanvas({
+    width: 600,
+    height: 600,
+  });
+
+  canvas.toBlob((blob) => {
+    croppedBlob = blob;
+    const url = URL.createObjectURL(blob);
+    
+    document.getElementById('previewImg').src = url;
+    document.getElementById('previewContainer').classList.remove('d-none');
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+    
+    cropperModal.hide();
+  }, 'image/jpeg', 0.9);
+});
+
+function removeImage() {
+  document.getElementById('catImage').value = '';
+  croppedBlob = null;
+  document.getElementById('previewContainer').classList.add('d-none');
+  document.getElementById('uploadPlaceholder').style.display = 'block';
+}
 
 // Submit
 document.getElementById('addCategoryForm').onsubmit = async function(e) {
@@ -152,7 +233,7 @@ document.getElementById('addCategoryForm').onsubmit = async function(e) {
 
   clearFieldError('nameError');
   clearFieldError('offerError');
-
+  clearFieldError('descriptionError');
 
   const btn = document.getElementById('submitBtn');
   const text = document.getElementById('btnText');
@@ -163,6 +244,11 @@ document.getElementById('addCategoryForm').onsubmit = async function(e) {
   spinner.classList.remove('d-none');
 
   const formData = new FormData(this);
+  
+  // If we have a cropped image, append it
+  if (croppedBlob) {
+    formData.set('image', croppedBlob, 'category.jpg');
+  }
 
   try {
     const res = await fetch('/admin/categories/add', {

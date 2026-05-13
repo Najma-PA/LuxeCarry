@@ -112,7 +112,7 @@ Sign In
 
 <% if(user.profilePic){ %>
 
-<img src="<%= user.profilePic %>"
+<img src="<%= user.profilePic?.url  ||user.profilePic%>"
 class="profile-avatar">
 
 <% } else { %>

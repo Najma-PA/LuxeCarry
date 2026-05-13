@@ -167,7 +167,7 @@
 <div class="avatar-letter me-2 side-avatar-letter">
 <%= user.name.charAt(0).toUpperCase() %>
 </div>
-<img src="<%= user.profilePic %>" class="profile-avatar side-profile-avatar me-2 <%= user.profilePic ? '' : 'd-none' %>">
+<img src="<%= user.profilePic ? user.profilePic.url : '' %>" class="profile-avatar side-profile-avatar me-2 <%= user.profilePic && user.profilePic.url ? '' : 'd-none' %>">
 
 <h6 class="mb-0 user-display-name"><%= user.name %></h6>
 
@@ -224,8 +224,8 @@
 
 <div class="text-center mt-4">
     <div class="profile-pic-container">
-        <% if(user.profilePic) { %>
-            <img src="<%= user.profilePic %>" id="profilePicPreview" class="profile-pic-preview">
+        <% if(user.profilePic && user.profilePic.url) { %>
+            <img src="<%= user.profilePic.url %>" id="profilePicPreview" class="profile-pic-preview">
         <% } else { %>
             <div id="profilePicLetter" class="avatar-letter" style="width: 112px; height: 112px; font-size: 48px; border-radius: 50%;">
                 <%= user.name.charAt(0).toUpperCase() %>
@@ -235,7 +235,7 @@
         <label for="profilePicInput" class="change-pic-btn">
             <i class="fa fa-camera"></i>
         </label>
-        <button id="removePicBtn" class="remove-pic-btn <%= user.profilePic ? '' : 'd-none' %>" type="button" title="Remove Picture">
+        <button id="removePicBtn" class="remove-pic-btn <%= user.profilePic && user.profilePic.url ? '' : 'd-none' %>" type="button" title="Remove Picture">
             <i class="fa fa-trash"></i>
         </button>
         <input type="file" id="profilePicInput" accept="image/*" class="d-none">

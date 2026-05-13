@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Banners - LuxeCarry Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body style="background-color: #f1f5f9;">
+
+<div class="d-flex">
+  <!-- Sidebar -->
+  <%- include('../partials/admin/sidebar', { active: 'banners' }) %>
+
+  <!-- Main Content -->
+  <div class="flex-grow-1 p-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2 class="fw-bold mb-1">Promotional Banners</h2>
+        <p class="text-muted">Manage homepage highlights and sales.</p>
+      </div>
+      <a href="/admin/banners/add" class="btn btn-gold">
+        <i class="fa-solid fa-plus me-2"></i> Add Banner
+      </a>
+    </div>
+
+    <div class="card-shadow p-0 overflow-hidden">
+      <table class="table table-hover mb-0">
+        <thead class="bg-light">
+          <tr>
+            <th class="px-4 py-3">BANNER</th>
+            <th>TITLE</th>
+            <th>STATUS</th>
+            <th>ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if(banners && banners.length > 0) { %>
+            <% banners.forEach(banner => { %>
+              <tr>
+                <td class="px-4 py-3">
+                  <img src="<%= banner.image.url %>" style="width: 120px; height: 50px; object-fit: cover; border-radius: 4px;">
+                </td>
+                <td>
+                  <div class="fw-bold"><%= banner.title %></div>
+                  <small class="text-muted"><%= banner.subtitle %></small>
+                </td>
+                <td>
+                  <span class="pill-badge <%= banner.isActive ? 'status-active' : 'status-inactive' %>">
+                    <%= banner.isActive ? 'Active' : 'Inactive' %>
+                  </span>
+                </td>
+                <td>
+                  <button onclick="toggleBanner('<%= banner._id %>')" class="btn-action" title="Toggle Status">
+                    <i class="fa-solid <%= banner.isActive ? 'fa-eye-slash text-danger' : 'fa-eye text-success' %>"></i>
+                  </button>
+                  <button onclick="deleteBanner('<%= banner._id %>')" class="btn-action text-muted" title="Delete">
+                    <i class="fa-solid fa-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="4" class="text-center py-5 text-muted">No banners found. Start by adding one!</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  async function toggleBanner(id) {
+    const res = await fetch(`/admin/banners/toggle/${id}`, { method: 'PATCH' });
+    if (res.ok) window.location.reload();
+  }
+
+  async function deleteBanner(id) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "This banner will be permanently removed!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#dc2626',
+      confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+      const res = await fetch(`/admin/banners/${id}`, { method: 'DELETE' });
+      if (res.ok) window.location.reload();
+    }
+  }
+</script>
+</body>
+</html>

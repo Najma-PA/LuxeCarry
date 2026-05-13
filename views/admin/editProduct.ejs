@@ -92,8 +92,8 @@
                     <div class="small">Thumbnail</div>
                   </div>
                   <img id="thumbPreview"
-                        src="<%= product.thumbnail || '' %>"
-                        style="<%= product.thumbnail ? 'display:block' : 'display:none' %>">
+                        src="<%= product.thumbnail ? product.thumbnail.url : '' %>"
+                        style="<%= (product.thumbnail && product.thumbnail.url) ? 'display:block' : 'display:none' %>">
                         <input type="file" id="thumbInput" hidden onchange="handleThumbnailSelect(event)">
                 </div>
               </div>
@@ -129,7 +129,7 @@
                 <div class="d-flex align-items-center">
                     <div class="variant-images-previews d-flex" id="variantPreviews_<%= vIdx %>">
                         <% (v.images || []).forEach(img => { %>
-                            <img src="<%= img %>" class="variant-img-preview">
+                            <img src="<%= img.url %>" class="variant-img-preview">
                         <% }) %>
                     </div>
                     <button type="button" class="btn btn-sm btn-outline-gold ms-auto" onclick="openVariantImageModal(<%= vIdx %>)">
@@ -210,11 +210,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
+<script src="/js/admin/editProduct.js"></script>
 <script>
 // Data initialized from server
 const productId = "<%= product._id %>";
 let thumbnailBlob = null;
-let existingThumbnail = "<%= product.thumbnail || '' %>";
+let existingThumbnail = <%- JSON.stringify(product.thumbnail || null) %>;
 
 function triggerThumbnailInput() {
   currentVariantIndex =null;
@@ -236,16 +237,14 @@ function handleThumbnailSelect(event) {
 let variantImagesData = <%- JSON.stringify(
   (product.variants || []).map(v => ({
     existing: [
-      v.images?.[0] || "",
-      v.images?.[1] || "",
-      v.images?.[2] || "",
-      v.images?.[3] || ""
+      v.images?.[0] ? { url: v.images[0].url, public_id: v.images[0].public_id } : null,
+      v.images?.[1] ? { url: v.images[1].url, public_id: v.images[1].public_id } : null,
+      v.images?.[2] ? { url: v.images[2].url, public_id: v.images[2].public_id } : null,
+      v.images?.[3] ? { url: v.images[3].url, public_id: v.images[3].public_id } : null
     ],
     newBlobs: [null, null, null, null]
   }))
 ) %>;
-
-// SweetAlert2, Cropper.js, etc should be loaded above this -->
 
 
 let cropper;
@@ -376,7 +375,12 @@ function openVariantImageModal(vIdx) {
     container.innerHTML = '';
     const data = variantImagesData[vIdx];
     for (let i = 1; i <= 4; i++) {
-        const src = data.newBlobs[i-1] ? URL.createObjectURL(data.newBlobs[i-1]) : data.existing[i-1];
+        const existingImg = data.existing[i - 1];
+
+        const src = data.newBlobs[i - 1]
+          ? URL.createObjectURL(data.newBlobs[i - 1])
+          : existingImg?.url || "";
+        //const src = data.newBlobs[i-1] ? URL.createObjectURL(data.newBlobs[i-1]) : data.existing[i-1];
         const hasImg = src !== "";
         const slotHtml = `
             <div class="col-6">
@@ -402,12 +406,22 @@ function updateVariantPreviews(vIdx) {
     const previewContainer = document.getElementById(`variantPreviews_${vIdx}`);
     previewContainer.innerHTML = '';
     const data = variantImagesData[vIdx];
-    data.existing.forEach(img => {
+    data.existing.forEach(img=>{
+      if(img?.url){
+        previewContainer.insertAdjacentHTML(
+          'beforeend',
+          `<img src="${img.url}" class="variant-img-preview">`
+        );
+      }
+    });
+    /*data.existing.forEach(img => {
         if(img) previewContainer.insertAdjacentHTML('beforeend', `<img src="${img}" class="variant-img-preview">`);
     });
+    */
     data.newBlobs.forEach(blob => {
         if(blob) previewContainer.insertAdjacentHTML('beforeend', `<img src="${URL.createObjectURL(blob)}" class="variant-img-preview">`);
     });
+    
 }
 
 function addVariant() {
@@ -528,18 +542,32 @@ document.getElementById('editProductForm').onsubmit = async function(e) {
         });
 
 
+        
         if (hasError) {
-            console.log("Frontend validation failed");
-            
+            document.getElementById('submitSpinner').classList.add('d-none');
+            submitBtn.disabled = false;
+            return;
         }
+           // console.log("Frontend validation failed");
+            
+    
         //append images
        // const rows = document.querySelectorAll('.variant-row');
         rows.forEach((row, i) => {
             const vIdx = row.getAttribute('data-index');
             const data = variantImagesData[vIdx];
-            data.existing.forEach(url => {
+            data.existing.forEach(img => {
+               if(img){
+                  formData.append(
+                     `existingVariantImages_${i}`,
+                     JSON.stringify(img)
+                  );
+                }
+            });
+            /*data.existing.forEach(url => {
                if(url) formData.append(`existingVariantImages_${i}`, url); 
             });
+            */
             data.newBlobs.forEach((blob, bIdx) => {
                if(blob) formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
             });
