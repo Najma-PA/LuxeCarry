@@ -1,0 +1,343 @@
+let cropper;
+let currentSlot = null;
+let currentVariantIndex = null;
+let thumbnailBlob = null;
+let variantImagesData = [];
+
+function updateImagePreview(slot, blob) {
+  const url = URL.createObjectURL(blob);
+
+  if (currentVariantIndex !== null) {
+    variantImagesData[currentVariantIndex].newBlobs[slot - 1] = blob;
+    document.getElementById(`vImg_${slot}`).src = url;
+    document.getElementById(`vSlot_${slot}`).classList.add('has-image');
+    updateVariantPreviews(currentVariantIndex);
+  } else {
+    thumbnailBlob = blob;
+    document.getElementById(`img${slot}`).src = url;
+    document.getElementById(`slot${slot}`).classList.add('has-image');
+  }
+}
+
+const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+const variantImageModal = new bootstrap.Modal(document.getElementById('variantImageModal'));
+
+function addVariant() {
+  const vIdx = variantImagesData.length;
+  variantImagesData.push({ newBlobs: [null, null, null, null] });
+
+  const row = `
+        <tr class="variant-row" data-index="${vIdx}">
+            <td>
+                <input name="variantType[]" value="Color" class="form-control form-control-sm border-0 bg-light">
+                <div class="error-variant text-danger" style="font-size: 10px; display:none;"></div>
+            </td>
+            <td><input name="variantValue[]" class="form-control form-control-sm" placeholder="e.g. Black"></td>
+            <td><input type="number" name="variantStock[]" class="form-control form-control-sm" value="0"></td>
+            <td>
+                <div class="d-flex align-items-center">
+                    <div class="variant-images-previews d-flex" id="variantPreviews_${vIdx}"></div>
+                    <button type="button" class="btn btn-sm btn-outline-warning ms-2" onclick="openVariantImageModal(${vIdx})">
+                        <i class="fas fa-images"></i>
+                    </button>
+                </div>
+            </td>
+            <td class="text-end"><button type="button" onclick="this.closest('tr').remove()" class="btn btn-sm btn-light text-danger">X</button></td>
+        </tr>
+    `;
+  document.getElementById('variantTable').insertAdjacentHTML('beforeend', row);
+
+  const newRow = document.querySelector(`.variant-row[data-index="${vIdx}"]`);
+  newRow.querySelectorAll('input').forEach((input) => {
+    input.addEventListener('input', () => {
+      newRow.querySelector('.error-variant').style.display = 'none';
+    });
+  });
+}
+
+// Initial variant
+addVariant();
+
+function triggerFileInput(slot, isThumbnail = false) {
+  if (isThumbnail) {
+    currentVariantIndex = null;
+    document.getElementById(`input${slot}`).click();
+  } else {
+    document.getElementById(`vInput_${slot}`).click();
+  }
+}
+
+function removeImage(event, slot) {
+  event.stopPropagation();
+  variantImagesData[currentVariantIndex].newBlobs[slot - 1] = null;
+  document.getElementById(`vImg_${slot}`).src = '';
+  document.getElementById(`vSlot_${slot}`).classList.remove('has-image');
+  updateVariantPreviews(currentVariantIndex);
+}
+
+function handleFileSelect(event, slot) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // IMMEDIATE VALIDATION
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+  if (!allowedTypes.includes(file.type)) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Invalid File Type',
+      text: 'Please select a valid image (jpg, jpeg, png, or webp)',
+      confirmButtonColor: '#ca8a04',
+    });
+    event.target.value = ''; // Clear selection
+    return;
+  }
+
+  currentSlot = slot;
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    document.getElementById('cropperImage').src = e.target.result;
+    cropModal.show();
+  };
+  reader.readAsDataURL(file);
+}
+
+document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+  cropper = new Cropper(document.getElementById('cropperImage'), {
+    aspectRatio: 4 / 5,
+    viewMode: 2,
+    autoCropArea: 1,
+  });
+});
+
+document.getElementById('cropModal').addEventListener('hidden.bs.modal', function () {
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
+
+  if (currentVariantIndex !== null) {
+    const input = document.getElementById(`vInput_${currentSlot}`);
+    if (input) input.value = '';
+  } else {
+    document.getElementById(`input${currentSlot}`).value = '';
+  }
+});
+
+currentVariantIndex = null;
+document.getElementById('cropButton').onclick = function () {
+  if (!cropper) return;
+  cropper.getCroppedCanvas({ width: 800, height: 1000 }).toBlob(
+    (blob) => {
+      updateImagePreview(currentSlot, blob);
+      cropModal.hide();
+    },
+    'image/jpeg',
+    0.9
+  );
+};
+
+function openVariantImageModal(vIdx) {
+  currentVariantIndex = vIdx;
+  const container = document.getElementById('variantModalSlots');
+  container.innerHTML = '';
+  const data = variantImagesData[vIdx];
+  for (let i = 1; i <= 4; i++) {
+    const blob = data.newBlobs[i - 1];
+    const src = blob ? URL.createObjectURL(blob) : '';
+    const hasImg = src !== '';
+    const slotHtml = `
+            <div class="col-6">
+                <div class="image-slot ${hasImg ? 'has-image' : ''}" id="vSlot_${i}" onclick="triggerFileInput(${i})">
+                    <div class="slot-placeholder">
+                        <i class="fas fa-plus mb-2"></i>
+                        <div class="small">Image ${i}</div>
+                    </div>
+                    <img id="vImg_${i}" src="${src}" alt="" style="${hasImg ? 'display:block' : ''}">
+                    <input type="file" id="vInput_${i}" accept="image/*" hidden onchange="handleFileSelect(event, ${i})">
+                    <button type="button" class="remove-img-btn" style="${hasImg ? 'display:flex' : ''}" onclick="removeImage(event, ${i})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    container.insertAdjacentHTML('beforeend', slotHtml);
+  }
+  variantImageModal.show();
+}
+
+function updateVariantPreviews(vIdx) {
+  const previewContainer = document.getElementById(`variantPreviews_${vIdx}`);
+  previewContainer.innerHTML = '';
+  variantImagesData[vIdx].newBlobs.forEach((blob) => {
+    if (blob)
+      previewContainer.insertAdjacentHTML(
+        'beforeend',
+        `<img src="${URL.createObjectURL(blob)}" class="variant-img-preview">`
+      );
+  });
+}
+
+function setFieldError(id, msg) {
+  const errEl = document.getElementById(`error-${id}`);
+  if (errEl) {
+    errEl.innerText = msg;
+    errEl.classList.remove('d-none');
+  }
+}
+
+function clearFieldError(id) {
+  const errEl = document.getElementById(`error-${id}`);
+  if (errEl) {
+    errEl.classList.add('d-none');
+  }
+}
+
+['Name', 'Category', 'Price', 'Offer', 'Desc'].forEach((idSuffix) => {
+  const el = document.getElementById(`prod${idSuffix}`);
+  if (el) {
+    el.addEventListener('input', () => {
+      const map = {
+        prodName: 'name',
+        prodCategory: 'category',
+        prodPrice: 'price',
+        prodOffer: 'offer',
+        prodDesc: 'description',
+      };
+      clearFieldError(map[el.id]);
+    });
+    if (el.tagName === 'SELECT') {
+      el.addEventListener('change', () => clearFieldError('category'));
+    }
+  }
+});
+
+document.getElementById('productForm').onsubmit = async function (e) {
+  e.preventDefault();
+  //clear errors
+  ['name', 'category', 'price', 'offer', 'description'].forEach(clearFieldError);
+  document.querySelectorAll('.error-variant').forEach((el) => (el.style.display = 'none'));
+
+  const submitBtn = this.querySelector('button[type="submit"]');
+  const spinner = document.getElementById('submitSpinner');
+
+  spinner.classList.remove('d-none');
+  submitBtn.disabled = true;
+
+  try {
+    const formData = new FormData(this);
+
+    const variantRows = document.querySelectorAll('.variant-row');
+    const variantError = document.getElementById('error-variants');
+    if (variantError) {
+      variantError.innerText = '';
+      variantError.classList.add('d-none');
+    }
+
+    let hasError = false;
+
+    if (!formData.get('name')) {
+      setFieldError('name', 'Product name required');
+      hasError = true;
+    }
+    //category
+    if (!formData.get('category')) {
+      setFieldError('category', 'Select category');
+      hasError = true;
+    }
+
+    if (!formData.get('price') || formData.get('price') <= 0) {
+      setFieldError('price', 'Valid price required');
+      hasError = true;
+    }
+    //validate variants
+    if (variantRows.length === 0) {
+      if (variantError) {
+        variantError.innerText = 'Please add at least one variant';
+        variantError.classList.remove('d-none');
+      }
+      hasError = true;
+    }
+
+    variantRows.forEach((row, i) => {
+      const vIdx = row.getAttribute('data-index');
+
+      const images = variantImagesData[vIdx].newBlobs.filter((b) => b !== null);
+
+      if (images.length < 3) {
+        const err = row.querySelector('.error-variant');
+        err.innerText = 'Minimum 3 images are required';
+        err.style.display = 'block';
+        hasError = true;
+      }
+    });
+
+    //Stop if validation fails
+    if (hasError) {
+      spinner.classList.add('d-none');
+      submitBtn.disabled = false;
+      return;
+    }
+
+    if (thumbnailBlob) {
+      formData.append('thumbnail', thumbnailBlob, 'thumbnail.jpg');
+    }
+    //Append variant images
+    variantRows.forEach((row, i) => {
+      const vIdx = row.getAttribute('data-index');
+      variantImagesData[vIdx].newBlobs.forEach((blob, bIdx) => {
+        if (blob) {
+          formData.append(`variantImages_${i}`, blob, `variant-${i}-${bIdx}.jpg`);
+        }
+      });
+    });
+
+    const response = await fetch('/admin/products/add', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      Swal.fire({
+        icon: 'success',
+        title: 'Success!',
+        text: result.message,
+        confirmButtonColor: '#ca8a04',
+      }).then(() => {
+        window.location.href = result.redirectUrl || '/admin/products';
+      });
+    } else {
+      if (result.errors) {
+        for (const [key, msg] of Object.entries(result.errors)) {
+          if (key.startsWith('variant_')) {
+            const parts = key.split('_');
+            const idx = parts[parts.length - 1];
+            const row = document.querySelectorAll('.variant-row')[idx];
+
+            if (row) {
+              const err = row.querySelector('.error-variant');
+              err.innerText = msg;
+              err.style.display = 'block';
+            }
+          } else {
+            setFieldError(key, msg);
+          }
+        }
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: result.message || 'something went wrong',
+          confirmButtonColor: '#ca8a04',
+        });
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    Swal.fire('Error', 'Server communication failed.', 'error');
+  } finally {
+    spinner.classList.add('d-none');
+    submitBtn.disabled = false;
+  }
+};
