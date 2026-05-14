@@ -5,7 +5,7 @@ const Product = require('../../models/productModel');
 //LOAD SHOP PAGE
 exports.loadShop = async (req, res) => {
   try {
-    const data = await productService.getShopProducts(req.query);
+    const data = await productService.getShopProducts(req.query, req.session.user?._id);
 
     // get categories
     const categories = await Category.find({ isActive: true, isDeleted: { $ne: true } });

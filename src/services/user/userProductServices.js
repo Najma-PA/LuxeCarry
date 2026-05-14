@@ -1,6 +1,7 @@
 const Product = require('../../models/productModel');
+const Wishlist = require('../../models/wishlistModel');
 
-exports.getShopProducts = async (query) => {
+exports.getShopProducts = async (query, userId) => {
   let { search = '', category, minPrice, maxPrice, sort, page = 1, color } = query;
 
   page = parseInt(page);
@@ -61,11 +62,25 @@ exports.getShopProducts = async (query) => {
     .sort(sortOption)
     .skip(skip)
     .limit(limit);
+  let wishlistProductIds = [];
+  if (userId) {
+    const wishlist = await Wishlist.findOne({ user: userId });
 
+    if (wishlist) {
+      wishlistProductIds = wishlist.items.map((item) => item.product.toString());
+    }
+  }
+  // ADD isWishlisted TO PRODUCTS
+  const updatedProducts = products.map((product) => {
+    const obj = product.toObject();
+
+    obj.isWishlisted = wishlistProductIds.includes(product._id.toString());
+
+    return obj;
+  });
   const total = await Product.countDocuments(filter);
-
   return {
-    products,
+    products: updatedProducts,
     currentPage: page,
     totalPages: Math.ceil(total / limit),
     query,
