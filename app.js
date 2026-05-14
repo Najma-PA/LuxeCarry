@@ -2,16 +2,16 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 
-const passport = require("./config/passport");
+const passport = require('./src/config/passport');
 
-const adminSession = require('./config/adminSession');
-const userSession = require('./config/userSession');
-const connectDB = require('./config/connectDb');
+const adminSession = require('./src/config/adminSession');
+const userSession = require('./src/config/userSession');
+const connectDB = require('./src/config/connectDb');
 
-const userRoutes = require('./routes/user');
-const adminRoutes = require('./routes/admin');
-const noCache = require('./middleware/noCache');
-const errorHandler = require('./middleware/errorHandler');
+const userRoutes = require('./src/routes/user');
+const adminRoutes = require('./src/routes/admin');
+const noCache = require('./src/middleware/noCache');
+const errorHandler = require('./src/middleware/errorHandler');
 
 const app = express();
 
@@ -37,19 +37,18 @@ app.use(userSession);
 /* PASSPORT */
 app.use(passport.initialize());
 app.use(passport.session());
-const cartService = require('./services/cartService');
+const cartService = require('./src/services/user/cartService');
 
 /* GLOBAL LOCALS */
 app.use(async (req, res, next) => {
   try {
-    const user = req.user || (req.session?.user || null);
+    const user = req.user || req.session?.user || null;
     res.locals.user = user;
-    res.locals.admin =req.session?.admin || null;
-    
+    res.locals.admin = req.session?.admin || null;
+
     // Support both Passport (_id) and Custom Session (id)
-    const userId = user ? (user._id || user.id) : null;
+    const userId = user ? user._id || user.id : null;
     res.locals.cartCount = userId ? await cartService.getCartCount(userId) : 0;
-    
   } catch (err) {
     console.error('Error in global locals middleware:', err);
     res.locals.cartCount = 0;
@@ -61,16 +60,15 @@ app.use('/admin', adminRoutes);
 app.use('/user', noCache, userRoutes);
 
 /* ROOT */
-const { redirectIfUserLoggedIn } = require('./middleware/userAuth');
+const { redirectIfUserLoggedIn } = require('./src/middleware/userAuth');
 /*app.get('/', redirectIfUserLoggedIn, (req, res) => {
   res.render('user/home', {
     user: req.user || null
   });
   */
- app.get('/', redirectIfUserLoggedIn, (req, res) => {
+app.get('/', redirectIfUserLoggedIn, (req, res) => {
   res.redirect('/user/home');
 });
-
 
 /* ERROR HANDLER */
 app.use(errorHandler);
@@ -78,10 +76,12 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
 
 /* DB + SERVER */
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server running at http://localhost:${PORT}`);
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Failed to connect to DB:', err);
   });
-}).catch(err => {
-  console.error('Failed to connect to DB:', err);
-});
