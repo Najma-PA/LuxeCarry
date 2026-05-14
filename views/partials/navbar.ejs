@@ -110,7 +110,7 @@ Sign In
 
 <a href="/user/profile" style="text-decoration: none;">
 
-<% if(user.profilePic){ %>
+<% if(user.profilePic.url){ %>
 
 <img src="<%= user.profilePic?.url  ||user.profilePic%>"
 class="profile-avatar">

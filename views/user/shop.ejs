@@ -223,11 +223,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 showToast(data.message);
                 const icon = element.querySelector('i');
-                if (data.message.includes('added')) {
-                    icon.classList.replace('fa-regular', 'fa-solid');
-                    icon.style.color = '#ef4444';
+                if (data.action ==='added') {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid')
+                    icon.style.color = '#b36b00';
                 } else {
-                    icon.classList.replace('fa-solid', 'fa-regular');
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular')
                     icon.style.color = '#6b7280';
                 }
             }

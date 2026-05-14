@@ -3,13 +3,23 @@
   <div class="col-md-4 mb-4">
     <div class="card border-0 shadow-sm product-card h-100" style="border-radius: 16px; overflow: hidden; background-color: #ffffff;">
       <a href="/user/product/<%= p._id %>" class="position-relative bg-light d-block" style="padding: 20px; border-radius: 16px 16px 0 0; text-align: center; min-height: 220px; display: flex; align-items: center; justify-content: center; text-decoration: none;">
-        <span class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm wishlist-toggle" 
+       <!-- <span class="position-absolute d-flex align-items-center justify-content-center bg-white shadow-sm wishlist-toggle" 
               style="top: 15px; right: 15px; width: 32px; height: 32px; border-radius: 50%; color: #6b7280; transition: color 0.2s; z-index: 2; cursor: pointer;" 
               data-id="<%= p._id %>">
           <i class="fa-regular fa-heart" style="font-size: 15px;"></i>
-        </span>
+        </span>-->
+        <div class="position-absolute wishlist-toggle" style="top: 15px; 
+      right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; 
+      align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;" 
+      data-id="<%= p._id %>">
+      <i class="<%= p.isWishlisted ? 'fa-solid' : 'fa-regular' %> fa-heart"
+   style="color: <%= p.isWishlisted ? '#b36b00' : '#a0aec0' %>; font-size: 14px;">
+</i>
+          
+      </div>
         <img src="<%= p.thumbnail.url || '/images/placeholder.jpg'%>" class="img-fluid" style="max-height: 180px; object-fit: contain;">
       </a>
+       
       <div class="card-body p-4 d-flex flex-column">
         <div class="d-flex align-items-center mb-2">
           <% 

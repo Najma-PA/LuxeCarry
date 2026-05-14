@@ -125,6 +125,7 @@ Explore our premium collection of bags and accessories
 </div>
 
 </div>
+
 <!--Dynamic Products-->
 <div class="container mt-5 mb-5">
 
@@ -135,31 +136,38 @@ Explore our premium collection of bags and accessories
 <a href="/user/shop" class="text-decoration-none fw-bold" style="color: #c26a00; font-size: 13px;">View All Collection</a>
 
 </div>
+<div class="col-md-9">
 
-<div class="row g-4">
-    <div class="row" id="product-grid">
+<div class="row" id="product-grid">
 
 <%- include('../partials/user/product-grid') %>
 
 </div>
+
 <!--
 <% products.forEach(p => { %>
 
 <div class="col-md-3 mb-4">
 
-<div class="card border-0 shadow-sm h-100" style="border-radius: 20px; overflow: hidden; background: white; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
+<div class="card border-0 shadow-sm h-100" style="border-radius: 20px; overflow: hidden; 
+background: white; transition: transform 0.3s ease;
+" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
 
   <a href="/user/product/<%= p._id %>" class="position-relative d-block" 
     style="background-color: #f4f6f8; padding: 25px; height: 260px; 
     display: flex; align-items: center; justify-content: center; text-decoration: none;">
-      <div class="position-absolute wishlist-toggle" style="top: 15px; 
+      
+      <img src="<%= p.thumbnail.url || '/images/placeholder.jpg'%>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
+  </a>
+  <div class="position-absolute wishlist-toggle" style="top: 15px; 
       right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; 
       align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;" 
       data-id="<%= p._id %>">
-          <i class="far fa-heart" style="color: #a0aec0; font-size: 14px;"></i>
+      <i class="<%= p.isWishlisted ? 'fa-solid' : 'fa-regular' %> fa-heart"
+   style="color: <%= p.isWishlisted ? '#b36b00' : '#a0aec0' %>; font-size: 14px;">
+</i>
+          
       </div>
-      <img src="<%= p.thumbnail.url || '/images/placeholder.jpg'%>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-  </a>
 
   <div class="card-body p-4 d-flex flex-column">
 
@@ -215,9 +223,9 @@ Explore our premium collection of bags and accessories
 </div>
 
 <% }) %>
-
-</div>
 -->
+</div>
+
 </div>
 
 <!-- OFFER -->
@@ -260,10 +268,21 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('click', async (e) => {
         const wishlistToggle = e.target.closest('.wishlist-toggle');
         if (wishlistToggle) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    await handleToggleWishlist(
+        wishlistToggle.dataset.id,
+        wishlistToggle
+    );
+
+    return;
+}
+/*if (wishlistToggle) {
             e.preventDefault();
             await handleToggleWishlist(wishlistToggle.dataset.id, wishlistToggle);
         }
-
+         */ 
         const addToCartBtn = e.target.closest('.add-to-cart-btn');
         if (addToCartBtn) {
             const productId =addToCartBtn.dataset.id;
@@ -284,11 +303,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success) {
                 showToast(data.message);
                 const icon = element.querySelector('i');
-                if (data.message.includes('added')) {
-                    icon.classList.replace('far', 'fas');
-                    icon.style.color = '#ef4444';
+                if (data.action === 'added') {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                    icon.style.color = '#b36b00';
                 } else {
-                    icon.classList.replace('fas', 'far');
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
                     icon.style.color = '#a0aec0';
                 }
             }
