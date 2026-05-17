@@ -38,11 +38,28 @@ app.use(userSession);
 app.use(passport.initialize());
 app.use(passport.session());
 const cartService = require('./src/services/user/cartService');
+const userService = require('./src/services/user/userService');
 
 /* GLOBAL LOCALS */
 app.use(async (req, res, next) => {
   try {
-    const user = req.user || req.session?.user || null;
+    const sessionUser = req.user || req.session?.user || null;
+    let user = null;
+
+    if (sessionUser) {
+      const userId = sessionUser._id || sessionUser.id;
+      user = await userService.findUserById(userId);
+      
+      // If user was blocked or deleted in the admin dashboard:
+      if (!user || user.isBlocked) {
+        req.session.user = null;
+        if (req.logout) {
+          req.logout(() => {});
+        }
+        user = null;
+      }
+    }
+
     res.locals.user = user;
     res.locals.admin = req.session?.admin || null;
 
@@ -51,6 +68,7 @@ app.use(async (req, res, next) => {
     res.locals.cartCount = userId ? await cartService.getCartCount(userId) : 0;
   } catch (err) {
     console.error('Error in global locals middleware:', err);
+    res.locals.user = null;
     res.locals.cartCount = 0;
   }
   next();
