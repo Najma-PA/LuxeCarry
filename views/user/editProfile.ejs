@@ -150,14 +150,17 @@
     
 
 
-<%- include("../partials/navbar") %>
+<%- include("../partials/user/navbar") %>
 
 
 
 <div class="container account-container">
 
 <div class="row">
-
+    <%- include("../partials/user/sidebar",{
+        user,activePage:'profile'
+    }) %>
+<!--
 <div class="col-md-3">
     
 <div class="p-3">
@@ -215,7 +218,7 @@
 
 </div>
 </div>
-
+-->
 <div class="col-md-9 d-flex align-items-start pt-5">
 
 <div class="account-card p-4 w-75">
@@ -482,53 +485,62 @@ document.addEventListener('DOMContentLoaded', () => {
             Swal.fire('Error', 'Server error', 'error');
         }
     }
-
     function updateUIAfterPhotoChange(newPath) {
+        // Update all unified luxury avatar components on the page
+        document.querySelectorAll('.lc-avatar-container').forEach(container => {
+            const img = container.querySelector('.lc-avatar-img');
+            const letter = container.querySelector('.lc-avatar-letter');
+            
+            if (newPath) {
+                if (img) {
+                    img.src = newPath;
+                    img.classList.remove('d-none');
+                }
+                if (letter) {
+                    letter.classList.add('d-none');
+                    letter.classList.remove('d-flex');
+                }
+            } else {
+                if (img) {
+                    img.src = '';
+                    img.classList.add('d-none');
+                }
+                if (letter) {
+                    letter.classList.remove('d-none');
+                    letter.classList.add('d-flex');
+                }
+            }
+        });
+
+        // Also update page-specific profile page preview elements
         const picPreview = document.getElementById('profilePicPreview');
         const letterAvatar = document.getElementById('profilePicLetter');
-        const sideLetterAvatar = document.querySelector('.side-avatar-letter');
-        const sidePicAvatar = document.querySelector('.side-profile-avatar');
         const removeBtn = document.getElementById('removePicBtn');
 
         if (newPath) {
-            // Updated
             if (picPreview) {
                 picPreview.src = newPath;
                 picPreview.classList.remove('d-none');
             }
-            if (letterAvatar) letterAvatar.classList.add('d-none');
-            if (removeBtn) removeBtn.classList.remove('d-none');
-            
-            if (sidePicAvatar) {
-                sidePicAvatar.src = newPath;
-                sidePicAvatar.classList.remove('d-none');
+            if (letterAvatar) {
+                letterAvatar.classList.add('d-none');
             }
-            if (sideLetterAvatar) sideLetterAvatar.classList.add('d-none');
-
-            // Header avatars
-            document.querySelectorAll('.profile-avatar').forEach(img => {
-                img.src = newPath;
-                img.classList.remove('d-none');
-            });
-            document.querySelectorAll('.avatar-letter').forEach(div => {
-                if(!div.classList.contains('side-avatar-letter') && div.id !== 'profilePicLetter') {
-                    div.classList.add('d-none');
-                }
-            });
+            if (removeBtn) {
+                removeBtn.classList.remove('d-none');
+            }
         } else {
-            // Removed
-            if (picPreview) picPreview.classList.add('d-none');
-            if (letterAvatar) letterAvatar.classList.remove('d-none');
-            if (removeBtn) removeBtn.classList.add('d-none');
-
-            if (sidePicAvatar) sidePicAvatar.classList.add('d-none');
-            if (sideLetterAvatar) sideLetterAvatar.classList.remove('d-none');
-
-            document.querySelectorAll('.profile-avatar').forEach(img => img.classList.add('d-none'));
-            document.querySelectorAll('.avatar-letter').forEach(div => div.classList.remove('d-none'));
+            if (picPreview) {
+                picPreview.src = '';
+                picPreview.classList.add('d-none');
+            }
+            if (letterAvatar) {
+                letterAvatar.classList.remove('d-none');
+            }
+            if (removeBtn) {
+                removeBtn.classList.add('d-none');
+            }
         }
     }
-
     function showToast(msg) {
         Swal.fire({
             icon: 'success',

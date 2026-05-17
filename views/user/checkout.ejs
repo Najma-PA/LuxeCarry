@@ -8,290 +8,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Inter', sans-serif;
-            color: #1e293b;
-        }
 
-        .checkout-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .checkout-header h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-        }
-
-        .section-title {
-            font-size: 1.1rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 25px;
-        }
-
-        .section-title i {
-            color: #b78846; /* LuxeCarry Gold */
-        }
-
-        .checkout-form-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
-            margin-bottom: 30px;
-        }
-
-        .form-label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 8px;
-        }
-
-        .form-control, .form-select {
-            border: 1px solid #e2e8f0;
-            padding: 12px 15px;
-            font-size: 0.95rem;
-            border-radius: 6px;
-            transition: all 0.2s;
-        }
-
-        .form-control:focus {
-            border-color: #b78846;
-            box-shadow: 0 0 0 3px rgba(183, 136, 70, 0.1);
-        }
-
-        .btn-saved-address {
-            background: #2d2d2d;
-            color: #fff;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            margin-top: 15px;
-            transition: background 0.2s;
-        }
-
-        .btn-saved-address:hover {
-            background: #1a1a1a;
-            color: #fff;
-        }
-
-        /* Payment Selection List */
-        .payment-method-item {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px 20px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .payment-method-item:hover {
-            border-color: #b78846;
-            background: #fafafa;
-        }
-
-        .payment-method-item input[type="radio"] {
-            width: 18px;
-            height: 18px;
-            accent-color: #b78846;
-            margin-right: 15px;
-        }
-
-        .payment-method-item label {
-            flex-grow: 1;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .payment-method-item i {
-            color: #94a3b8;
-            font-size: 1.2rem;
-        }
-
-        /* Order Summary Card */
-        .order-summary-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 100px;
-        }
-
-        .order-summary-card h5 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin-bottom: 25px;
-        }
-
-        .summary-item-list {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            padding-right: 5px;
-        }
-
-        .summary-item-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .summary-item-list::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 10px;
-        }
-
-        .summary-item-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .summary-item-row img {
-            width: 65px;
-            height: 65px;
-            object-fit: cover;
-            border-radius: 8px;
-            background: #f1f5f9;
-        }
-
-        .summary-item-details {
-            flex-grow: 1;
-        }
-
-        .summary-item-details .name {
-            font-weight: 700;
-            font-size: 0.95rem;
-            margin-bottom: 2px;
-        }
-
-        .summary-item-details .attr {
-            font-size: 0.75rem;
-            color: #64748b;
-        }
-
-        .summary-item-details .price {
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-top: 5px;
-        }
-
-        /* Coupon Section */
-        .coupon-section {
-            margin-top: 25px;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 20px;
-            margin-bottom: 25px;
-        }
-
-        .coupon-input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn-apply-coupon {
-            background: #f8f1e7;
-            color: #b78846;
-            border: 1px solid #f1e4d1;
-            padding: 8px 20px;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        .coupon-message {
-            font-size: 0.75rem;
-            color: #16a34a;
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* Totals */
-        .summary-totals {
-            font-size: 0.9rem;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            color: #64748b;
-        }
-
-        .total-row.discount {
-            color: #16a34a;
-        }
-
-        .total-row.grand-total {
-            border-top: 1.5px solid #000;
-            margin-top: 15px;
-            padding-top: 15px;
-            color: #000;
-            font-weight: 800;
-            font-size: 1.4rem;
-        }
-
-        .btn-place-order {
-            background: #b78846;
-            color: #fff;
-            border: none;
-            width: 100%;
-            padding: 18px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 1.05rem;
-            margin-top: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            transition: opacity 0.2s;
-        }
-
-        .btn-place-order:hover {
-            opacity: 0.9;
-            color: #fff;
-        }
-
-        /* Modal for saved addresses */
-        .address-option {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .address-option:hover {
-            border-color: #b78846;
-            background: #fffaf0;
-        }
-
-        .address-option.selected {
-            border-color: #b78846;
-            background: #fffaf0;
-        }
-    </style>
 </head>
 <body>
 
-<%- include('../partials/navbar') %>
+<%- include('../partials/user/navbar') %>
 
 <div class="checkout-container">
     <div class="checkout-header">
@@ -309,47 +30,64 @@
                 </div>
 
                 <div class="checkout-form-card">
-                    <% const defaultAddr = (addresses && addresses.length > 0 && addresses[0].isDefault) ? addresses[0] : null; %>
-                    <div class="row g-3">
-                        <div class="col-12">
-                            <label class="form-label">Full Name</label>
-                            <input type="text" name="name" id="ship_name" class="form-control" placeholder="Enter full name" value="<%= defaultAddr ? defaultAddr.name : '' %>" required>
-                        </div>
-                        <div class="col-md-7">
-                            <label class="form-label">Phone Number</label>
-                            <input type="text" name="phone" id="ship_phone" class="form-control" placeholder="+1 (555) 000-0000" value="<%= defaultAddr ? defaultAddr.phone : '' %>" required>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label">Pincode</label>
-                            <input type="text" name="pincode" id="ship_pincode" class="form-control" placeholder="10001" value="<%= defaultAddr ? defaultAddr.pincode : '' %>" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Street Address</label>
-                            <input type="text" name="street" id="ship_street" class="form-control" placeholder="5th Avenue, Manhattan" value="<%= defaultAddr ? defaultAddr.street : '' %>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">City</label>
-                            <input type="text" name="city" id="ship_city" class="form-control" placeholder="New York" value="<%= defaultAddr ? defaultAddr.city : '' %>" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">State</label>
-                            <input type="text" name="state" id="ship_state" class="form-control" placeholder="NY" value="<%= defaultAddr ? defaultAddr.state : '' %>" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Country</label>
-                            <select name="country" id="ship_country" class="form-select">
-                                <option value="United States" <%= (defaultAddr && defaultAddr.country === 'United States') ? 'selected' : '' %>>United States</option>
-                                <option value="India" <%= (defaultAddr && defaultAddr.country === 'India') ? 'selected' : '' %>>India</option>
-                                <option value="UK" <%= (defaultAddr && defaultAddr.country === 'UK') ? 'selected' : '' %>>United Kingdom</option>
-                                <option value="Canada" <%= (defaultAddr && defaultAddr.country === 'Canada') ? 'selected' : '' %>>Canada</option>
-                            </select>
-                        </div>
-                    </div>
+                    <% 
+                    const selectedAddress = addresses && addresses.length > 0 
+                        ? addresses.find(addr => addr.isDefault) || addresses[0] 
+                        : null; 
+                    %>
+                    <input type="hidden" name="addressId" id="selectedAddressId" value="<%= selectedAddress ? selectedAddress._id : '' %>">
 
-                    <% if(addresses && addresses.length > 0) { %>
-                        <button type="button" class="btn-saved-address" data-bs-toggle="modal" data-bs-target="#addressModal">
-                            Select Saved Address
-                        </button>
+                    <% if (addresses && addresses.length > 0) { %>
+                        <div class="address-cards-grid row g-3">
+                            <% addresses.forEach(addr => { %>
+                                <div class="col-md-6">
+                                    <div class="lc-checkout-address-card <%= selectedAddress && selectedAddress._id.toString() === addr._id.toString() ? 'selected' : '' %>" 
+                                         data-id="<%= addr._id %>"
+                                         onclick="selectCheckoutAddress('<%= addr._id %>')">
+                                        <div class="lc-address-card-header d-flex justify-content-between align-items-start">
+                                            <h6 class="mb-1 text-truncate fw-bold" style="max-width: 70%;" title="<%= addr.name %>"><%= addr.name %></h6>
+                                            <% if (addr.isDefault) { %>
+                                                <span class="badge lc-badge-default">Default</span>
+                                            <% } %>
+                                        </div>
+                                        <div class="lc-address-card-body mt-2">
+                                            <p class="mb-1 text-muted small"><i class="fa fa-phone me-1"></i> <%= addr.phone %></p>
+                                            <p class="mb-1 text-muted small text-truncate"><i class="fa fa-map-marker-alt me-1"></i> <%= addr.street %></p>
+                                            <p class="mb-1 text-muted small text-truncate"><%= addr.city %>, <%= addr.state %> - <%= addr.pincode %></p>
+                                            <p class="mb-0 text-muted small"><%= addr.country || 'India' %></p>
+                                        </div>
+                                        <div class="lc-address-card-footer mt-3 pt-2 border-top d-flex justify-content-end">
+                                            <a href="/user/editAddress/<%= addr._id %>?redirect=checkout" 
+                                               class="btn btn-sm btn-outline-secondary py-1 px-3 rounded-pill fw-bold" 
+                                               style="font-size: 11px;"
+                                               onclick="event.stopPropagation();">
+                                                <i class="fa fa-edit me-1"></i> Edit
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                        <div class="mt-4 pt-2 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
+                            <a href="/user/addAddress?redirect=checkout" class="btn btn-theme-premium">
+                                <i class="fa fa-plus me-1"></i> Add New Address
+                            </a>
+                            <a href="/user/addresses?redirect=checkout" class="btn btn-link text-decoration-none text-muted fw-bold" style="font-size: 13px;">
+                                <i class="fa-solid fa-location-dot me-1"></i> Manage Addresses
+                            </a>
+                        </div>
+                    <% } else { %>
+                        <!-- No Saved Address Scenario -->
+                        <div class="text-center py-5">
+                            <div class="mb-3 text-muted">
+                                <i class="fa-solid fa-map-location-dot" style="font-size: 3.5rem; color: #b78846; opacity: 0.8;"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">No saved addresses found</h5>
+                            <p class="text-muted small mb-4" style="max-width: 320px; margin: 0 auto;">Please add a shipping address to proceed with your premium order placement.</p>
+                            <a href="/user/addAddress?redirect=checkout" class="btn btn-theme-premium px-4">
+                                <i class="fa fa-plus me-1"></i> Add Address
+                            </a>
+                        </div>
                     <% } %>
                 </div>
 
@@ -454,52 +192,40 @@
     </form>
 </div>
 
-<!-- Address Modal -->
-<div class="modal fade" id="addressModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
-            <div class="modal-header">
-                <h5 class="modal-title fw-bold">Your Saved Addresses</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body p-4">
-                <% if(addresses && addresses.length > 0) { %>
-                    <% addresses.forEach(addr => { %>
-                        <div class="address-option" onclick="selectAddress(<%= JSON.stringify(addr) %>)">
-                            <div class="d-flex justify-content-between">
-                                <strong><%= addr.name %></strong>
-                                <% if(addr.isDefault) { %>
-                                    <span class="badge bg-light text-dark border">Default</span>
-                                <% } %>
-                            </div>
-                            <div class="text-muted small mt-1">
-                                <%= addr.street %>, <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %>
-                            </div>
-                            <div class="text-muted small">Phone: <%= addr.phone %></div>
-                        </div>
-                    <% }) %>
-                <% } %>
-            </div>
-        </div>
-    </div>
-</div>
-
 <%- include('../partials/footer') %>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function selectAddress(addr) {
-        document.getElementById('ship_name').value = addr.name;
-        document.getElementById('ship_phone').value = addr.phone;
-        document.getElementById('ship_pincode').value = addr.pincode;
-        document.getElementById('ship_street').value = addr.street;
-        document.getElementById('ship_city').value = addr.city;
-        document.getElementById('ship_state').value = addr.state;
-        document.getElementById('ship_country').value = addr.country || 'United States';
+    function selectCheckoutAddress(addressId) {
+        // Update the hidden input value
+        document.getElementById('selectedAddressId').value = addressId;
         
-        // Close modal
-        bootstrap.Modal.getInstance(document.getElementById('addressModal')).hide();
+        // Remove selected class from all address cards
+        document.querySelectorAll('.lc-checkout-address-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selected class to the clicked address card
+        const selectedCard = document.querySelector(`.lc-checkout-address-card[data-id="${addressId}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
     }
+
+    // Validate shipping address selection on checkout form submission
+    document.getElementById('checkoutForm')?.addEventListener('submit', function(e) {
+        const addressId = document.getElementById('selectedAddressId').value;
+        if (!addressId) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Shipping Address Required',
+                text: 'Please add and select a shipping address before placing your order.',
+                confirmButtonColor: '#b78846'
+            });
+        }
+    });
 </script>
 </body>
 </html>

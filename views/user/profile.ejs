@@ -8,7 +8,7 @@
     <title>Profile</title>
     <link rel="stylesheet" href="/css/style.css">
 
-    <style> 
+    <!--<style> 
      html, body{ 
         height:100%; 
     } 
@@ -43,14 +43,7 @@
         border-radius:50%; 
         object-fit:cover; 
     } 
-    .avatar-letter{ 
-        width:36px; height:36px; 
-        border-radius:50%; 
-        background:#c26a00; 
-        color:white; display:flex; 
-        align-items:center; 
-        justify-content:center; 
-        font-weight:600; } 
+
     .profile-menu li{ 
         padding:12px; 
         border-radius:8px; 
@@ -64,7 +57,9 @@
     .avatar-letter{ 
         width:40px; height:40px; border-radius:50%; 
         background:#c26a00; color:white; display:flex; 
-        align-items:center; justify-content:center; font-weight:600; } 
+        align-items:center; justify-content:center; font-weight:600;
+     line-height: 1;
+    flex-shrink: 0;} 
         /* profile card */ 
         .profile-card{ background:white; border-radius:15px; 
         box-shadow:0 4px 10px rgba(0,0,0,0.05); } 
@@ -84,25 +79,39 @@
         background:#fafafa; font-size:14px; } 
     .profile-footer a:hover{ 
         color:#c26a00; } 
-        </style>
+        </style>-->
 
 </head>
 <body>
 
     
-<%- include("../partials/navbar") %>
+<%- include("../partials/user/navbar") %>
 
 
 
 <div class="container account-container">
 
 <div class="row">
-
+    <%- include("../partials/user/sidebar",{
+        user,activePage:'profile'
+    }) %>
+  <!--  
 <div class="col-md-3">
     
 <div class="p-3">
 
 <div class="d-flex align-items-center mb-4">
+    <% if(user.profilePic){%>
+        <img src="<%= user.profilePic?.url || user.profilePic %>"
+        class="profile-avatar me-2"
+        style="width: 40px;height: 40px;"
+        >
+    <% }else {%>
+        <div class="avatar-letter me-2">
+        <%= user?.name?.trim()?.charAt(0)?.toUpperCase() %>
+
+        </div>
+    <%} %>
 
 <div class="me-2">
     <% if(user.profilePic) { %>
@@ -160,7 +169,7 @@
 
 </div>
 </div>
-
+-->
 <div class="col-md-9 d-flex align-items-start r pt-5">
 
 <div class="account-card p-4 w-75">
@@ -173,15 +182,9 @@ Update your account details and contact information
 <!-- Avatar Section -->
  
 <div class="d-flex align-items-center mb-4 mt-4">
-    <div class="me-2">
-    <% if(user.profilePic) { %>
-        <img src="<%= user.profilePic?.url  ||user.profilePic%>" class="profile-avatar" style="width: 40px; height: 40px;">
-    <% } else { %>
-        <div class="avatar-letter">
-            <%= user.name.charAt(0).toUpperCase() %>
-        </div>
-    <% } %>
-</div>
+    <div class="me-3">
+        <%- include('../partials/user/avatar', { targetUser: user, size: 48, className: 'lc-profile-avatar' }) %>
+    </div>
 
   
     <div>

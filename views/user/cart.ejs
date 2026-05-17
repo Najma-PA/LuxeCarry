@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body style="background-color: #fafbfc;">
-    <%- include('../partials/navbar') %>
+    <%- include('../partials/user/navbar') %>
 
 <div class="container my-5 pt-4">
 
@@ -395,11 +395,30 @@ document.addEventListener('DOMContentLoaded', () => {
             const container = document.querySelector('.container.my-5');
             if (container) {
                 container.innerHTML = `
-                    <div class="text-center py-5">
+    <div class="cart-title-container mb-5">
+        <h1 class="text-serif m-0">Shopping Cart</h1>
+        <span class="item-count">(0 items)</span>
+    </div>
+
+    <div class="text-center py-5">
+        <h4 class="text-muted mb-4">
+            Your cart is currently empty.
+        </h4>
+
+        <a href="/user/shop"
+           class="btn-checkout-premium px-5">
+
+           Explore Collection
+
+        </a>
+    </div>
+`;
+                /*container.innerHTML = `
+                   <div class="text-center py-5">
                         <h4 class="text-muted mb-4">Your cart is currently empty.</h4>
                         <a href="/user/shop" class="btn-checkout-premium px-5">Explore Collection</a>
                     </div>
-                `;
+                `;*/
             }
             return; // Stop here if cart is empty to avoid null references
         }

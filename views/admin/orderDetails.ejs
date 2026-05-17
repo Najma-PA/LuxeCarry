@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Update Order Status</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+<link rel="stylesheet" href="/css/admin.css">
+</head>
+
+<body>
+
+<div class="d-flex">
+
+<%- include('../partials/admin/sidebar',
+{ active:'orders' }) %>
+
+<div class="main-content w-100 p-5">
+
+    <!-- Header -->
+    <div class="mb-4">
+
+        <h2 class="fw-bold mb-1"
+        style="color:#0f172a;">
+
+            Update Order Status
+
+        </h2>
+
+        <p class="text-muted mb-0">
+
+            Order ID:
+            #<%= order.orderCode %>
+
+        </p>
+
+    </div>
+
+    <!-- Top Grid -->
+    <div class="admin-order-grid">
+
+        <!-- Order Details -->
+        <div class="admin-order-detail-card">
+
+            <h3 class="admin-order-card-title">
+
+                Order Details
+
+            </h3>
+
+            <div class="mb-4">
+
+                <div class="admin-order-label">
+                    Customer
+                </div>
+
+                <div class="admin-order-text">
+
+                    <%= order.userId.name %>
+
+                </div>
+
+            </div>
+
+            <div>
+
+                <div class="admin-order-label">
+                    Shipping Address
+                </div>
+
+                <div class="admin-order-text">
+
+                    <i class="fa-solid fa-location-dot me-2"
+                    style="color:#c26a00;"></i>
+
+                    <%= order.shippingAddress.street %>,
+                    <br>
+
+                    <%= order.shippingAddress.city %>,
+                    <%= order.shippingAddress.state %>
+
+                    -
+                    <%= order.shippingAddress.pincode %>
+
+                    <br>
+
+                    <%= order.shippingAddress.country %>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Status Management -->
+        <div class="admin-order-detail-card">
+
+            <h3 class="admin-order-card-title">
+
+                Status Management
+
+            </h3>
+
+            <form
+            action="/admin/orders/<%= order._id %>/status"
+            method="POST"
+            class="admin-status-form">
+
+                <div>
+
+                    <div class="admin-order-label mb-2">
+
+                        Current Status
+
+                    </div>
+
+                    <select name="status"
+                    class="admin-status-select">
+
+                        <option value="Pending"
+                        <%= order.status === 'Pending'
+                        ? 'selected' : '' %>>
+
+                        Pending
+
+                        </option>
+
+                        <option value="Processing"
+                        <%= order.status === 'Processing'
+                        ? 'selected' : '' %>>
+
+                        Processing
+
+                        </option>
+
+                        <option value="Shipped"
+                        <%= order.status === 'Shipped'
+                        ? 'selected' : '' %>>
+
+                        Shipped
+
+                        </option>
+
+                        <option value="Out for Delivery"
+                        <%= order.status === 'Out for Delivery'
+                        ? 'selected' : '' %>>
+
+                        Out for Delivery
+
+                        </option>
+
+                        <option value="Delivered"
+                        <%= order.status === 'Delivered'
+                        ? 'selected' : '' %>>
+
+                        Delivered
+
+                        </option>
+
+                        <option value="Cancelled"
+                        <%= order.status === 'Cancelled'
+                        ? 'selected' : '' %>>
+
+                        Cancelled
+
+                        </option>
+
+                    </select>
+
+                </div>
+
+                <button
+                type="submit"
+                class="btn-gold w-100">
+
+                    <i class="fa-solid fa-rotate me-2"></i>
+
+                    Update Status
+
+                </button>
+
+            </form>
+
+            <div class="admin-status-note">
+
+                Changing status will automatically
+                update the customer's order tracking.
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Products -->
+    <div class="admin-order-products-card">
+
+        <!-- Header -->
+        <div class="admin-order-products-header">
+
+            <div class="admin-order-products-title">
+
+                Products Ordered
+
+            </div>
+
+            <div class="admin-order-products-count">
+
+                <%= order.items.length %> items total
+
+            </div>
+
+        </div>
+
+        <!-- Table -->
+        <table class="table admin-order-table mb-0">
+
+            <thead>
+
+                <tr>
+
+                    <th>PRODUCT</th>
+                    <th>QUANTITY</th>
+                    <th>PRICE</th>
+                    <th>TOTAL</th>
+
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+            <% order.items.forEach(item => { %>
+
+            <tr>
+
+                <td>
+
+                    <div class="admin-product-info">
+
+                        <img
+                        src="<%= item.product.productImage?.[0] || '/images/no-image.png' %>"
+                        class="admin-product-image">
+
+                        <div>
+
+                            <div class="admin-product-name">
+
+                                <%= item.product.productName %>
+
+                            </div>
+
+                            <% if(item.variantValue){ %>
+
+                            <div class="admin-product-meta">
+
+                                Variant:
+                                <%= item.variantValue %>
+
+                            </div>
+
+                            <% } %>
+
+                        </div>
+
+                    </div>
+
+                </td>
+
+                <td>
+
+                    <%= item.quantity %>
+
+                </td>
+
+                <td>
+
+                    ₹<%= item.price.toLocaleString() %>
+
+                </td>
+
+                <td>
+
+                    ₹<%= (item.price * item.quantity)
+                    .toLocaleString() %>
+
+                </td>
+
+            </tr>
+
+            <% }) %>
+
+            </tbody>
+
+        </table>
+
+        <!-- Totals -->
+        <div class="admin-order-total-section">
+
+            <div class="admin-order-total-box">
+
+                <div class="admin-order-total-row">
+
+                    <span class="admin-order-total-label">
+                        Subtotal
+                    </span>
+
+                    <span class="admin-order-total-value">
+
+                        ₹<%= order.subtotal.toLocaleString() %>
+
+                    </span>
+
+                </div>
+
+                <div class="admin-order-total-row">
+
+                    <span class="admin-order-total-label">
+                        Shipping
+                    </span>
+
+                    <span class="admin-order-total-value">
+
+                        ₹0
+
+                    </span>
+
+                </div>
+
+                <div class="admin-order-total-row">
+
+                    <span class="admin-order-total-label">
+                        Tax
+                    </span>
+
+                    <span class="admin-order-total-value">
+
+                        ₹<%= order.tax.toLocaleString() %>
+
+                    </span>
+
+                </div>
+
+                <div class="admin-order-total-row
+                admin-order-grand">
+
+                    <span class="admin-order-total-label">
+                        Total
+                    </span>
+
+                    <span class="admin-order-total-value">
+
+                        ₹<%= order.totalAmount
+                        .toLocaleString() %>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+</body>
+</html>

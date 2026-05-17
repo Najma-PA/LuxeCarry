@@ -1,0 +1,119 @@
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-lg custom-navbar border-bottom py-3">
+  <div class="container">
+    
+    <!-- Logo -->
+    <a class="navbar-brand fw-bold d-flex align-items-center fs-4" href="/" style="letter-spacing: 0.5px;">
+      <i class="fa-solid fa-bag-shopping me-2" style="color: #c26a00;"></i>
+      <span style="color: #1a1a1a;">Luxe</span><span style="color: #c26a00;">Carry</span>
+    </a>
+
+    <!-- Hamburger Menu Toggle -->
+    <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMenu">
+      <!-- Center Links -->
+      <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/user/shop">Shop</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/contact">Contact</a>
+        </li>
+      </ul>
+
+      <!-- Right Side -->
+      <div class="d-flex align-items-center gap-3">
+        <!-- Search -->
+        <form action="/user/shop" method="GET" class="search-box position-relative d-flex align-items-center" id="navSearchForm">
+          <input type="text" 
+                 id="navSearchInput"
+                 name="search"
+                 class="form-control rounded-pill ps-4 pe-5"
+                 placeholder="Search collection..."
+                 value="<%= locals.query ? query.search || '' : '' %>"
+                 style="padding-right: 70px !important; font-size: 0.9rem;">
+          
+          <div class="position-absolute end-0 d-flex align-items-center me-3 gap-2">
+            <!-- Clear Icon -->
+            <i class="fa-solid fa-xmark" id="navSearchClear" 
+               style="cursor: pointer; color: #999; <%= (locals.query && query.search) ? '' : 'display: none !important;' %>"></i>
+            
+            <!-- Search Icon Button -->
+            <button type="submit" style="background: none; border: none; padding: 0; color: #666;">
+               <i class="fa fa-search"></i>
+            </button>
+          </div>
+        </form>
+
+        <!-- Wishlist -->
+        <a href="/user/wishlist" class="nav-icon" title="Wishlist">
+          <i class="fa-regular fa-heart"></i>
+        </a>
+
+        <!-- Cart -->
+        <a href="/user/cart" class="nav-icon position-relative" title="Shopping Cart">
+          <i class="fa-solid fa-cart-arrow-down"></i>
+          <span id="cart-count-badge" class="cart-badge" style="<%= locals.cartCount > 0 ? 'display: flex;' : 'display: none;' %>">
+            <%= (locals.cartCount > 0) ? locals.cartCount : '' %>
+          </span>
+        </a>
+
+        <!-- Login / Profile -->
+        <% if(!user){ %>
+          <a href="/user/login" class="btn btn-outline-dark rounded-pill px-4 fw-medium transition-all" style="border-color: #c26a00; color: #c26a00; font-size: 0.9rem;">
+            Sign In
+          </a>
+        <% } else { %>
+          <a href="/user/profile" class="d-flex align-items-center" style="text-decoration: none;" title="My Account">
+            <%- include('./avatar', { targetUser: user, size: 38, className: 'navbar-avatar' }) %>
+          </a>
+        <% } %>
+
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Search Input Interactions
+  document.addEventListener('DOMContentLoaded', () => {
+    const navSearchInput = document.getElementById('navSearchInput');
+    const navSearchClear = document.getElementById('navSearchClear');
+
+    if (navSearchInput && navSearchClear) {
+      navSearchInput.addEventListener('input', function() {
+        if (this.value) {
+          navSearchClear.style.setProperty('display', 'block', 'important');
+        } else {
+          navSearchClear.style.setProperty('display', 'none', 'important');
+        }
+      });
+
+      navSearchClear.addEventListener('click', function() {
+        navSearchInput.value = '';
+        navSearchClear.style.setProperty('display', 'none', 'important');
+        navSearchInput.focus();
+        
+        if (window.location.pathname === '/user/shop') {
+           window.location.href = '/user/shop';
+        }
+      });
+    }
+  });
+
+  // Force reload to prevent BFcache (Back-Forward cache) from bypassing logout
+  window.addEventListener("pageshow", function (event) {
+    if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+      window.location.reload();
+    }
+  });
+</script>

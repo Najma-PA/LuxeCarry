@@ -13,10 +13,15 @@
 </head>
 <body>
 
-<%- include('../partials/navbar') %>
+<%- include('../partials/user/navbar') %>
 
-<div class="container wishlist-container">
+<div class="container account-container">
+    <div class="row">
+        <%- include('../partials/user/sidebar',{
+            user,activePage:'wishlist'
+        }) %>
     
+    <div class="col-md-9">
     <div class="wishlist-header">
         <div>
             <h1 class="heading-serif">My Wishlist</h1>
@@ -88,9 +93,9 @@
             <% }) %>
         </div>
     <% } %>
-
+   </div>
 </div>
-
+</div>
 <%- include('../partials/footer') %>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>

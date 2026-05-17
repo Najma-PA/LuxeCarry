@@ -1,0 +1,76 @@
+<!-- USER SIDEBAR PARTIAL -->
+<div class="col-lg-3 col-md-4 mb-4">
+  <div class="lc-sidebar-card">
+    
+    <!-- User Profile Header -->
+    <div class="d-flex align-items-center lc-sidebar-header">
+      <%- include('./avatar', { targetUser: user, size: 48, className: 'lc-sidebar-avatar me-3' }) %>
+      <div class="overflow-hidden">
+        <h6 class="mb-0 text-truncate lc-sidebar-name" title="<%= user.name %>"><%= user.name %></h6>
+        <small class="text-muted text-truncate d-block small" style="font-size: 0.8rem;" title="<%= user.email %>"><%= user.email %></small>
+      </div>
+    </div>
+
+    <!-- Sidebar Menu Options -->
+    <ul class="lc-sidebar-menu">
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'profile' ? 'active' : '' %>">
+        <a href="/user/profile" class="lc-sidebar-menu-link">
+          <i class="fa fa-user"></i> <span>Profile Settings</span>
+        </a>
+      </li>
+
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'orders' ? 'active' : '' %>">
+        <a href="/user/orders" class="lc-sidebar-menu-link">
+          <i class="fa fa-box"></i> <span>My Orders</span>
+        </a>
+      </li>
+
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'wishlist' ? 'active' : '' %>">
+        <a href="/user/wishlist" class="lc-sidebar-menu-link">
+          <i class="fa fa-heart"></i> <span>Wishlist</span>
+        </a>
+      </li>
+
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'addresses' ? 'active' : '' %>">
+        <a href="/user/addresses" class="lc-sidebar-menu-link">
+          <i class="fa fa-location-dot"></i> <span>Addresses</span>
+        </a>
+      </li>
+
+      <% if (user && !user.googleId) { %>
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'change-password' ? 'active' : '' %>">
+        <a href="/user/changePassword" class="lc-sidebar-menu-link">
+          <i class="fa fa-key"></i> <span>Change Password</span>
+        </a>
+      </li>
+      <% } %>
+
+      <!-- Coupons, Wallet, Referral are placeholders for future expansion -->
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'coupons' ? 'active' : '' %>">
+        <a href="#" class="lc-sidebar-menu-link text-muted opacity-75" style="pointer-events: none; cursor: default;">
+          <i class="fa fa-ticket"></i> <span>Coupons</span>
+        </a>
+      </li>
+
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'wallet' ? 'active' : '' %>">
+        <a href="#" class="lc-sidebar-menu-link text-muted opacity-75" style="pointer-events: none; cursor: default;">
+          <i class="fa fa-wallet"></i> <span>My Wallet</span>
+        </a>
+      </li>
+
+      <li class="lc-sidebar-menu-item <%= locals.activePage === 'referral' ? 'active' : '' %>">
+        <a href="#" class="lc-sidebar-menu-link text-muted opacity-75" style="pointer-events: none; cursor: default;">
+          <i class="fa fa-gift"></i> <span>Refer & Earn</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="lc-sidebar-divider"></div>
+
+    <!-- Logout -->
+    <a href="/user/logout" class="lc-sidebar-logout-link">
+      <i class="fa fa-sign-out"></i> <span>Logout</span>
+    </a>
+
+  </div>
+</div>

@@ -1,0 +1,36 @@
+<%
+  // Reusable Luxury Avatar Component
+  // Expects:
+  // - targetUser: User object (optional, defaults to locals.user)
+  // - size: number in pixels (optional, default 40)
+  // - className: extra CSS class names (optional)
+  // - id: unique ID for specific instances if needed (optional)
+
+  const u = (typeof targetUser !== 'undefined') ? targetUser : (locals.user || null);
+  const s = (typeof size !== 'undefined') ? size : 40;
+  const c = (typeof className !== 'undefined') ? className : '';
+  const avatarId = (typeof id !== 'undefined') ? id : '';
+
+  if (u) {
+    const hasImage = !!(u.profilePic && u.profilePic.url);
+    const imageUrl = hasImage ? u.profilePic.url : '';
+    const initial = u.name ? u.name.trim().charAt(0).toUpperCase() : 'U';
+%>
+<div class="lc-avatar-container <%= c %>" 
+     id="<%= avatarId %>"
+     data-user-id="<%= u._id || u.id %>"
+     style="width: <%= s %>px; height: <%= s %>px; min-width: <%= s %>px; min-height: <%= s %>px; position: relative;">
+  
+  <!-- Image Avatar -->
+  <img src="<%= imageUrl %>" 
+       alt="<%= u.name %>" 
+       class="lc-avatar-img <%= hasImage ? '' : 'd-none' %>"
+       style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+  
+  <!-- Letter Avatar -->
+  <div class="lc-avatar-letter <%= hasImage ? 'd-none' : 'd-flex' %>" 
+       style="font-size: <%= Math.max(12, Math.floor(s * 0.4)) %>px;">
+    <%= initial %>
+  </div>
+</div>
+<% } %>

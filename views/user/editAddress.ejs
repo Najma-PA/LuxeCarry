@@ -5,13 +5,14 @@
 <title>Edit Address | LuxeCarry</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
 <link rel="stylesheet" href="/css/address.css">
 
 </head>
 
 <body>
 
-<%- include("../partials/navbar") %>
+<%- include("../partials/user/navbar") %>
 
 <div class="account-container">
 
@@ -22,7 +23,7 @@
       <h3 class="page-title">Edit Address</h3>
       <p class="page-sub">Update your delivery details.</p>
 
-      <form action="/user/editAddress/<%= address._id %>" method="POST">
+      <form action="/user/editAddress/<%= address._id %><%= typeof redirect !== 'undefined' && redirect === 'checkout' ? '?redirect=checkout' : '' %>" method="POST">
 
         <div class="row mb-3">
 
@@ -83,7 +84,7 @@
 
         <div class="address-actions">
           <button type="submit" class="edit-btn">Update Address</button>
-          <a href="/user/addresses" class="cancel-btn">Cancel</a>
+          <a href="<%= typeof redirect !== 'undefined' && redirect === 'checkout' ? '/user/checkout' : '/user/addresses' %>" class="cancel-btn">Cancel</a>
         </div>
 
       </form>
@@ -100,7 +101,7 @@
     <span>Privacy • Terms</span>
   </div>
 </footer>
-<script>
+<!--<script>
   window.addEventListener("pageshow", function (event) {
     const navEntries = performance.getEntriesByType("navigation");
     const isBackForward = navEntries.length > 0 && navEntries[0].type === "back_forward";
@@ -109,6 +110,6 @@
       window.location.replace('/user/addresses');
     }
   });
-</script>
+</script>-->
 </body>
 </html>
