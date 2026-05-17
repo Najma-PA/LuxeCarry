@@ -119,7 +119,7 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 
 <div class="row" id="product-grid">
 
-<%- include('../partials/user/product-grid') %>
+<%- include('../partials/user/product-grid',{isHome:false}) %>
 
 </div>
 
@@ -141,6 +141,7 @@ Discover our curated collection of premium luxury handbags crafted for elegance 
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/js/user/product-actions.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // --- SHOP LOGIC ---
@@ -197,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- WISHLIST & CART FLOW ---
-    document.addEventListener('click', async (e) => {
+    /*document.addEventListener('click', async (e) => {
         const wishlistToggle = e.target.closest('.wishlist-toggle');
         if (wishlistToggle) {
             e.preventDefault();
@@ -243,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             badge.style.display = count > 0 ? 'flex' : 'none';
         }
     }
-
+/*
     function showToast(msg, icon = 'success') {
         Toastify({
             text: msg,
@@ -256,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
             }
         }).showToast();
-    }
+    }*/
 });
 </script>
 

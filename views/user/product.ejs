@@ -653,11 +653,7 @@ function disableOutOfStockVariants() {
     }
   }
 
-  function updateTitle() {
-    // Optional: match mockup by adding (Color, Size) to title 
-    // const baseName = product.name;
-    // document.querySelector('.product-title').innerText = `${baseName} ( ${selectedColor}${selectedSize ? ', ' + selectedSize : ''} )`;
-  }
+
 
   async function toggleWishlist(productId) {
     try {
@@ -671,7 +667,8 @@ function disableOutOfStockVariants() {
       });
 
       if (res.status === 401) {
-        window.location.href = '/user/login';
+        window.location.href = `/user/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+       
         return;
       }
 
@@ -690,7 +687,7 @@ function disableOutOfStockVariants() {
           });
       } else {
         if (data.message === 'Please log in to continue.') {
-          window.location.href = '/user/login';
+          window.location.href = `/user/login?redirect=${encodeURIComponent(window.location.pathname +window.location.search)}`;
         } else {
           Swal.fire({
             icon: 'error',
@@ -730,7 +727,7 @@ function disableOutOfStockVariants() {
       });
 
       if (res.status === 401) {
-        window.location.href = '/user/login';
+        window.location.href =  `/user/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
         return;
       }
 
@@ -760,7 +757,7 @@ function disableOutOfStockVariants() {
         });
       } else {
         if (data.message === 'Please log in to continue.') {
-          window.location.href = '/user/login';
+          window.location.href = `/user/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
         } else {
           const stockInfo =document.getElementById('stockInfo');
           if(data.message && data.message.toLowerCase().includes('unavailable')){

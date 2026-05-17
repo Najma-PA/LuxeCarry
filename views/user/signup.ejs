@@ -98,7 +98,7 @@ value="<%= typeof formData !== 'undefined' && formData.confirmPassword ? formDat
 
 <hr>
 
-<a href="/user/auth/google" class="google-btn text-decoration-none text-dark">
+<a href="/user/auth/google<%= typeof redirect !== 'undefined' && redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>" class="google-btn text-decoration-none text-dark">
 <img src="https://www.svgrepo.com/show/355037/google.svg" width="18">
 Sign up with Google
 </a>

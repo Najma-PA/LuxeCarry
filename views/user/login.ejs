@@ -36,7 +36,7 @@
 <% } %>
 
 <form action="/user/login" method="POST">
-
+<input type="hidden" name="redirect" value="<%=redirect %>">
 <div class="mb-3">
 <label class="form-label">EMAIL ADDRESS</label>
 <input type="email" class="form-control" name="email" placeholder="Enter email" value="<%= typeof formData !== 'undefined' && formData.email ? formData.email : '' %>">
@@ -71,7 +71,7 @@ Forgot password?
 
 <hr>
 
-<a href="/user/auth/google" class="google-btn text-decoration-none text-dark">
+<a href="/user/auth/google<%= redirect ? '?redirect=' + encodeURIComponent(redirect) : '' %>" class="google-btn text-decoration-none text-dark">
 <img src="https://www.svgrepo.com/show/355037/google.svg" width="18">
 Sign in with Google
 </a>

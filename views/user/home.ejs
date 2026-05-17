@@ -49,16 +49,16 @@ Explore our premium collection of bags and accessories
 <!-- HERO / BANNER CAROUSEL -->
 <div class="container mt-5">
   <% if(typeof banners !== 'undefined' && banners.length > 0) { %>
-    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div id="heroCarousel" class="carousel slide rounded-4 overflow-hidden" data-bs-ride="carousel">
       <div class="carousel-indicators">
         <% banners.forEach((banner, idx) => { %>
           <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="<%= idx %>" class="<%= idx === 0 ? 'active' : '' %>" aria-label="Slide <%= idx + 1 %>"></button>
         <% }) %>
       </div>
-      <div class="carousel-inner" style="border-radius: 20px; overflow: hidden;">
+      <div class="carousel-inner" >
         <% banners.forEach((banner, idx) => { %>
           <div class="carousel-item <%= idx === 0 ? 'active' : '' %>">
-            <div class="hero position-relative">
+            <div class="hero position-relative overflow-hidden rounded-4">
               <img src="<%= banner.image.url %>" class="d-block w-100" style="height: 450px; object-fit: cover;" alt="<%= banner.title %>">
               <div class="hero-text position-absolute top-50 start-0 translate-middle-y ps-5 ms-4">
                 <h2 class="text-white" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);"><%= banner.title %></h2>
@@ -136,94 +136,11 @@ Explore our premium collection of bags and accessories
 <a href="/user/shop" class="text-decoration-none fw-bold" style="color: #c26a00; font-size: 13px;">View All Collection</a>
 
 </div>
-<div class="col-md-9">
 
 <div class="row" id="product-grid">
 
-<%- include('../partials/user/product-grid') %>
+<%- include('../partials/user/product-grid',{isHome:true}) %>
 
-</div>
-
-<!--
-<% products.forEach(p => { %>
-
-<div class="col-md-3 mb-4">
-
-<div class="card border-0 shadow-sm h-100" style="border-radius: 20px; overflow: hidden; 
-background: white; transition: transform 0.3s ease;
-" onmouseover="this.style.transform='translateY(-10px)'" onmouseout="this.style.transform='translateY(0)'">
-
-  <a href="/user/product/<%= p._id %>" class="position-relative d-block" 
-    style="background-color: #f4f6f8; padding: 25px; height: 260px; 
-    display: flex; align-items: center; justify-content: center; text-decoration: none;">
-      
-      <img src="<%= p.thumbnail.url || '/images/placeholder.jpg'%>" style="max-height: 100%; max-width: 100%; object-fit: contain;">
-  </a>
-  <div class="position-absolute wishlist-toggle" style="top: 15px; 
-      right: 15px; background: white; width: 32px; height: 32px; border-radius: 50%; display: flex; 
-      align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,0.06); cursor: pointer; z-index: 2;" 
-      data-id="<%= p._id %>">
-      <i class="<%= p.isWishlisted ? 'fa-solid' : 'fa-regular' %> fa-heart"
-   style="color: <%= p.isWishlisted ? '#b36b00' : '#a0aec0' %>; font-size: 14px;">
-</i>
-          
-      </div>
-
-  <div class="card-body p-4 d-flex flex-column">
-
-    <% if (p.offer > 0 || (p.category && p.category.offer > 0)) { 
-        let pOffer = Number(p.offer) || 0;
-        let cOffer = (p.category && typeof p.category === 'object') ? (Number(p.category.offer) || 0) : 0;
-        let bestOffer = Math.max(pOffer, cOffer);
-    %>
-        <span class="badge bg-danger rounded-pill px-2 py-1 mb-2 align-self-start" style="font-size: 9px; font-weight: 600; 
-        letter-spacing: 0.5px;"><%= bestOffer %>% OFF</span>
-    <% } else { %>
-        <div style="height: 22px;" class="mb-2"></div>
-    <% } %>
-
-    <div class="text-uppercase fw-bold mb-1" style="color: #c26a00; font-size: 9px; letter-spacing: 0.8px;">
-        <%= (p.category && p.category.name) ? p.category.name : 'LUXECARRY PREMIUM' %>
-    </div>
-
-    <h6 class="mb-1 text-truncate" style="font-family: 'Playfair Display', 'Georgia', serif; font-weight: 600; 
-    font-size: 15px; color: #2d3748; letter-spacing: 0.2px;"><%= p.name %></h6>
-
-    <div class="mb-2 d-flex align-items-baseline">
-        <span class="fw-bold" style="font-size: 15px; color: #1a202c;">₹<%= p.finalPrice %></span>
-        <% if (p.price > p.finalPrice) { %>
-            <span class="text-muted text-decoration-line-through ms-2" style="font-size: 12px;">₹<%= p.price %></span>
-        <% } %>
-    </div>
-
-    <div class="mb-3">
-        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-        <i class="fas fa-star" style="color: #dcb360; font-size: 9px;"></i>
-        <i class="far fa-star" style="color: #dcb360; font-size: 9px;"></i>
-    </div>
-
-    <div class="mt-auto d-flex gap-2">
-        <button class="btn btn-dark w-50 rounded-pill py-1 add-to-cart-btn" style="font-size: 11px; font-weight: 600; 
-        background-color: #1a1a1a; border: none; letter-spacing: 0.3px;" data-id="<%= p._id %>">
-            View
-        </button>
-        <a href="/user/product/<%= p._id %>" class="btn w-50 rounded-pill py-1" style="font-size: 11px; 
-          font-weight: 600; background: transparent; color: #c26a00; border: 1px solid #dfc3a3; text-decoration: none; 
-          text-align: center; display: inline-block; letter-spacing: 0.3px;">
-            Buy Now
-        </a>
-    </div>
-
-  </div>
-
-</div>
-
-</div>
-
-<% }) %>
--->
 </div>
 
 </div>
@@ -262,8 +179,9 @@ Upgrade your wardrobe with our best sellers
 <%- include('../partials/footer') %>
 
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="/js/user/product-actions.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
+/*document.addEventListener('DOMContentLoaded', () => {
     // Shared functionality for Home page Toggle and Add to Cart
     document.addEventListener('click', async (e) => {
         const wishlistToggle = e.target.closest('.wishlist-toggle');
@@ -282,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             await handleToggleWishlist(wishlistToggle.dataset.id, wishlistToggle);
         }
-         */ 
+          
         const addToCartBtn = e.target.closest('.add-to-cart-btn');
         if (addToCartBtn) {
             const productId =addToCartBtn.dataset.id;
@@ -290,7 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
             
         }
     });
-
+*/
+/*
     async function handleToggleWishlist(productId, element) {
         try {
             const res = await fetch('/user/wishlist/toggle', {
@@ -324,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function showToast(msg, icon = 'success') {
+   /* function showToast(msg, icon = 'success') {
         Toastify({
             text: msg,
             duration: 2500,
@@ -337,7 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }).showToast();
     }
-});
+});*/
 </script>
 
 </body>
