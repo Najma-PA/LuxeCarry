@@ -7,7 +7,8 @@ const path = require('path');
 
 const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
-
+const Wishlist = require('../../models/wishlistModel');
+const Banner = require('../../models/bannerModel');
 // OTP generator
 function generateOtp() {
   const digits = '1234567890';
@@ -35,7 +36,8 @@ exports.googleSuccess = (req, res) => {
       role: req.user.role || 'user',
     };
   }
-  res.redirect('/user/home');
+  const redirectUrl = req.query.state || '/user/home';
+  res.redirect(redirectUrl);
 };
 
 exports.googleFailure = (req, res) => {
@@ -47,12 +49,12 @@ exports.showLogin = (req, res) => {
   if (req.session.user?.role === 'user') return res.redirect('/user/home');
   if (req.session.user?.role === 'admin') return res.redirect('/admin/dashboard');
 
-  res.render('user/login', { error: null, formData: {} });
+  res.render('user/login', { error: null, formData: {}, redirect: req.query.redirect || '' });
 };
 
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, redirect } = req.body;
 
     if (!email || !password) {
       return res.render('user/login', {
@@ -82,8 +84,8 @@ exports.loginUser = async (req, res) => {
       profilePic: user.profilePic || null,
       role: 'user',
     };
-
-    res.redirect('/user/home');
+    const redirectUrl = redirect || '/user/home';
+    res.redirect(redirectUrl);
   } catch (err) {
     res.render('user/login', { error: 'Login failed', formData: req.body });
   }
@@ -102,7 +104,6 @@ exports.sendOTP = async (req, res) => {
   if (!user) {
     return res.render('user/forgotPassword', { error: 'Invalid email' });
   }
-
   const otp = generateOtp();
 
   req.session.resetOTP = otp;
@@ -309,13 +310,10 @@ exports.registerUser = async (req, res) => {
 /* HOME */
 exports.userHome = async (req, res) => {
   try {
-    // Get active and non-archived categories
     const categories = await Category.find({ isActive: true, isDeleted: { $ne: true } });
 
-    // Get active category IDs for product filtering
     const activeCategoryIds = categories.map((c) => c._id);
 
-    // Get latest products belonging to active categories
     const products = await Product.find({
       isActive: true,
       category: { $in: activeCategoryIds },
@@ -323,12 +321,23 @@ exports.userHome = async (req, res) => {
       .populate('category')
       .sort({ createdAt: -1 })
       .limit(8);
-
+    let wishlistIds = [];
+    if (req.session.user) {
+      const wishlist = await Wishlist.findOne({ user: req.session.user.id });
+      wishlistIds = wishlist ? wishlist.items.map((item) => item.product.toString()) : [];
+    }
+    const updatedProducts = products.map((product) => {
+      const obj = product.toObject();
+      obj.isWishlisted = wishlistIds.includes(product._id.toString());
+      return obj;
+    });
+    const banners = await Banner.find({ isActive: true }).sort({ createdAt: -1 });
     res.render('user/home', {
       title: 'Home',
       user: req.session.user,
       categories,
-      products,
+      products: updatedProducts,
+      banners,
     });
   } catch (err) {
     console.error(err);

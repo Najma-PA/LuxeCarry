@@ -21,11 +21,21 @@ router.get('/signup', noCache, redirectIfUserLoggedIn, userController.showRegist
 router.post('/signup', noCache, userController.registerUser);
 
 // GOOGLE
-router.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/auth/google', (req, res, next) => {
+  if (req.query.redirect) {
+    req.session.returnTo = req.query.redirect;
+    req.session.save((err) => {
+      if (err) console.error('Session save error:', err);
+      passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+    });
+  } else {
+    passport.authenticate('google', { scope: ['profile', 'email'] })(req, res, next);
+  }
+});
 
 router.get(
   '/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: '/user/login' }),
+  passport.authenticate('google', { failureRedirect: '/user/login', keepSessionInfo: true }),
   noCache,
   userController.googleSuccess
 );
@@ -54,7 +64,7 @@ router.get('/product/:id', userProductController.loadProductDetails);
 router.get('/product/check/:id', userProductController.checkProductAvailability);
 // Wishlist
 router.get('/wishlist', isUserAuth, wishlistController.showWishlist);
-router.patch('/wishlist/toggle', isUserAuth, wishlistController.toggleWishlist);
+router.patch('/wishlist/toggle', wishlistController.toggleWishlist);
 router.delete('/wishlist/:productId', isUserAuth, wishlistController.removeItem);
 
 // Add to cart

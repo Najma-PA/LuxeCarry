@@ -11,8 +11,11 @@ exports.showWishlist = async (req, res) => {
 
 exports.toggleWishlist = async (req, res) => {
   try {
+    if (!req.session.user) {
+      return res.status(401).json({ success: false, message: 'Please log in to continue' });
+    }
     const { productId } = req.body;
-    const result = await wishlistService.toggleWishlist(req.user._id, productId);
+    const result = await wishlistService.toggleWishlist(req.session.user.id, productId);
     res.json(result);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

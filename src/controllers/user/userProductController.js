@@ -5,7 +5,7 @@ const Product = require('../../models/productModel');
 //LOAD SHOP PAGE
 exports.loadShop = async (req, res) => {
   try {
-    const data = await productService.getShopProducts(req.query, req.session.user?._id);
+    const data = await productService.getShopProducts(req.query, req.session.user?.id);
 
     // get categories
     const categories = await Category.find({ isActive: true, isDeleted: { $ne: true } });
@@ -42,7 +42,7 @@ exports.loadShop = async (req, res) => {
       });
 
       const paginationHtml = await new Promise((resolve, reject) => {
-        res.render('partials/user/pagination', { ...data }, (err, html) => {
+        res.render('partials/user/pagination', { ...data, isHome: false }, (err, html) => {
           if (err) reject(err);
           else resolve(html);
         });
