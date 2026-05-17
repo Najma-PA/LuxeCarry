@@ -544,7 +544,8 @@ exports.loadAddresses = async (req, res) => {
 };
 exports.loadAddAddress = (req, res) => {
   const user = req.session.user;
-  res.render('user/addAddress', { user });
+  const redirect = req.query.redirect || '';
+  res.render('user/addAddress', { user, redirect });
 };
 
 exports.addAddress = async (req, res) => {
@@ -575,7 +576,11 @@ exports.addAddress = async (req, res) => {
       isDefault,
     });
 
-    res.redirect('/user/addresses');
+    if (req.query.redirect === 'checkout') {
+      res.redirect('/user/checkout');
+    } else {
+      res.redirect('/user/addresses');
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send('Something went wrong');
@@ -591,7 +596,8 @@ exports.loadEditAddress = async (req, res) => {
     }
 
     const user = req.session.user;
-    res.render('user/editAddress', { address, user });
+    const redirect = req.query.redirect || '';
+    res.render('user/editAddress', { address, user, redirect });
   } catch (error) {
     console.error(error);
     res.redirect('/user/addresses');
@@ -633,7 +639,11 @@ exports.updateAddress = async (req, res) => {
 
     await Address.findByIdAndUpdate(req.params.id, updateData);
 
-    res.redirect('/user/addresses');
+    if (req.query.redirect === 'checkout') {
+      res.redirect('/user/checkout');
+    } else {
+      res.redirect('/user/addresses');
+    }
   } catch (error) {
     console.error(error);
     res.status(500).send('Something went wrong');
