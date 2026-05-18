@@ -12,7 +12,7 @@ const userRoutes = require('./src/routes/user');
 const adminRoutes = require('./src/routes/admin');
 const noCache = require('./src/middleware/noCache');
 const errorHandler = require('./src/middleware/errorHandler');
-
+const methodOverride = require('method-override');
 const app = express();
 
 /* VIEW ENGINE */
@@ -26,7 +26,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-/* CACHE */
+app.use(methodOverride('_method'));
 
 // app.use(noCache);
 
@@ -49,7 +49,7 @@ app.use(async (req, res, next) => {
     if (sessionUser) {
       const userId = sessionUser._id || sessionUser.id;
       user = await userService.findUserById(userId);
-      
+
       // If user was blocked or deleted in the admin dashboard:
       if (!user || user.isBlocked) {
         req.session.user = null;
