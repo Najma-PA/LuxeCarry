@@ -160,65 +160,7 @@
     <%- include("../partials/user/sidebar",{
         user,activePage:'profile'
     }) %>
-<!--
-<div class="col-md-3">
-    
-<div class="p-3">
 
-<div class="d-flex align-items-center mb-4">
-
-<div class="avatar-letter me-2 side-avatar-letter">
-<%= user.name.charAt(0).toUpperCase() %>
-</div>
-<img src="<%= user.profilePic ? user.profilePic.url : '' %>" class="profile-avatar side-profile-avatar me-2 <%= user.profilePic && user.profilePic.url ? '' : 'd-none' %>">
-
-<h6 class="mb-0 user-display-name"><%= user.name %></h6>
-
-</div>
-
-<ul class="list-unstyled profile-menu">
-
-<li class="active">
-<a href="/user/profile" class="text-decoration-none text-dark">
-<i class="fa fa-user me-2"></i> Profile Settings
-</a>
-</li>
-
-<li>
-<a href="/user/orders" class="text-decoration-none text-dark">
-<i class="fa fa-box me-2"></i> My Orders
-</a>
-</li>
-
-<li>
-<a href="/user/wishlist" class="text-decoration-none text-dark">
-<i class="fa fa-heart me-2"></i> Wishlist
-</a>
-</li>
-
-<li>
-<a href="/user/addresses" class="text-decoration-none text-dark">
-<i class="fa fa-location-dot me-2"></i> Addresses
-</a>
-</li>
-
-<li><i class="fa fa-ticket me-2"></i> Coupons</li>
-
-<li><i class="fa fa-wallet me-2"></i> My Wallet</li>
-
-<li><i class="fa fa-gift me-2"></i> Refer & Earn</li>
-
-</ul>
-
-<hr>
-
-<a href="/user/logout" class="text-danger text-decoration-none">
-<i class="fa fa-sign-out me-2"></i> Logout
-</a>
-
-</div>
-</div>
--->
 <div class="col-md-9 d-flex align-items-start pt-5">
 
 <div class="account-card p-4 w-75">
@@ -298,24 +240,7 @@
 
 </div>
 
-<footer class="profile-footer border-top mt-5 py-3"> 
-    <div class="container d-flex justify-content-between align-items-center flex-wrap"> 
-        <div class="d-flex align-items-center gap-2"> 
-            <i class="fa-solid fa-bag-shopping" style="color:#c26a00"></i> 
-            <span class="fw-bold">LuxeCarry</span> 
-        </div> 
-        <div class="small text-muted"> © 2026 LuxeCarry. All rights reserved. 
-
-        </div> 
-        <div class="small"> 
-            <a href="#" class="text-decoration-none text-muted me-3"> Privacy Policy 
-                
-            </a> <a href="#" class="text-decoration-none text-muted"> Terms of Service 
-
-            </a> 
-        </div> 
-    </div> 
-</footer>
+<%- include("../partials/user/footer-short") %>
 <!-- Cropper Modal -->
 <div class="modal fade" id="cropperModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">

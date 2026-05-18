@@ -241,13 +241,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             <div class="lc-order-summary-left">
 
                 <img
-                src="<%= item.product.productImage?.[0] || '/images/no-image.png' %>"
+                src="<%= item.product?.thumbnail?.url ||item.product?.displayImage|| '/images/placeholder.jpg' %>"
                 class="lc-order-summary-image">
 
                 <div>
 
                     <div class="lc-order-summary-name">
-                        <%= item.product.productName %>
+                        <%= item.product?.name %>
                     </div>
 
                     <% if(item.variantValue){ %>
@@ -334,12 +334,187 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </div>
 
     </div>
+<div class="mt-4">
+
+  <% if(
+    order.status === 'Pending' ||
+    order.status === 'Confirmed'
+  ) { %>
+
+    <button
+      class="btn btn-danger"
+      data-bs-toggle="modal"
+      data-bs-target="#cancelOrderModal"
+    >
+      Cancel Order
+    </button>
+
+  <% } %>
+
+  <% if(order.status === 'Delivered') { %>
+
+    <button
+      class="btn btn-warning"
+      data-bs-toggle="modal"
+      data-bs-target="#returnOrderModal"
+    >
+      Return Order
+    </button>
+
+  <% } %>
 
 </div>
-
+</div>
+<%- include('../partials/user/footer-short') %>
 </div>
 
-<%- include('../partials/footer') %>
+<!-- Cancel Order Modal -->
 
+<div
+    class="modal fade"
+    id="cancelOrderModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <form
+                action="/user/orders/<%= order._id %>/cancel?_method=PATCH"
+                method="POST"
+            >
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Cancel Order
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    ></button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <label class="form-label">
+                        Cancellation Reason (Optional)
+                    </label>
+
+                    <textarea
+                        name="reason"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Enter reason..."
+                    ></textarea>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Close
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger"
+                    >
+                        Confirm Cancel
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<!-- Return Order Modal -->
+
+<div
+    class="modal fade"
+    id="returnOrderModal"
+    tabindex="-1"
+    aria-hidden="true"
+>
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <form
+                action="/user/orders/<%= order._id %>/return?_method=PATCH"
+                method="POST"
+            >
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title">
+                        Return Order
+                    </h5>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                    ></button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <label class="form-label">
+                        Return Reason
+                    </label>
+
+                    <textarea
+                        name="reason"
+                        class="form-control"
+                        rows="4"
+                        required
+                        placeholder="Enter return reason..."
+                    ></textarea>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                    >
+                        Close
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-warning"
+                    >
+                        Submit Return
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

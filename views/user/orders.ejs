@@ -147,13 +147,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     <div class="lc-order-product-left">
 
                         <img
-                        src="<%= item.product.productImage?.[0] || '/images/no-image.png' %>"
+                        src="<%= item.product?.thumbnail?.url ||item.product?.displayImage|| '/images/placeholder.jpg' %>"
                         class="lc-order-product-image">
 
                         <div>
 
                             <h5 class="lc-order-product-name">
-                                <%= item.product.productName %>
+                                <%= item.product?.name %>
                             </h5>
 
                             <% if(item.variantValue){ %>
@@ -212,10 +212,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     <% } %>
 
 </div>
-
+<%- include('../partials/user/footer-short') %>
 </div>
 
-<%- include('../partials/footer') %>
+
 
 </body>
 </html>
