@@ -5,10 +5,10 @@ const cartSchema = new mongoose.Schema({
   items: [
     {
       product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-      variant: { type: mongoose.Schema.Types.ObjectId }, 
-      quantity: { type: Number, default: 1 }
-    }
-  ]
+      variant: { type: mongoose.Schema.Types.ObjectId },
+      quantity: { type: Number, default: 1 },
+    },
+  ],
 });
 
 module.exports = mongoose.model('Cart', cartSchema);

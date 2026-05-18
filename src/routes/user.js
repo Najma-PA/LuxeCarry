@@ -6,6 +6,7 @@ const userController = require('../controllers/user/userController');
 const userProductController = require('../controllers/user/userProductController');
 const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
+const orderController = require('../controllers/user/orderController');
 const wishlistController = require('../controllers/user/wishlistController');
 const { upload, handleMulterError } = require('../middleware/multer');
 const { isUserAuth, redirectIfUserLoggedIn } = require('../middleware/userAuth');
@@ -82,8 +83,13 @@ router.get('/cart/items-status', isUserAuth, cartController.getCartItemsStatus);
 // Checkout
 router.get('/checkout', isUserAuth, checkoutController.getCheckoutPage);
 router.post('/order-place', isUserAuth, checkoutController.placeOrder);
-router.get('/order-success/:orderId', isUserAuth, checkoutController.getOrderSuccessPage);
 
+//orders
+router.get('/order-success/:orderId', isUserAuth, orderController.getOrderSuccessPage);
+router.get('/orders', isUserAuth, orderController.getUserOrders);
+router.get('/orders/:orderId', isUserAuth, orderController.getOrderDetails);
+router.patch('/orders/:orderId/cancel', isUserAuth, orderController.cancelOrder);
+router.patch('/orders/:orderId/return', isUserAuth, orderController.returnOrder);
 // Update quantity
 router.patch('/cart/update/:id', isUserAuth, cartController.updateQuantity);
 
