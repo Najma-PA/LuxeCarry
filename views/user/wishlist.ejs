@@ -21,13 +21,17 @@
             user,activePage:'wishlist'
         }) %>
     
-    <div class="col-md-9">
-    <div class="wishlist-header">
+    <div class="col-lg-9 col-md-8">
+    <div class="dashboard-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h1 class="heading-serif">My Wishlist</h1>
-            <p><%= wishlist.items.length %> items curated in your collection</p>
+            <h1 class="dashboard-page-title">
+                Wishlist
+            </h1>
+            <p class="dashboard-page-subtitle">
+                Your saved favorite products
+            </p>
         </div>
-        <a href="javascript:void(0)" class="share-link">
+        <a href="javascript:void(0)" class="share-link text-decoration-none py-2 px-3 border rounded-pill" style="color:#c26a00; border-color:#e2e8f0; font-size: 0.9rem;">
             <i class="fa-solid fa-share-nodes"></i> Share Wishlist
         </a>
     </div>

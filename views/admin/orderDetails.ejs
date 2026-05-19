@@ -31,28 +31,28 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         <h2 class="fw-bold mb-1"
         style="color:#0f172a;">
 
-            Update Order Status
+            Order Details & Status
 
         </h2>
 
         <p class="text-muted mb-0">
 
             Order ID:
-            #<%= order.orderCode %>
+            #<%= order.orderId %>
 
         </p>
 
     </div>
 
     <!-- Top Grid -->
-    <div class="admin-order-grid">
+    <div class="admin-order-grid mb-4">
 
-        <!-- Order Details -->
+        <!-- Customer & Address Details -->
         <div class="admin-order-detail-card">
 
             <h3 class="admin-order-card-title">
 
-                Order Details
+                Customer & Shipping
 
             </h3>
 
@@ -64,7 +64,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 <div class="admin-order-text">
 
-                    <%= order.userId.name %>
+                    <strong><%= order.userId?.name || 'Customer' %></strong><br>
+                    <%= order.userId?.email || '' %>
 
                 </div>
 
@@ -81,6 +82,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     <i class="fa-solid fa-location-dot me-2"
                     style="color:#c26a00;"></i>
 
+                    <%= order.shippingAddress.name %><br>
                     <%= order.shippingAddress.street %>,
                     <br>
 
@@ -92,7 +94,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                     <br>
 
-                    <%= order.shippingAddress.country %>
+                    <%= order.shippingAddress.country %><br>
+                    Phone: <%= order.shippingAddress.phone %>
 
                 </div>
 
@@ -100,115 +103,80 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
         </div>
 
-        <!-- Status Management -->
+        <!-- Global Order & Payment Summary -->
         <div class="admin-order-detail-card">
 
             <h3 class="admin-order-card-title">
 
-                Status Management
+                Order & Payment Summary
 
             </h3>
 
-            <form
-            action="/admin/orders/<%= order._id %>/status"
-            method="POST"
-            class="admin-status-form">
-
-                <div>
-
-                    <div class="admin-order-label mb-2">
-
-                        Current Status
-
-                    </div>
-
-                    <select name="status"
-                    class="admin-status-select">
-
-                        <option value="Pending"
-                        <%= order.status === 'Pending'
-                        ? 'selected' : '' %>>
-
-                        Pending
-
-                        </option>
-
-                        <option value="Processing"
-                        <%= order.status === 'Processing'
-                        ? 'selected' : '' %>>
-
-                        Processing
-
-                        </option>
-
-                        <option value="Shipped"
-                        <%= order.status === 'Shipped'
-                        ? 'selected' : '' %>>
-
-                        Shipped
-
-                        </option>
-
-                        <option value="Out for Delivery"
-                        <%= order.status === 'Out for Delivery'
-                        ? 'selected' : '' %>>
-
-                        Out for Delivery
-
-                        </option>
-
-                        <option value="Delivered"
-                        <%= order.status === 'Delivered'
-                        ? 'selected' : '' %>>
-
-                        Delivered
-
-                        </option>
-
-                        <option value="Cancelled"
-                        <%= order.status === 'Cancelled'
-                        ? 'selected' : '' %>>
-
-                        Cancelled
-
-                        </option>
-
-                    </select>
-
+            <div class="mb-3">
+                <div class="admin-order-label">Global Order Status</div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <span class="order-badge
+                        <%= order.orderStatus === 'Pending'
+                            ? 'order-pending'
+                            : order.orderStatus === 'Confirmed'
+                            ? 'order-processing'
+                            : order.orderStatus === 'Shipped' || order.orderStatus === 'Out for Delivery'
+                            ? 'order-shipped'
+                            : order.orderStatus === 'Delivered'
+                            ? 'order-delivered'
+                            : 'order-cancelled' %>">
+                        <%= order.orderStatus %>
+                    </span>
+                    <form action="/admin/orders/<%= order._id %>/orderStatus" method="POST" class="d-flex gap-1 align-items-center">
+                        <select name="orderStatus" class="form-select form-select-sm" style="width: 130px;">
+                            <% ['Pending', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'].forEach(st => { %>
+                                <option value="<%= st %>" <%= order.orderStatus === st ? 'selected' : '' %>><%= st %></option>
+                            <% }) %>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-dark">Update</button>
+                    </form>
                 </div>
+            </div>
 
-                <button
-                type="submit"
-                class="btn-gold w-100">
+            <div class="mb-3">
+                <div class="admin-order-label">Payment Status</div>
+                <div class="d-flex align-items-center justify-content-between mt-1">
+                    <span class="badge <%= order.paymentStatus === 'Paid' ? 'bg-success' : order.paymentStatus === 'Pending' ? 'bg-warning text-dark' : 'bg-danger' %>">
+                        <%= order.paymentStatus %>
+                    </span>
+                    <form action="/admin/orders/<%= order._id %>/payment" method="POST" class="d-flex gap-1 align-items-center">
+                        <select name="paymentStatus" class="form-select form-select-sm" style="width: 130px;">
+                            <% ['Pending', 'Paid', 'Failed', 'Refunded'].forEach(ps => { %>
+                                <option value="<%= ps %>" <%= order.paymentStatus === ps ? 'selected' : '' %>><%= ps %></option>
+                            <% }) %>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-dark">Update</button>
+                    </form>
+                </div>
+            </div>
 
-                    <i class="fa-solid fa-rotate me-2"></i>
+            <div class="mb-3">
+                <div class="admin-order-label">Payment Method</div>
+                <div class="admin-order-text mt-1"><strong><%= order.paymentMethod %></strong></div>
+            </div>
 
-                    Update Status
-
-                </button>
-
-            </form>
-
-            <div class="admin-status-note">
-
-                Changing status will automatically
-                update the customer's order tracking.
-
+            <div>
+                <div class="admin-order-label">Total Amount Payable</div>
+                <div class="admin-order-text mt-1 fw-bold text-success fs-5">₹<%= order.totalAmount.toLocaleString() %></div>
             </div>
 
         </div>
 
     </div>
 
-    <!-- Products -->
+    <!-- Products Ordered -->
     <div class="admin-order-products-card">
 
-        <!-- Header -->
         <div class="admin-order-products-header">
 
             <div class="admin-order-products-title">
 
-                Products Ordered
+                Products Ordered 
 
             </div>
 
@@ -220,17 +188,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
         </div>
 
-        <!-- Table -->
-        <table class="table admin-order-table mb-0">
+        <table class="table admin-order-table align-middle mb-0">
 
             <thead>
 
                 <tr>
 
-                    <th>PRODUCT</th>
-                    <th>QUANTITY</th>
-                    <th>PRICE</th>
-                    <th>TOTAL</th>
+                    <th style="width: 35%;">PRODUCT</th>
+                    <th style="width: 8%;">QTY</th>
+                    <th style="width: 22%;">PRICE DETAILS</th>
+                    <th style="width: 35%;">STATUS & ACTIONS</th>
 
                 </tr>
 
@@ -247,23 +214,22 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     <div class="admin-product-info">
 
                         <img
-                        src="<%= item.product.productImage?.[0] || '/images/no-image.png' %>"
-                        class="admin-product-image">
+                        src="<%= item.productImage || '/images/no-image.png' %>"
+                        class="admin-product-image" style="width: 60px; height: 60px; object-fit: cover; border-radius: 6px;">
 
                         <div>
 
-                            <div class="admin-product-name">
+                            <div class="admin-product-name fw-bold" style="color: #0f172a;">
 
-                                <%= item.product.productName %>
+                                <%= item.productName %>
 
                             </div>
 
                             <% if(item.variantValue){ %>
 
-                            <div class="admin-product-meta">
+                            <div class="admin-product-meta text-muted small mt-1">
 
-                                Variant:
-                                <%= item.variantValue %>
+                                Variant: <strong><%= item.variantValue %></strong>
 
                             </div>
 
@@ -275,22 +241,99 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 </td>
 
-                <td>
+                <td class="fw-bold">
 
-                    <%= item.quantity %>
-
-                </td>
-
-                <td>
-
-                    ₹<%= item.price.toLocaleString() %>
+                    × <%= item.quantity %>
 
                 </td>
 
                 <td>
 
-                    ₹<%= (item.price * item.quantity)
-                    .toLocaleString() %>
+                    <% 
+                        const oPrice = item.originalPrice || item.price || 0;
+                        const pDisc = item.productDiscount || 0;
+                        const fPrice = item.finalPrice || item.price || 0;
+                        const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
+                    %>
+                    <div class="small">
+                        <div class="text-muted d-flex justify-content-between">Original: <span class="fw-bold text-decoration-line-through">₹<%= oPrice.toLocaleString() %></span></div>
+                        <div class="text-success d-flex justify-content-between">Discount: <span>- ₹<%= pDisc.toLocaleString() %></span></div>
+                        <div class="text-primary d-flex justify-content-between">Final Price: <span class="fw-bold">₹<%= fPrice.toLocaleString() %></span></div>
+                        <hr class="my-1">
+                        <div class="fw-bold d-flex justify-content-between text-dark">Total Price: <span>₹<%= tPrice.toLocaleString() %></span></div>
+                    </div>
+
+                </td>
+
+                <td>
+
+                    <div class="d-flex flex-column gap-2">
+                        <!-- Current status badge -->
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="order-badge
+                                <%= item.status === 'Pending'
+                                    ? 'order-pending'
+                                    : item.status === 'Confirmed'
+                                    ? 'order-processing'
+                                    : item.status === 'Shipped' || item.status === 'Out for Delivery'
+                                    ? 'order-shipped'
+                                    : item.status === 'Delivered'
+                                    ? 'order-delivered'
+                                    : 'order-cancelled' %>">
+                                <%= item.status %>
+                            </span>
+                            <!-- Status change form -->
+                            <form action="/admin/orders/<%= order._id %>/items/<%= item._id %>/status" method="POST" class="d-flex gap-1 align-items-center">
+                                <select name="status" class="form-select form-select-sm" style="width: 140px;">
+                                    <% ['Pending', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'].forEach(st => { %>
+                                        <option value="<%= st %>" <%= item.status === st ? 'selected' : '' %>><%= st %></option>
+                                    <% }) %>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-gold">Update</button>
+                            </form>
+                        </div>
+
+                        <!-- Cancellation Reason -->
+                        <% if (item.status === 'Cancelled' && item.cancelReason) { %>
+                            <div class="alert alert-danger p-2 mb-0 mt-1 small">
+                                <strong>Cancel Reason:</strong> <%= item.cancelReason %>
+                                <% if (item.cancelledAt) { %>
+                                    <div class="text-muted text-end mt-1" style="font-size: 10px;">At: <%= new Date(item.cancelledAt).toLocaleString() %></div>
+                                <% } %>
+                            </div>
+                        <% } %>
+
+                        <!-- Return Reason -->
+                        <% if (item.status === 'Returned' && item.returnReason) { %>
+                            <div class="alert alert-warning p-2 mb-0 mt-1 small text-dark">
+                                <strong>Return Reason:</strong> <%= item.returnReason %>
+                                <% if (item.returnedAt) { %>
+                                    <div class="text-muted text-end mt-1" style="font-size: 10px;">At: <%= new Date(item.returnedAt).toLocaleString() %></div>
+                                <% } %>
+                            </div>
+                        <% } %>
+
+                        <!-- Refund Manager 
+                        <div class="bg-light p-2 rounded mt-1 border">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="small text-muted">Refund Amount:</span>
+                                <span class="fw-bold small text-dark">₹<%= (item.refundAmount || 0).toLocaleString() %></span>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="small text-muted">Refund Status:</span>
+                                <span class="badge bg-secondary mb-1" style="font-size: 10px;"><%= item.refundStatus %></span>
+                            </div>
+                            <form action="/admin/orders/<%= order._id %>/items/<%= item._id %>/refund" method="POST" class="d-flex gap-1 align-items-center mt-1">
+                                <input type="number" name="refundAmount" value="<%= item.refundAmount || 0 %>" class="form-control form-control-sm" style="width: 70px;" placeholder="Amount">
+                                <select name="refundStatus" class="form-select form-select-sm" style="width: 110px; font-size: 11px;">
+                                    <% ['Not Requested', 'Pending', 'Processed', 'Completed'].forEach(rs => { %>
+                                        <option value="<%= rs %>" <%= item.refundStatus === rs ? 'selected' : '' %>><%= rs %></option>
+                                    <% }) %>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-dark" style="font-size: 11px;">Save</button>
+                            </form>
+                        </div>-->
+                    </div>
 
                 </td>
 
@@ -302,7 +345,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
         </table>
 
-        <!-- Totals -->
+        <!-- Dynamic Totals Summary -->
+        <% 
+            const dynamicSubtotal = order.items.reduce((sum, item) => sum + ((item.originalPrice || item.price || 0) * item.quantity), 0);
+            const dynamicDiscount = order.items.reduce((sum, item) => sum + ((item.productDiscount || 0) * item.quantity), 0);
+        %>
         <div class="admin-order-total-section">
 
             <div class="admin-order-total-box">
@@ -310,40 +357,26 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                 <div class="admin-order-total-row">
 
                     <span class="admin-order-total-label">
-                        Subtotal
+                        Original Subtotal
                     </span>
 
                     <span class="admin-order-total-value">
 
-                        ₹<%= order.subtotal.toLocaleString() %>
+                        ₹<%= dynamicSubtotal.toLocaleString() %>
 
                     </span>
 
                 </div>
 
-                <div class="admin-order-total-row">
+                <div class="admin-order-total-row text-success">
 
                     <span class="admin-order-total-label">
-                        Shipping
+                        Product Discount
                     </span>
 
                     <span class="admin-order-total-value">
 
-                        ₹0
-
-                    </span>
-
-                </div>
-
-                <div class="admin-order-total-row">
-
-                    <span class="admin-order-total-label">
-                        Tax
-                    </span>
-
-                    <span class="admin-order-total-value">
-
-                        ₹<%= order.tax.toLocaleString() %>
+                        - ₹<%= dynamicDiscount.toLocaleString() %>
 
                     </span>
 
@@ -353,7 +386,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                 admin-order-grand">
 
                     <span class="admin-order-total-label">
-                        Total
+                        Grand Total
                     </span>
 
                     <span class="admin-order-total-value">

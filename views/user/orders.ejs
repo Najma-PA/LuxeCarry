@@ -20,20 +20,26 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 <div class="orders-page-wrapper">
 
-<div class="container">
+<div class="container py-5">
+    <div class="row">
+        <!-- Sidebar -->
+        <%- include("../partials/user/sidebar", { user, activePage: 'orders' }) %>
 
-    <!-- Header -->
-    <div class="orders-page-header">
+        <!-- Main Content Column -->
+        <div class="col-lg-9 col-md-8">
 
-        <h1 class="orders-page-title">
-            My Orders
-        </h1>
+            <!-- Header -->
+            <div class="dashboard-page-header">
 
-        <p class="orders-page-subtitle">
-            Track and manage your luxury purchases
-        </p>
+                <h1 class="dashboard-page-title">
+                    My Orders
+                </h1>
 
-    </div>
+                <p class="dashboard-page-subtitle">
+                    Track and manage your orders
+                </p>
+
+            </div>
 
     <!-- Filters -->
     <div class="orders-filter-bar">
@@ -41,152 +47,154 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         <div class="orders-search-box">
 
             <input type="text"
-                   placeholder="Search by Order ID...">
+                   id="orders-search-input"
+                   placeholder="Search by Order ID or Product Name...">
 
             <i class="fa-solid fa-magnifying-glass"></i>
 
         </div>
 
-        <select class="orders-filter-select">
+        <select id="orders-filter-select" class="orders-filter-select">
 
-            <option>All Orders</option>
-            <option>Pending</option>
-            <option>Delivered</option>
-            <option>Cancelled</option>
-            <option>Returned</option>
+            <option value="All">All Orders</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Out for Delivery">Out for Delivery</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Returned">Returned</option>
 
         </select>
 
     </div>
+    <div id="orders-list-container">
+    <% if(orders.length > 0){ %>
+    <% orders.forEach(order => { %>
 
-    <!-- Orders -->
+    <div class="lc-order-group-card">
 
-    <% if(orders.length > 0) { %>
+    <!-- ORDER HEADER -->
+    <div class="lc-order-group-header">
 
-        <% orders.forEach(order => { %>
+        <div>
 
-        <div class="lc-order-card">
+            <h5 class="mb-1">
+                Order #<%= order.orderId %>
+            </h5>
 
-            <!-- Header -->
-            <div class="lc-order-card-header">
+            <small class="text-muted">
+                <%= new Date(order.createdAt)
+                    .toDateString() %>
+            </small>
 
-                <div class="lc-order-meta">
+        </div>
+        <a href="/user/orders/invoice/<%= order._id %>"
+            class="btn btn-light border btn-sm rounded-pill text-secondary">
+            <i class="fa-solid fa-download me-1"></i>
+            Invoice
+            
+        </a>
 
-                    <div class="lc-order-meta-item">
+    </div>
 
-                        <span>Order ID</span>
+    <!-- PRODUCTS -->
+    <div class="d-flex flex-column gap-3">
 
-                        <strong>
-                            #<%= order._id.toString().slice(-6).toUpperCase() %>
-                        </strong>
+        <% order.items.forEach(item => { %>
+
+        <div class="lc-product-order-card">
+
+            <!-- LEFT -->
+            <div class="d-flex gap-3 align-items-center">
+
+                <img
+                    src="<%= item.product?.thumbnail?.url || '/images/no-image.png' %>"
+                    class="lc-product-order-image">
+
+                <div>
+
+                    <h6 class="mb-1">
+                        <%= item.product?.name %>
+                    </h6>
+
+                    <div class="text-muted small mb-1">
+
+                        Variant:
+                        <%= item.variantValue || '-' %>
 
                     </div>
 
-                    <div class="lc-order-meta-item">
+                    <div class="text-muted small">
 
-                        <span>Date</span>
-
-                        <strong>
-                            <%= new Date(order.createdAt)
-                            .toLocaleDateString('en-IN',{
-                                day:'numeric',
-                                month:'short',
-                                year:'numeric'
-                            }) %>
-                        </strong>
+                        Qty:
+                        <%= item.quantity %>
 
                     </div>
-
-                    <div class="lc-order-meta-item">
-
-                        <span>Total</span>
-
-                        <strong>
-                            ₹<%= order.totalAmount.toLocaleString() %>
-                        </strong>
-
-                    </div>
-
-                </div>
-
-                <div class="d-flex align-items-center gap-3">
-
-                    <span class="order-status-badge
-                    <%= order.status === 'Delivered'
-                        ? 'order-status-delivered'
-                        : order.status === 'Cancelled'
-                        ? 'order-status-cancelled'
-                        : order.status === 'Returned'
-                        ? 'order-status-returned'
-                        : 'order-status-pending' %>">
-
-                        <i class="fa-solid fa-circle"></i>
-
-                        <%= order.status %>
-
-                    </span>
-
-                    <a href="/user/orders/<%= order._id %>"
-                       class="btn-order-outline">
-
-                       View Details
-
-                    </a>
 
                 </div>
 
             </div>
 
-            <!-- Products -->
-            <div class="lc-order-card-body">
+           <!-- RIGHT -->
+<div
+    class="d-flex flex-column
+    align-items-end
+    justify-content-between
+    h-100">
 
-                <% order.items.forEach(item => { %>
+   
+<div
+    class="d-flex
+    align-items-center
+    gap-3">
 
-                <div class="lc-order-product">
+    
+    <div
+        class="lc-order-status-badge
+        <%= item.status
+            .toLowerCase()
+            .replace(/\s+/g,'-') %>">
 
-                    <div class="lc-order-product-left">
+        <%=item.status %>
 
-                        <img
-                        src="<%= item.product?.thumbnail?.url ||item.product?.displayImage|| '/images/placeholder.jpg' %>"
-                        class="lc-order-product-image">
+    </div>
+    <a
+        href="/user/orders/<%= order._id %>/product/<%= item.id %>"
+        class="btn btn-view-details btn-sm rounded-pill">
 
-                        <div>
+        View Details
 
-                            <h5 class="lc-order-product-name">
-                                <%= item.product?.name %>
-                            </h5>
+    </a>
 
-                            <% if(item.variantValue){ %>
+</div>
+   
 
-                            <div class="lc-order-product-meta">
-                                Variant: <%= item.variantValue %>
-                            </div>
+       
 
-                            <% } %>
+    <!-- PRICE -->
+    <div class="fw-bold fs-5 mt-4">
 
-                            <div class="lc-order-product-meta">
-                                Qty: <%= item.quantity %>
-                            </div>
+        Rs.
+        <%= (
+            item.totalPrice || (item.price * item.quantity) || 0
+        ).toLocaleString() %>
 
-                        </div>
+    </div>
 
-                    </div>
-
-                    <div class="lc-order-product-price">
-
-                        ₹<%= item.price.toLocaleString() %>
-
-                    </div>
-
-                </div>
-
-                <% }) %>
-
-            </div>
+</div>
 
         </div>
 
         <% }) %>
+
+    </div>
+
+</div>
+
+<% }) %>
+
+           
 
     <% } else { %>
 
@@ -210,12 +218,130 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     </div>
 
     <% } %>
+    </div>
 
-</div>
+        </div> <!-- Close col-lg-9 col-md-8 -->
+    </div> <!-- Close row -->
+</div> <!-- Close container -->
 <%- include('../partials/user/footer-short') %>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('orders-search-input');
+    const filterSelect = document.getElementById('orders-filter-select');
+    const listContainer = document.getElementById('orders-list-container');
 
+    let debounceTimeout = null;
+
+    const performFilter = async () => {
+        const searchValue = searchInput.value.trim();
+        const filterValue = filterSelect.value;
+
+        try {
+            const response = await fetch(`/user/orders/filter?search=${encodeURIComponent(searchValue)}&status=${encodeURIComponent(filterValue)}`);
+            const data = await response.json();
+
+            if (data.success) {
+                renderOrders(data.orders);
+            }
+        } catch (error) {
+            console.error('Error fetching filtered orders:', error);
+        }
+    };
+
+    const renderOrders = (orders) => {
+        if (!orders || orders.length === 0) {
+            listContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fa-solid fa-bag-shopping fs-1 text-muted mb-4"></i>
+                    <h3>No matching orders found</h3>
+                    <p class="text-muted">Try adjusting your search terms or status filter.</p>
+                    <a href="/user/shop" class="btn-order-primary mt-3">Continue Shopping</a>
+                </div>
+            `;
+            return;
+        }
+
+        let html = '';
+        orders.forEach(order => {
+            let itemsHtml = '';
+            order.items.forEach(item => {
+                const totalPriceVal = item.totalPrice || (item.price * item.quantity) || 0;
+                const pName = item.productName || item.product?.name || 'Product';
+                const pImage = item.productImage || item.product?.thumbnail?.url || '/images/no-image.png';
+                const variantText = item.variantValue || '-';
+                const badgeClass = item.status.toLowerCase().replace(/\s+/g, '-');
+                const itemId = item._id || item.id;
+
+                itemsHtml += `
+                    <div class="lc-product-order-card">
+                        <!-- LEFT -->
+                        <div class="d-flex gap-3 align-items-center">
+                            <img src="${pImage}" class="lc-product-order-image" alt="${pName}">
+                            <div>
+                                <h6 class="mb-1">${pName}</h6>
+                                <div class="text-muted small mb-1">Variant: ${variantText}</div>
+                                <div class="text-muted small">Qty: ${item.quantity}</div>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT -->
+                        <div class="d-flex flex-column align-items-end justify-content-between h-100">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="lc-order-status-badge ${badgeClass}">
+                                    ${item.status}
+                                </div>
+                                <a href="/user/orders/${order._id}/product/${itemId}" class="btn btn-view-details btn-sm rounded-pill">
+                                    View Details
+                                </a>
+                            </div>
+
+                            <!-- PRICE -->
+                            <div class="fw-bold fs-5 mt-4">
+                                Rs. ${totalPriceVal.toLocaleString()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const orderDateStr = new Date(order.createdAt).toDateString();
+
+            html += `
+                <div class="lc-order-group-card">
+                    <!-- ORDER HEADER -->
+                    <div class="lc-order-group-header">
+                        <div>
+                            <h5 class="mb-1">Order #${order.orderId}</h5>
+                            <small class="text-muted">${orderDateStr}</small>
+                        </div>
+                        <a href="/user/orders/invoice/${order._id}" class="btn btn-light border btn-sm rounded-pill text-secondary">
+                            <i class="fa-solid fa-download me-1"></i>
+                            Invoice
+                        </a>
+                    </div>
+
+                    <!-- PRODUCTS -->
+                    <div class="d-flex flex-column gap-3">
+                        ${itemsHtml}
+                    </div>
+                </div>
+            `;
+        });
+
+        listContainer.innerHTML = html;
+    };
+
+    // Event Listeners
+    searchInput.addEventListener('input', () => {
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(performFilter, 300);
+    });
+
+    filterSelect.addEventListener('change', performFilter);
+});
+</script>
 
 </body>
 </html>

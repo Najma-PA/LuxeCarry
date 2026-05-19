@@ -2,317 +2,455 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Orders | LuxeCarry Admin</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-rel="stylesheet">
-
-<link rel="stylesheet"
-href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/admin.css">
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc;
+        color: #0f172a;
+    }
+    .main-content {
+        background-color: #f8fafc;
+        min-height: 100vh;
+        width: 100%;
+        padding: 40px !important;
+    }
+    .kpi-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .kpi-label {
+        font-size: 0.9rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1;
+    }
+    .kpi-icon-container {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+    }
+    .icon-pending {
+        background-color: #fef9c3;
+        color: #ca8a04;
+    }
+    .icon-shipped {
+        background-color: #dbeafe;
+        color: #2563eb;
+    }
+    .icon-processing {
+        background-color: #ffedd5;
+        color: #ea580c;
+    }
+    .search-filter-bar {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .search-input-wrapper {
+        position: relative;
+        flex-grow: 1;
+    }
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    .search-input {
+        width: 100%;
+        background-color: #f1f5f9;
+        border: none;
+        border-radius: 10px;
+        padding: 12px 16px 12px 48px;
+        font-size: 0.9rem;
+        color: #0f172a;
+        outline: none;
+        transition: background-color 0.2s;
+    }
+    .search-input::placeholder {
+        color: #94a3b8;
+    }
+    .search-input:focus {
+        background-color: #e2e8f0;
+    }
+    .select-wrapper {
+        position: relative;
+    }
+    .select-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        pointer-events: none;
+    }
+    .filter-select {
+        background-color: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 12px 36px 12px 44px;
+        font-size: 0.9rem;
+        color: #0f172a;
+        font-weight: 500;
+        cursor: pointer;
+        appearance: none;
+        outline: none;
+        min-width: 150px;
+        transition: border-color 0.2s;
+    }
+    .filter-select:focus {
+        border-color: #cbd5e1;
+    }
+    .select-caret {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        pointer-events: none;
+        font-size: 0.8rem;
+    }
+    .table-container {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .orders-table {
+        margin: 0;
+    }
+    .orders-table th {
+        background-color: #f8fafc;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 16px 24px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .orders-table td {
+        padding: 16px 24px;
+        vertical-align: middle;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+        color: #334155;
+    }
+    .order-id-link {
+        color: #ca8a04;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    .order-id-link:hover {
+        color: #a16207;
+        text-decoration: underline;
+    }
+    .customer-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .avatar-circle {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #eff6ff;
+        color: #1e40af;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .customer-name {
+        font-weight: 500;
+        color: #0f172a;
+    }
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 9999px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .badge-pending {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    .badge-shipped {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+    .badge-processing {
+        background-color: #e0f2fe;
+        color: #0369a1;
+    }
+    .badge-delivered {
+        background-color: #d1fae5;
+        color: #065f46;
+    }
+    .badge-cancelled {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    .badge-returned {
+        background-color: #f3e8ff;
+        color: #6b21a8;
+    }
+    .action-dropdown-btn {
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 8px;
+        transition: background-color 0.2s, color 0.2s;
+        text-decoration: none;
+    }
+    .action-dropdown-btn:hover {
+        background-color: #f1f5f9;
+        color: #475569;
+    }
+</style>
 </head>
 
 <body>
 
 <div class="d-flex">
 
-<%- include('../partials/admin/sidebar',
-{ active:'orders' }) %>
+<%- include('../partials/admin/sidebar', { active:'orders' }) %>
 
-<div class="main-content p-5 w-100">
+<div class="main-content">
 
-    <!-- Header -->
+    <!-- Header Section -->
     <div class="mb-4">
-
-        <h2 class="fw-bold mb-1"
-        style="color:#0f172a;">
-
-            Orders
-
-        </h2>
-
-        <p class="text-muted mb-0">
-
-            Manage and track customer purchases.
-
-        </p>
-
+        <h1 class="fw-bold mb-1" style="color: #0f172a; font-size: 1.75rem;">Orders</h1>
+        <p class="text-muted mb-0" style="font-size: 0.95rem;">Manage and track your customer handbag purchases.</p>
     </div>
 
     <!-- Summary Cards -->
     <div class="row g-4 mb-4">
-
         <div class="col-md-4">
-
-            <div class="orders-summary-card">
-
+            <div class="kpi-card">
                 <div>
-
-                    <div class="orders-summary-label">
-                        Pending Orders
-                    </div>
-
-                    <div class="orders-summary-value">
-                        <%= pendingCount %>
-                    </div>
-
+                    <div class="kpi-label">Pending Orders</div>
+                    <div class="kpi-value"><%= pendingCount %></div>
                 </div>
-
-                <div class="orders-summary-icon
-                orders-icon-yellow">
-
-                    <i class="fa-solid fa-box-open"></i>
-
+                <div class="kpi-icon-container icon-pending">
+                    <i class="fa-solid fa-clipboard-list"></i>
                 </div>
-
             </div>
-
         </div>
 
         <div class="col-md-4">
-
-            <div class="orders-summary-card">
-
+            <div class="kpi-card">
                 <div>
-
-                    <div class="orders-summary-label">
-                        Shipped Today
-                    </div>
-
-                    <div class="orders-summary-value">
-                        <%= shippedCount %>
-                    </div>
-
+                    <div class="kpi-label">Shipped Today</div>
+                    <div class="kpi-value"><%= shippedCount %></div>
                 </div>
-
-                <div class="orders-summary-icon
-                orders-icon-blue">
-
+                <div class="kpi-icon-container icon-shipped">
                     <i class="fa-solid fa-truck"></i>
-
                 </div>
-
             </div>
-
         </div>
 
         <div class="col-md-4">
-
-            <div class="orders-summary-card">
-
+            <div class="kpi-card">
                 <div>
-
-                    <div class="orders-summary-label">
-                        Processing
-                    </div>
-
-                    <div class="orders-summary-value">
-                        <%= processingCount %>
-                    </div>
-
+                    <div class="kpi-label">Processing</div>
+                    <div class="kpi-value"><%= processingCount %></div>
                 </div>
-
-                <div class="orders-summary-icon
-                orders-icon-orange">
-
+                <div class="kpi-icon-container icon-processing">
                     <i class="fa-solid fa-rotate"></i>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
 
-    <!-- Table Card -->
-    <div class="card-shadow">
-
-        <!-- Toolbar -->
-        <div class="d-flex justify-content-between
-                    align-items-center
-                    p-4
-                    border-bottom
-                    flex-wrap
-                    gap-3">
-
-            <!-- Search -->
-            <form method="GET"
-            class="search-bar-wrapper
-            position-relative">
-
-                <i class="fa-solid fa-magnifying-glass"></i>
-
-                <input type="text"
-                       name="search"
-                       value="<%= search || '' %>"
-                       placeholder="Search by Order ID or customer...">
-
-            </form>
-
-            <!-- Filters -->
-            <div class="d-flex gap-2">
-
-                <select class="status-select"
-                onchange="window.location=this.value">
-
-                    <option value="/admin/orders">
-                        All Status
-                    </option>
-
-                    <option value="/admin/orders?status=Pending">
-                        Pending
-                    </option>
-
-                    <option value="/admin/orders?status=Shipped">
-                        Shipped
-                    </option>
-
-                    <option value="/admin/orders?status=Delivered">
-                        Delivered
-                    </option>
-
-                    <option value="/admin/orders?status=Cancelled">
-                        Cancelled
-                    </option>
-
-                </select>
-
-            </div>
-
+    <!-- Search & Filter Form -->
+    <form method="GET" action="/admin/orders" class="search-filter-bar mb-4">
+        <!-- Search Input -->
+        <div class="search-input-wrapper">
+            <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            <input type="text" 
+                   name="search" 
+                   value="<%= search || '' %>" 
+                   class="search-input" 
+                   placeholder="Search by Order ID, customer name or handbag model...">
         </div>
 
-        <!-- Table -->
-        <table class="table table-hover mb-0">
+        <!-- Date Range Filter -->
+        <div class="select-wrapper">
+            <i class="fa-solid fa-calendar select-icon"></i>
+            <select name="dateRange" class="filter-select" onchange="this.form.submit()">
+                <option value="All" <%= dateRange === 'All' ? 'selected' : '' %>>Date Range</option>
+                <option value="Today" <%= dateRange === 'Today' ? 'selected' : '' %>>Today</option>
+                <option value="Yesterday" <%= dateRange === 'Yesterday' ? 'selected' : '' %>>Yesterday</option>
+                <option value="Last 7 Days" <%= dateRange === 'Last 7 Days' ? 'selected' : '' %>>Last 7 Days</option>
+                <option value="Last 30 Days" <%= dateRange === 'Last 30 Days' ? 'selected' : '' %>>Last 30 Days</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-caret"></i>
+        </div>
 
+        <!-- Status Filter -->
+        <div class="select-wrapper">
+            <i class="fa-solid fa-sliders select-icon"></i>
+            <select name="status" class="filter-select" onchange="this.form.submit()">
+                <option value="" <%= !status ? 'selected' : '' %>>Status</option>
+                <option value="Pending" <%= status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                <option value="Confirmed" <%= status === 'Confirmed' ? 'selected' : '' %>>Confirmed</option>
+                <option value="Shipped" <%= status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                <option value="Out for Delivery" <%= status === 'Out for Delivery' ? 'selected' : '' %>>Out for Delivery</option>
+                <option value="Delivered" <%= status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                <option value="Cancelled" <%= status === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                <option value="Returned" <%= status === 'Returned' ? 'selected' : '' %>>Returned</option>
+            </select>
+            <i class="fa-solid fa-chevron-down select-caret"></i>
+        </div>
+    </form>
+
+    <!-- Orders Table Container -->
+    <div class="table-container mb-4">
+        <table class="table table-hover orders-table align-middle">
             <thead>
-
                 <tr>
-
-                    <th>ORDER ID</th>
-                    <th>CUSTOMER</th>
-                    <th>DATE</th>
-                    <th>STATUS</th>
-                    <th>ACTION</th>
-
+                    <th style="width: 18%;">ORDER ID</th>
+                    <th style="width: 32%;">CUSTOMER</th>
+                    <th style="width: 22%;">DATE</th>
+                    <th style="width: 18%;">STATUS</th>
+                    <th style="width: 10%;" class="text-center">ACTION</th>
                 </tr>
-
             </thead>
-
             <tbody>
-
-            <% orders.forEach(order => { %>
-
-            <tr>
-
-                <td>
-
-                    <a href="/admin/orders/<%= order._id %>"
-                    class="order-id-link">
-
-                    #<%= order.orderCode %>
-
-                    </a>
-
-                </td>
-
-                <td>
-
-                    <div class="order-table-user">
-
-                        <div class="customer-avatar">
-
-                            <%= order.userId.name.charAt(0)
-                            .toUpperCase() %>
-
-                        </div>
-
-                        <div class="order-table-user-name">
-
-                            <%= order.userId.name %>
-
-                        </div>
-
-                    </div>
-
-                </td>
-
-                <td>
-
-                    <%= new Date(order.createdAt)
-                    .toLocaleDateString('en-IN',{
-                        day:'numeric',
-                        month:'short',
-                        year:'numeric'
-                    }) %>
-
-                </td>
-
-                <td>
-
-                    <span class="order-badge
-                    <%= order.status === 'Pending'
-                        ? 'order-pending'
-                        : order.status === 'Processing'
-                        ? 'order-processing'
-                        : order.status === 'Shipped'
-                        ? 'order-shipped'
-                        : order.status === 'Delivered'
-                        ? 'order-delivered'
-                        : 'order-cancelled' %>">
-
-                        <i class="fa-solid fa-circle"></i>
-
-                        <%= order.status %>
-
-                    </span>
-
-                </td>
-
-                <td>
-
-                    <a href="/admin/orders/<%= order._id %>"
-                    class="btn-action">
-
-                    <i class="fa-solid fa-eye"></i>
-
-                    </a>
-
-                </td>
-
-            </tr>
-
-            <% }) %>
-
+                <% if (orders && orders.length > 0) { %>
+                    <% orders.forEach(order => { %>
+                        <% 
+                            const customerName = order.userId?.name || 'Customer';
+                            const initials = customerName
+                                .split(' ')
+                                .map(w => w.charAt(0))
+                                .slice(0, 2)
+                                .join('')
+                                .toUpperCase();
+                        %>
+                        <tr>
+                            <td>
+                                <a href="/admin/orders/<%= order._id %>" class="order-id-link">
+                                    #<%= order.orderId || order._id %>
+                                </a>
+                            </td>
+                            <td>
+                                <div class="customer-cell">
+                                    <div class="avatar-circle">
+                                        <%= initials %>
+                                    </div>
+                                    <span class="customer-name"><%= customerName %></span>
+                                </div>
+                            </td>
+                            <td>
+                                <%= new Date(order.createdAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                }) %>
+                            </td>
+                            <td>
+                                <% 
+                                    let badgeClass = 'badge-pending';
+                                    if (order.orderStatus === 'Shipped') badgeClass = 'badge-shipped';
+                                    else if (order.orderStatus === 'Confirmed') badgeClass = 'badge-processing';
+                                    else if (order.orderStatus === 'Delivered') badgeClass = 'badge-delivered';
+                                    else if (order.orderStatus === 'Cancelled') badgeClass = 'badge-cancelled';
+                                    else if (order.orderStatus === 'Returned') badgeClass = 'badge-returned';
+                                %>
+                                <span class="status-badge <%= badgeClass %>">
+                                    <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i>
+                                    <%= order.orderStatus %>
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <a href="/admin/orders/<%= order._id %>" class="action-dropdown-btn">
+                                    <i class="fa-solid fa-ellipsis"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    <% }) %>
+                <% } else { %>
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-inbox d-block fs-3 mb-2"></i>
+                            No orders found matching the filter criteria.
+                        </td>
+                    </tr>
+                <% } %>
             </tbody>
-
         </table>
 
-        <!-- Pagination -->
-        <div class="pagination-wrapper">
+        <!-- State-Preserving Pagination -->
+        <% if (totalPages > 1) { %>
+        <div class="d-flex justify-content-end p-4 border-top bg-light align-items-center">
+            <nav aria-label="Page navigation">
+                <ul class="pagination mb-0 gap-1">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link border-0 text-muted rounded-3" href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>&status=<%= status %>&dateRange=<%= dateRange %>" aria-label="Previous">
+                                <i class="fa-solid fa-chevron-left small"></i>
+                            </a>
+                        </li>
+                    <% } %>
 
-            <% if(totalPages > 1){ %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item">
+                            <a class="page-link border border-0 rounded-3 px-3 py-2 <%= currentPage === i ? 'bg-warning text-dark fw-bold' : 'text-muted bg-transparent' %>" href="?page=<%= i %>&search=<%= encodeURIComponent(search) %>&status=<%= status %>&dateRange=<%= dateRange %>">
+                                <%= i %>
+                            </a>
+                        </li>
+                    <% } %>
 
-                <% for(let i=1;i<=totalPages;i++){ %>
-
-                    <a href="?page=<%= i %>"
-                    class="page-btn
-                    <%= currentPage===i?'active':'' %>">
-
-                    <%= i %>
-
-                    </a>
-
-                <% } %>
-
-            <% } %>
-
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link border-0 text-muted rounded-3" href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>&status=<%= status %>&dateRange=<%= dateRange %>" aria-label="Next">
+                                <i class="fa-solid fa-chevron-right small"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
         </div>
-
+        <% } %>
     </div>
 
 </div>

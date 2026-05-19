@@ -1,5 +1,38 @@
 <!-- USER SIDEBAR PARTIAL -->
-<div class="col-lg-3 col-md-4 mb-4">
+<style>
+    .user-dashboard-sidebar {
+        position: sticky;
+        top: 120px;
+        align-self: flex-start;
+        z-index: 10;
+    }
+    
+    @media(max-width: 991px){
+        .user-dashboard-sidebar{
+            position: static !important;
+        }
+    }
+    
+    .dashboard-page-header {
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #f1f5f9;
+        padding-bottom: 1rem;
+    }
+    
+    .dashboard-page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 0.25rem;
+    }
+    
+    .dashboard-page-subtitle {
+        color: #64748b;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+</style>
+<div class="col-lg-3 col-md-4 mb-4 user-dashboard-sidebar">
   <div class="lc-sidebar-card">
     
     <!-- User Profile Header -->
@@ -37,13 +70,6 @@
         </a>
       </li>
 
-      <% if (user && !user.googleId) { %>
-      <li class="lc-sidebar-menu-item <%= locals.activePage === 'change-password' ? 'active' : '' %>">
-        <a href="/user/changePassword" class="lc-sidebar-menu-link">
-          <i class="fa fa-key"></i> <span>Change Password</span>
-        </a>
-      </li>
-      <% } %>
 
       <!-- Coupons, Wallet, Referral are placeholders for future expansion -->
       <li class="lc-sidebar-menu-item <%= locals.activePage === 'coupons' ? 'active' : '' %>">

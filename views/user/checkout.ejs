@@ -20,9 +20,9 @@
     </div>
 
     <form id="checkoutForm" action="/user/order-place" method="POST">
-        <div class="row g-5">
+        <div class="row g-3">
             <!-- LEFT COLUMN: Shipping & Payment -->
-            <div class="col-lg-7">
+            <div class="col-lg-8">
                 
                 <!-- Shipping Address -->
                 <div class="section-title">
@@ -72,9 +72,9 @@
                             <a href="/user/addAddress?redirect=checkout" class="btn btn-theme-premium">
                                 <i class="fa fa-plus me-1"></i> Add New Address
                             </a>
-                            <a href="/user/addresses?redirect=checkout" class="btn btn-link text-decoration-none text-muted fw-bold" style="font-size: 13px;">
+                           <!-- <a href="/user/addresses?redirect=checkout" class="btn btn-link text-decoration-none text-muted fw-bold" style="font-size: 13px;">
                                 <i class="fa-solid fa-location-dot me-1"></i> Manage Addresses
-                            </a>
+                            </a>-->
                         </div>
                     <% } else { %>
                         <!-- No Saved Address Scenario -->
@@ -129,7 +129,7 @@
             </div>
 
             <!-- RIGHT COLUMN: Order Summary -->
-            <div class="col-lg-5">
+            <div class="col-lg-4">
                 <div class="order-summary-card">
                     <h5>Order Summary</h5>
 
@@ -148,7 +148,7 @@
                         <% }) %>
                     </div>
 
-                    <div class="coupon-section">
+                   <div class="coupon-section">
                         <div class="form-label">Have a coupon code?</div>
                         <div class="coupon-input-group">
                             <input type="text" id="couponCode" class="form-control" placeholder="WELCOME10">
@@ -158,23 +158,19 @@
                             <i class="fa-solid fa-circle-check"></i> Coupon WELCOME10 applied successfully!
                         </div>
                     </div>
-
+                
                     <div class="summary-totals">
                         <div class="total-row">
                             <span>Subtotal</span>
                             <span>₹<%= cart.subtotal.toLocaleString() %>.00</span>
                         </div>
                         <div class="total-row discount">
-                            <span>Discount (WELCOME10)</span>
+                            <span>Discount </span>
                             <span>-₹<%= cart.totalDiscount.toLocaleString() %>.00</span>
                         </div>
                         <div class="total-row">
                             <span>Shipping</span>
                             <span class="text-success fw-bold">Free</span>
-                        </div>
-                        <div class="total-row">
-                            <span>Tax</span>
-                            <span>₹<%= tax.toLocaleString() %>.00</span>
                         </div>
 
                         <div class="total-row grand-total">

@@ -51,7 +51,7 @@ rel="stylesheet">
                 </span>
 
                 <span class="summary-value">
-                    #<%= order._id.toString().slice(-6).toUpperCase() %>
+                    #<%= order.orderId %>
                 </span>
             </div>
 
@@ -95,7 +95,7 @@ rel="stylesheet">
         <!-- Buttons -->
         <div class="success-actions">
 
-            <a href="/user/orders/<%= order._id %>"
+            <a href="/user/orders"
                class="btn-order-primary">
 
                Order Details
