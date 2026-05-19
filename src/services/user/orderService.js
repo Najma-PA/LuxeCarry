@@ -8,27 +8,137 @@ exports.getOrderById = async (orderId) => {
   const order = await Order.findById(orderId).populate('items.product');
   return order;
 };
-exports.cancelOrder = async (orderId, userId, reason) => {
+exports.getOrderedProductDetails = async (orderId, itemId, userId) => {
   const order = await Order.findOne({
     _id: orderId,
     userId,
-  });
+  }).populate('items.product');
+
   if (!order) {
     return {
       success: false,
       message: 'Order not found',
     };
   }
-  if (order.status !== 'Pending' && order.status !== 'Confirmed') {
-    return { success: false, message: 'Order cannot be cancelled' };
+
+  const orderedItem = order.items.id(itemId);
+
+  if (!orderedItem) {
+    return {
+      success: false,
+      message: 'Product not found',
+    };
   }
 
-  //Restore variant stock
-  for (const item of order.items) {
+  return {
+    success: true,
+    order,
+    item: orderedItem,
+  };
+};
+exports.cancelOrder = async (orderId, itemId, userId, reason) => {
+  const order = await Order.findOne({
+    _id: orderId,
+    userId,
+  });
+
+  if (!order) {
+    return {
+      success: false,
+      message: 'Order not found',
+    };
+  }
+
+  const item = order.items.id(itemId) || order.items.find(i => i._id.toString() === itemId.toString());
+
+  if (!item) {
+    return {
+      success: false,
+      message: 'Item not found in order',
+    };
+  }
+
+  if (item.status !== 'Pending' && item.status !== 'Confirmed') {
+    return { success: false, message: 'Item cannot be cancelled at this stage' };
+  }
+
+  // Restore variant/product stock ONLY for this item
+  if (item.variant) {
+    await Product.updateOne(
+      {
+        _id: item.product,
+        'variants._id': item.variant,
+      },
+      {
+        $inc: {
+          'variants.$.stock': item.quantity,
+        },
+      }
+    );
+  } else {
+    await Product.updateOne(
+      { _id: item.product },
+      {
+        $inc: {
+          stock: item.quantity,
+        },
+      }
+    );
+  }
+
+  item.status = 'Cancelled';
+  item.cancelReason = reason || '';
+  item.cancelledAt = new Date();
+
+  // Refund fields
+  if (order.paymentStatus === 'Paid') {
+    item.refundAmount = item.totalPrice || (item.finalPrice * item.quantity);
+    item.refundStatus = 'Pending';
+  }
+
+  // Check if all items are cancelled to update the orderStatus
+  const allCancelled = order.items.every(i => i.status === 'Cancelled');
+  if (allCancelled) {
+    order.orderStatus = 'Cancelled';
+  }
+
+  await order.save();
+  return { success: true };
+};
+
+exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
+  const order = await Order.findOne({ _id: orderId, userId });
+
+  if (!order) {
+    return { success: false, message: 'Order not found' };
+  }
+
+  const item = order.items.id(itemId) || order.items.find(i => i._id.toString() === itemId.toString());
+
+  if (!item) {
+    return { success: false, message: 'Item not found in order' };
+  }
+
+  if (item.status !== 'Delivered') {
+    return { success: false, message: 'Return not allowed for this item status' };
+  }
+
+  let finalReason = reason;
+  if (reason === 'Other' && customReason) {
+    finalReason = customReason;
+  }
+
+  item.status = 'Returned';
+  item.returnReason = finalReason || '';
+  item.returnedAt = new Date();
+
+  // Restore stock ONLY for returned item, IF reason is NOT Damaged Product
+  const isDamaged = finalReason === 'Damaged Product' || reason === 'Damaged Product';
+  if (!isDamaged) {
     if (item.variant) {
       await Product.updateOne(
         {
-          _id: item.product._id,
+          _id: item.product,
           'variants._id': item.variant,
         },
         {
@@ -39,7 +149,7 @@ exports.cancelOrder = async (orderId, userId, reason) => {
       );
     } else {
       await Product.updateOne(
-        { _id: item.product._id },
+        { _id: item.product },
         {
           $inc: {
             stock: item.quantity,
@@ -48,23 +158,19 @@ exports.cancelOrder = async (orderId, userId, reason) => {
       );
     }
   }
-  order.status = 'Cancelled';
-  if (reason) {
-    order.cancelReason = reason;
+
+  // Refund fields
+  if (order.paymentStatus === 'Paid') {
+    item.refundAmount = item.totalPrice || (item.finalPrice * item.quantity);
+    item.refundStatus = 'Pending';
   }
-  await order.save();
-  return { success: true };
-};
-exports.returnOrder = async (orderId, userId, reason) => {
-  const order = await Order.findOne({ _id: orderId, userId });
-  if (!order) {
-    return { success: false, message: 'Order not found' };
+
+  // Check if all items are returned or cancelled to update global orderStatus
+  const allReturnedOrCancelled = order.items.every(i => i.status === 'Returned' || i.status === 'Cancelled');
+  if (allReturnedOrCancelled) {
+    order.orderStatus = 'Returned';
   }
-  if (order.status !== 'Delivered') {
-    return { success: false, message: 'Return not allowed' };
-  }
-  order.status = 'Returned';
-  order.returnReason = reason;
+
   await order.save();
   return { success: true };
 };

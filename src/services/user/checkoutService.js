@@ -32,15 +32,12 @@ exports.getCheckoutData = async (userId) => {
     createdAt: -1,
   });
 
-  const tax = Math.round(cart.total * 0.05);
-
-  const finalTotal = cart.total + tax;
+  const finalTotal = cart.total;
 
   return {
     success: true,
     cart,
     addresses,
-    tax,
     finalTotal,
   };
 };
@@ -80,24 +77,33 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
   }
 
   // Pricing
-  const tax = Math.round(cart.total * 0.05);
 
-  const finalTotal = cart.total + tax;
+  const finalTotal = cart.total;
 
   // Build order items
   const orderItems = [];
 
   for (const item of cart.items) {
-    const price = item.finalPrice;
+    const originalPrice = item.product.price;
+    const finalPrice = item.finalPrice;
+    const productDiscount = originalPrice - finalPrice;
+    const totalPrice = finalPrice * item.quantity;
 
     const variantDetail = item.variantDetail;
+    const productImage = item.product.thumbnail?.url || item.product.displayImage || '';
 
     orderItems.push({
       product: item.product._id,
+      productName: item.product.name,
+      productImage,
       variant: item.variant || null,
       variantValue: variantDetail ? variantDetail.value : null,
       quantity: item.quantity,
-      price,
+      originalPrice,
+      productDiscount,
+      finalPrice,
+      totalPrice,
+      status: 'Pending',
     });
 
     // Deduct stock
@@ -145,15 +151,9 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
 
     paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Paid',
 
-    subtotal: cart.subtotal,
-
-    tax,
-
-    discount: cart.totalDiscount,
+    orderStatus: 'Pending',
 
     totalAmount: finalTotal,
-
-    status: 'Pending',
   });
 
   // Clear cart

@@ -12,22 +12,23 @@ exports.generateInvoice = async (orderId, res) => {
     };
   }
 
-  // Create PDF
+  // PDF
   const doc = new PDFDocument({
     margin: 50,
+    size: 'A4',
   });
 
   const fileName = `invoice-${order.orderId || order._id}.pdf`;
 
-  // Response headers
   res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
 
   res.setHeader('Content-Type', 'application/pdf');
 
-  // Pipe PDF
   doc.pipe(res);
 
-  //header
+  // ======================================================
+  // HEADER
+  // ======================================================
 
   const logoPath = path.join(__dirname, '../../../public/images/logo.png');
 
@@ -57,102 +58,227 @@ exports.generateInvoice = async (orderId, res) => {
   doc.fontSize(24).font('Helvetica').fillColor('#666').text('INVOICE', 0, doc.y, {
     align: 'center',
   });
+
   doc.moveDown(2);
 
-  //orderdetails
+  // ======================================================
+  // ORDER DETAILS
+  // ======================================================
 
-  doc.moveDown(3);
+  const detailsTop = doc.y + 20;
 
-  const detailsTop = doc.y;
-
-  doc.fontSize(13).fillColor('#333').font('Helvetica');
+  doc.fontSize(12).font('Helvetica').fillColor('#333');
 
   // LEFT COLUMN
-  doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 80, detailsTop);
+  doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 70, detailsTop);
 
-  doc.text(`Order ID: ${order.orderId || order._id}`, 80, detailsTop + 25);
+  doc.text(`Order ID: ${order.orderId || order._id}`, 70, detailsTop + 22);
 
-  doc.text(`Order Date: ${order.createdAt.toDateString()}`, 80, detailsTop + 50);
+  doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 44);
 
-  // RIGHT COLUMN
-  doc.text(`Customer: ${order.userId.name}`, 340, detailsTop);
+  // ======================================================
+  // SHIPPING ADDRESS (RIGHT TOP)
+  // ======================================================
 
-  doc.text(`Email: ${order.userId.email}`, 340, detailsTop + 25);
-  //products
+  const addressTop = detailsTop;
 
-  doc.moveDown(6);
+  doc
+    .font('Helvetica-Bold')
+    .fontSize(14)
+    .fillColor('#111')
+    .text('Shipping Address', 340, addressTop);
+
+  doc.font('Helvetica').fontSize(11).fillColor('#444');
+
+  doc.text(`${order.shippingAddress.name}`, 340, addressTop + 24);
+
+  doc.text(`${order.shippingAddress.street}`, 340, addressTop + 42, {
+    width: 200,
+  });
+
+  doc.text(
+    `${order.shippingAddress.city}, ${order.shippingAddress.state} - ${order.shippingAddress.pincode}`,
+    340,
+    addressTop + 62,
+    {
+      width: 200,
+    }
+  );
+
+  doc.text(`${order.shippingAddress.country}`, 340, addressTop + 82);
+
+  doc.text(`Phone: ${order.shippingAddress.phone}`, 340, addressTop + 100);
+
+  doc.text(`Email: ${order.userId.email}`, 340, addressTop + 118, {
+    width: 200,
+  });
+
+  // ======================================================
+  // PRODUCTS TABLE
+  // ======================================================
+
+  doc.y = addressTop + 170;
 
   const tableTop = doc.y;
 
-  const tableLeft = 70;
+  const tableLeft = 50;
 
-  const productX = tableLeft + 10;
-  const qtyX = tableLeft + 300;
-  const priceX = tableLeft + 380;
-  const totalX = tableLeft + 470;
+  const productX = tableLeft + 10; // 60
+  const qtyX = tableLeft + 150; // 200
+  const originalX = tableLeft + 190; // 240
+  const discountX = tableLeft + 270; // 320
+  const finalX = tableLeft + 350; // 400
+  const totalX = tableLeft + 430; // 480
 
-  // Header Background
-  doc.rect(tableLeft, tableTop, 520, 35).fill('#111');
+  // TABLE HEADER
+  doc.roundedRect(tableLeft, tableTop, 500, 35, 6).fill('#111');
 
-  doc.fillColor('#fff').font('Helvetica-Bold').fontSize(12);
+  doc.fillColor('#fff').font('Helvetica-Bold').fontSize(11);
 
-  doc.text('Product', productX, tableTop + 11);
+  doc.text('Product', productX, tableTop + 11, {
+    width: 130,
+  });
 
-  doc.text('Qty', qtyX, tableTop + 11);
+  doc.text('Qty', qtyX, tableTop + 11, {
+    width: 30,
+    align: 'center',
+  });
 
-  doc.text('Price', priceX, tableTop + 11);
+  doc.text('Original', originalX, tableTop + 11, {
+    width: 70,
+    align: 'right',
+  });
 
-  doc.text('Total', totalX, tableTop + 11);
+  doc.text('Discount', discountX, tableTop + 11, {
+    width: 70,
+    align: 'right',
+  });
 
-  // Reset color
+  doc.text('Final', finalX, tableTop + 11, {
+    width: 70,
+    align: 'right',
+  });
+
+  doc.text('Total', totalX, tableTop + 11, {
+    width: 60,
+    align: 'right',
+  });
+
   doc.fillColor('#000');
 
   let position = tableTop + 35;
 
-  let totalAmount = 0;
-
-  order.items.forEach((item) => {
-    const total = item.quantity * item.price;
-
-    totalAmount += total;
+  order.items.forEach((item, index) => {
+    // Zebra Rows
+    if (index % 2 === 0) {
+      doc.rect(tableLeft, position, 500, 45).fill('#f8f8f8');
+    }
 
     // Row Border
-    doc.rect(tableLeft, position, 520, 40).stroke('#ddd');
+    doc.rect(tableLeft, position, 500, 45).stroke('#e5e5e5');
 
-    doc.font('Helvetica').fontSize(12);
+    doc.fillColor('#111').font('Helvetica').fontSize(10);
 
-    doc.text(item.product?.name || item.product?.productName, productX, position + 13);
+    // Product Name
+    const pName = item.productName || item.product?.name || 'Product';
+    doc.text(pName, productX, position + 15, {
+      width: 130,
+    });
 
-    doc.text(item.quantity.toString(), qtyX, position + 13);
+    // Qty
+    doc.text(item.quantity.toString(), qtyX, position + 15, {
+      width: 30,
+      align: 'center',
+    });
 
-    doc.text(`₹${item.price}`, priceX, position + 13);
-
-    doc.text(`₹${total}`, totalX, position + 13);
-
-    position += 40;
-  });
-  //Total
-
-  doc.moveDown(4);
-
-  doc
-    .font('Helvetica-Bold')
-    .fontSize(22)
-    .fillColor('#111')
-    .text(`Grand Total: ₹${totalAmount}`, 0, position + 40, {
+    // Original Price
+    doc.text(`₹ ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
+      width: 70,
       align: 'right',
     });
 
-  doc.moveDown(3);
+    // Product Discount
+    doc.text(`₹ ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
+      width: 70,
+      align: 'right',
+    });
+
+    // Final Price
+    doc.text(`₹ ${(item.finalPrice || 0).toLocaleString()}`, finalX, position + 15, {
+      width: 70,
+      align: 'right',
+    });
+
+    // Total
+    doc.text(`₹ ${(item.totalPrice || 0).toLocaleString()}`, totalX, position + 15, {
+      width: 60,
+      align: 'right',
+    });
+
+    position += 45;
+  });
+
+  // TOTALS
+
+  position += 35;
+
+  doc.font('Helvetica').fontSize(12).fillColor('#111');
+
+  const originalSubtotal = order.items.reduce(
+    (sum, item) => sum + (item.originalPrice || 0) * item.quantity,
+    0
+  );
+  const totalDiscount = order.items.reduce(
+    (sum, item) => sum + (item.productDiscount || 0) * item.quantity,
+    0
+  );
+
+  // Subtotal
+  doc.text('Subtotal', 330, position);
+
+  doc.text(`₹ ${originalSubtotal.toLocaleString()}`, 430, position, {
+    width: 110,
+    align: 'right',
+  });
+
+  position += 22;
+
+  // Discount
+  doc.text('Discount', 330, position);
+
+  doc.text(`- ₹ ${totalDiscount.toLocaleString()}`, 430, position, {
+    width: 110,
+    align: 'right',
+  });
+
+  position += 35;
+
+  // GRAND TOTAL BOX
+  doc.roundedRect(300, position - 8, 240, 40, 6).fill('#111');
+
+  doc.fillColor('#fff').font('Helvetica-Bold').fontSize(16);
+
+  doc.text('Grand Total', 315, position + 5);
+
+  doc.text(`₹ ${order.totalAmount.toLocaleString()}`, 415, position + 5, {
+    width: 115,
+    align: 'right',
+  });
+
+  // FOOTER
+
+  position += 80;
 
   doc
-    .font('Helvetica')
-    .fontSize(12)
     .fillColor('gray')
-    .text('Thank you for shopping with LuxeCarry!', 50, position + 100, {
+    .font('Helvetica')
+    .fontSize(11)
+    .text('Thank you for shopping with LuxeCarry!', 50, position, {
       width: 500,
       align: 'center',
     });
+
+  // END PDF
   doc.end();
 
   return {

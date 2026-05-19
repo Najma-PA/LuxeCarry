@@ -17,7 +17,6 @@ exports.getCheckoutPage = async (req, res) => {
     res.render('user/checkout', {
       cart: result.cart,
       addresses: result.addresses,
-      tax: result.tax,
       finalTotal: result.finalTotal,
       user: req.session.user,
     });

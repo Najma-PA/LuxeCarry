@@ -1674,16 +1674,14 @@ body {
 }
 
   
-/* ================================
-   ORDER SUCCESS PAGE
-================================ */
+/*ORDER SUCCESS PAGE*/
 
 .order-success-wrapper{
     min-height:80vh;
     display:flex;
     align-items:center;
     justify-content:center;
-    padding:60px 20px;
+    padding: 110px 20px 60px;
 }
 
 .success-card{
@@ -1815,9 +1813,7 @@ body {
     }
 }
 
-/* ================================
-   ORDER BUTTONS
-================================ */
+/* ORDER BUTTONS*/
 
 .btn-order-primary{
     background:#b78846;
@@ -1851,9 +1847,7 @@ body {
     color:#fff;
 }
 
-/* ================================
-   ORDER STATUS BADGES
-================================ */
+/*ORDER STATUS BADGES
 
 .order-status-badge{
     display:inline-flex;
@@ -1885,9 +1879,7 @@ body {
     color:#5b21b6;
 }
 
-/* ================================
-   ORDER DETAILS PAGE
-================================ */
+/*ORDER DETAILS PAGE*/
 
 .order-page-wrapper{
     padding:50px 0;
@@ -1960,9 +1952,7 @@ body {
     line-height:1.7;
 }
 
-/* ================================
-   RESPONSIVE
-================================ */
+/* RESPONSIVE*/
 
 @media(max-width:768px){
 
@@ -1996,9 +1986,7 @@ body {
 
 
 
-/* ==========================================
-   MY ORDERS PAGE
-========================================== */
+/*MY ORDERS PAGE*/
 
 .orders-page-wrapper{
     padding:50px 0 70px;
@@ -2062,9 +2050,7 @@ body {
     font-size:14px;
 }
 
-/* ==========================================
-   ORDER CARD
-========================================== */
+/* ORDER CARD*/
 
 .lc-order-card{
     background:#fff;
@@ -2160,9 +2146,7 @@ body {
     color:#111827;
 }
 
-/* ==========================================
-   ORDER TRACKING PAGE
-========================================== */
+/*ORDER TRACKING PAGE*/
 
 .order-tracking-wrapper{
     padding:50px 0 70px;
@@ -2195,9 +2179,7 @@ body {
     box-shadow:0 4px 20px rgba(0,0,0,0.03);
 }
 
-/* ==========================================
-   TRACKING STEPS
-========================================== */
+/*TRACKING STEPS*/
 
 .lc-tracking-steps{
     display:flex;
@@ -2265,9 +2247,7 @@ body {
     font-size:14px;
 }
 
-/* ==========================================
-   ORDER INFO CARDS
-========================================== */
+/*ORDER INFO CARDS*/
 
 .lc-info-card{
     background:#fff;
@@ -2298,9 +2278,7 @@ body {
     line-height:1.8;
 }
 
-/* ==========================================
-   ORDER SUMMARY LIST
-========================================== */
+/*ORDER SUMMARY LIST*/
 
 .lc-order-summary-card{
     background:#fff;
@@ -2405,9 +2383,7 @@ body {
 }
 
 
-/* ==========================================
-   ADMIN ORDERS PAGE
-========================================== */
+/* ADMIN ORDERS PAGE */
 
 .orders-summary-card {
   background: #fff;
@@ -2459,9 +2435,7 @@ body {
   color: #ea580c;
 }
 
-/* ==========================================
-   ORDER STATUS BADGES
-========================================== */
+/* ORDER STATUS BADGES*/
 
 .order-badge {
   padding: 7px 14px;
@@ -2502,9 +2476,7 @@ body {
   color: #b91c1c;
 }
 
-/* ==========================================
-   ORDER TABLE
-========================================== */
+/*ORDER TABLE*/
 
 .order-id-link {
   color: #c26a00;
@@ -2540,9 +2512,7 @@ body {
   color: #0f172a;
 }
 
-/* ==========================================
-   ORDER DETAIL PAGE
-========================================== */
+/*ORDER DETAIL PAGE*/
 
 .admin-order-wrapper {
   padding: 30px;
@@ -2644,9 +2614,7 @@ body {
   font-size: 1.1rem;
 }
 
-/* ==========================================
-   STATUS SELECT
-========================================== */
+/* STATUS SELECT*/
 
 .status-select {
   border: 1px solid #e2e8f0;
@@ -2661,9 +2629,7 @@ body {
   border-color: #c26a00;
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
+/*RESPONSIVE*/
 
 @media(max-width:768px){
 
@@ -2682,9 +2648,7 @@ body {
   }
 }
 
-/* ==========================================
-   ADMIN ORDER UPDATE PAGE
-========================================== */
+/*ADMIN ORDER UPDATE PAGE*/
 
 .admin-order-grid{
   display:grid;
@@ -2751,9 +2715,7 @@ body {
   margin-top:10px;
 }
 
-/* ==========================================
-   ORDER PRODUCTS TABLE
-========================================== */
+/* ORDER PRODUCTS TABLE*/
 
 .admin-order-products-card{
   background:#fff;
@@ -2867,9 +2829,8 @@ body {
   color:#c26a00;
 }
 
-/* ==========================================
-   RESPONSIVE
-========================================== */
+
+  /* RESPONSIVE*/
 
 @media(max-width:992px){
 
