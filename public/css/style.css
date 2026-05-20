@@ -988,9 +988,7 @@ body {
   color: #c26a00;
 }
 
-/* =========================================
-   EDIT PROFILE PAGE
-========================================= */
+/* EDIT PROFILE PAGE*/
 
 /* Profile Picture */
 
@@ -1075,9 +1073,8 @@ body {
   overflow: hidden;
 }
 
-/* =========================================
-   LUXE PREMIUM CORE UI (NAVBAR & SIDEBAR SYSTEM)
-========================================= */
+/*
+   LUXE PREMIUM CORE UI */
 
 /* Reusable Avatar Component Styles */
 .lc-avatar-container {
