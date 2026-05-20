@@ -110,11 +110,12 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
     if (item.variant) {
       await Product.updateOne(
         {
-          _id: item.product._id,
+          _id: item.product,
           'variants._id': item.variant,
         },
         {
           $inc: {
+            stock: -item.quantity,
             'variants.$.stock': -item.quantity,
           },
         }

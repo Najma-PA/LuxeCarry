@@ -171,7 +171,7 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
     item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
     item.refundStatus = 'Pending';
   }
-
+*/
   // Check if all items are returned or cancelled to update global orderStatus
   const allReturnedOrCancelled = order.items.every(
     (i) => i.status === 'Returned' || i.status === 'Cancelled'
@@ -179,7 +179,7 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
   if (allReturnedOrCancelled) {
     order.orderStatus = 'Returned';
   }
-*/
+
   await order.save();
   return { success: true };
 };
