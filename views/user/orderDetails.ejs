@@ -38,7 +38,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             <h1 class="order-tracking-title">
                 Order Tracking
             </h1>
-<!--
+
             <p class="order-tracking-subtitle">
 
                 Order
@@ -54,7 +54,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     year:'numeric'
                 }) %>
 
-            </p>-->
+            </p>
 
         </div>
         
@@ -172,7 +172,25 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 </div>
 
+<% if(item.status === 'Cancellation Requested'){ %>
 
+<div class="alert alert-warning mt-3">
+
+Your cancellation request is awaiting admin approval.
+
+</div>
+
+<% } %>
+
+<% if(item.status === 'Return Requested'){ %>
+
+<div class="alert alert-warning mt-3">
+
+Your return request is awaiting admin approval.
+
+</div>
+
+<% } %>
         <div class="lc-tracking-note">
 
             Your order is currently being processed and
@@ -361,7 +379,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     </div>
 </div>
 
-<% if (item.status === 'Pending' || item.status === 'Confirmed') { %>
+<% if (item.status !== 'Delivered' && item.status !== 'Cancelled' && item.status!=='Returned' && item.status!=='Cancellation Requested') { %>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"
@@ -372,8 +390,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </button>
     </div>
 <% } %>
+<%  
+const deliveredDate= item.deliveredAt? new Date(item.deliveredAt):null;
+const today = new Date();
 
-<% if (item.status === 'Delivered') { %>
+const diffDays = deliveredDate
+  ? (today - deliveredDate) / (1000 * 60 * 60 * 24)
+  : 999;
+%>
+
+<% if (item.status === 'Delivered'&& diffDays <= 15) { %>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"
@@ -385,9 +411,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     </div>
 <% } %>
 
-        </div> <!-- Close col-lg-9 col-md-8 -->
-    </div> <!-- Close row -->
-</div> <!-- Close container -->
+        </div> 
+    </div> 
+</div> 
 <%- include('../partials/user/footer-short') %>
 </div>
 
@@ -405,10 +431,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         <div class="modal-content">
 
             <form
-                action="/user/orders/<%= order._id %>/items/<%= item._id %>/cancel?_method=PATCH"
+                id="cancelOrderForm"
+                action="/user/orders/<%= order._id %>/items/cancel/<%= item._id %>"
                 method="POST"
             >
-
                 <div class="modal-header">
 
                     <h5 class="modal-title">
@@ -478,7 +504,8 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         <div class="modal-content">
 
             <form
-                action="/user/orders/<%= order._id %>/items/<%= item._id  %>/return?_method=PATCH"
+                id="returnOrderForm"
+                action="/user/orders/<%= order._id %>/items/return/<%= item._id %>"
                 method="POST"
             >
 
@@ -588,6 +615,121 @@ document.addEventListener('DOMContentLoaded', () => {
                 customReasonBox.classList.add('d-none');
                 customReasonBox.required = false;
                 customReasonBox.value = '';
+            }
+        });
+    }
+
+    // Cancel Order Form Submission
+    const cancelForm = document.getElementById('cancelOrderForm');
+    if (cancelForm) {
+        cancelForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const submitBtn = cancelForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const reason = cancelForm.querySelector('textarea[name="reason"]').value;
+
+            try {
+                const response = await fetch(cancelForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message || 'Order cancellation request submitted.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: data.message || 'Something went wrong.'
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+                // Close the modal
+                const modalEl = document.getElementById('cancelOrderModal');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                }
+            }
+        });
+    }
+
+    // Return Order Form Submission
+    const returnForm = document.getElementById('returnOrderForm');
+    if (returnForm) {
+        returnForm.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const submitBtn = returnForm.querySelector('button[type="submit"]');
+            if (submitBtn) submitBtn.disabled = true;
+
+            const reason = document.getElementById('returnReasonSelect').value;
+            const customReason = document.getElementById('customReasonBox').value;
+
+            try {
+                const response = await fetch(returnForm.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason, customReason })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: data.message || 'Order return request submitted.',
+                        showConfirmButton: false,
+                        timer: 1500
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed',
+                        text: data.message || 'Something went wrong.'
+                    });
+                }
+            } catch (err) {
+                console.error(err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.'
+                });
+            } finally {
+                if (submitBtn) submitBtn.disabled = false;
+                // Close the modal
+                const modalEl = document.getElementById('returnOrderModal');
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl);
+                    if (modal) modal.hide();
+                }
             }
         });
     }

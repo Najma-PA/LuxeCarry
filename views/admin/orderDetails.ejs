@@ -45,132 +45,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     </div>
 
     <!-- Top Grid -->
-    <div class="admin-order-grid mb-4">
-
-        <!-- Customer & Address Details -->
-        <div class="admin-order-detail-card">
-
-            <h3 class="admin-order-card-title">
-
-                Customer & Shipping
-
-            </h3>
-
-            <div class="mb-4">
-
-                <div class="admin-order-label">
-                    Customer
-                </div>
-
-                <div class="admin-order-text">
-
-                    <strong><%= order.userId?.name || 'Customer' %></strong><br>
-                    <%= order.userId?.email || '' %>
-
-                </div>
-
-            </div>
-
-            <div>
-
-                <div class="admin-order-label">
-                    Shipping Address
-                </div>
-
-                <div class="admin-order-text">
-
-                    <i class="fa-solid fa-location-dot me-2"
-                    style="color:#c26a00;"></i>
-
-                    <%= order.shippingAddress.name %><br>
-                    <%= order.shippingAddress.street %>,
-                    <br>
-
-                    <%= order.shippingAddress.city %>,
-                    <%= order.shippingAddress.state %>
-
-                    -
-                    <%= order.shippingAddress.pincode %>
-
-                    <br>
-
-                    <%= order.shippingAddress.country %><br>
-                    Phone: <%= order.shippingAddress.phone %>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Global Order & Payment Summary -->
-        <div class="admin-order-detail-card">
-
-            <h3 class="admin-order-card-title">
-
-                Order & Payment Summary
-
-            </h3>
-
-            <div class="mb-3">
-                <div class="admin-order-label">Global Order Status</div>
-                <div class="d-flex align-items-center justify-content-between mt-1">
-                    <span class="order-badge
-                        <%= order.orderStatus === 'Pending'
-                            ? 'order-pending'
-                            : order.orderStatus === 'Confirmed'
-                            ? 'order-processing'
-                            : order.orderStatus === 'Shipped' || order.orderStatus === 'Out for Delivery'
-                            ? 'order-shipped'
-                            : order.orderStatus === 'Delivered'
-                            ? 'order-delivered'
-                            : 'order-cancelled' %>">
-                        <%= order.orderStatus %>
-                    </span>
-                    <form action="/admin/orders/<%= order._id %>/orderStatus" method="POST" class="d-flex gap-1 align-items-center">
-                        <select name="orderStatus" class="form-select form-select-sm" style="width: 130px;">
-                            <% ['Pending', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'].forEach(st => { %>
-                                <option value="<%= st %>" <%= order.orderStatus === st ? 'selected' : '' %>><%= st %></option>
-                            <% }) %>
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-dark">Update</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <div class="admin-order-label">Payment Status</div>
-                <div class="d-flex align-items-center justify-content-between mt-1">
-                    <span class="badge <%= order.paymentStatus === 'Paid' ? 'bg-success' : order.paymentStatus === 'Pending' ? 'bg-warning text-dark' : 'bg-danger' %>">
-                        <%= order.paymentStatus %>
-                    </span>
-                    <form action="/admin/orders/<%= order._id %>/payment" method="POST" class="d-flex gap-1 align-items-center">
-                        <select name="paymentStatus" class="form-select form-select-sm" style="width: 130px;">
-                            <% ['Pending', 'Paid', 'Failed', 'Refunded'].forEach(ps => { %>
-                                <option value="<%= ps %>" <%= order.paymentStatus === ps ? 'selected' : '' %>><%= ps %></option>
-                            <% }) %>
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-dark">Update</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="mb-3">
-                <div class="admin-order-label">Payment Method</div>
-                <div class="admin-order-text mt-1"><strong><%= order.paymentMethod %></strong></div>
-            </div>
-
-            <div>
-                <div class="admin-order-label">Total Amount Payable</div>
-                <div class="admin-order-text mt-1 fw-bold text-success fs-5">₹<%= order.totalAmount.toLocaleString() %></div>
-            </div>
-
-        </div>
-
-    </div>
-
+    <div class="row g-4 mb-4">
     <!-- Products Ordered -->
-    <div class="admin-order-products-card">
+    <div class="col-lg-9">
+    <div class="admin-order-products-card h-100">
 
         <div class="admin-order-products-header">
 
@@ -196,7 +74,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                     <th style="width: 35%;">PRODUCT</th>
                     <th style="width: 8%;">QTY</th>
-                    <th style="width: 22%;">PRICE DETAILS</th>
+                    <th style="width: 22%;">PRICE </th>
                     <th style="width: 35%;">STATUS & ACTIONS</th>
 
                 </tr>
@@ -256,15 +134,12 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
                     %>
                     <div class="small">
-                        <div class="text-muted d-flex justify-content-between">Original: <span class="fw-bold text-decoration-line-through">₹<%= oPrice.toLocaleString() %></span></div>
-                        <div class="text-success d-flex justify-content-between">Discount: <span>- ₹<%= pDisc.toLocaleString() %></span></div>
-                        <div class="text-primary d-flex justify-content-between">Final Price: <span class="fw-bold">₹<%= fPrice.toLocaleString() %></span></div>
-                        <hr class="my-1">
-                        <div class="fw-bold d-flex justify-content-between text-dark">Total Price: <span>₹<%= tPrice.toLocaleString() %></span></div>
+                        <div class="fw-bold d-flex justify-content-between text-dark"><span>₹<%= tPrice.toLocaleString() %></span></div>
                     </div>
+                   
 
                 </td>
-
+                
                 <td>
 
                     <div class="d-flex flex-column gap-2">
@@ -282,15 +157,183 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     : 'order-cancelled' %>">
                                 <%= item.status %>
                             </span>
-                            <!-- Status change form -->
-                            <form action="/admin/orders/<%= order._id %>/items/<%= item._id %>/status" method="POST" class="d-flex gap-1 align-items-center">
-                                <select name="status" class="form-select form-select-sm" style="width: 140px;">
-                                    <% ['Pending', 'Confirmed', 'Shipped', 'Out for Delivery', 'Delivered', 'Cancelled', 'Returned'].forEach(st => { %>
-                                        <option value="<%= st %>" <%= item.status === st ? 'selected' : '' %>><%= st %></option>
+                            <!-- NORMAL STATUS UPDATE -->
+                             <% if (
+                                item.status !== 'Cancellation Requested' &&
+                                item.status !== 'Return Requested'
+                            ) { %>
+
+                            <form
+                                action="/admin/orders/<%= order._id %>/items/<%= item._id %>/status"
+                                method="POST"
+                                class="d-flex gap-1 align-items-center">
+
+                                <select
+                                    name="status"
+                                    class="form-select form-select-sm"
+                                    style="width: 160px;">
+
+                                    <% [
+                                        'Pending',
+                                        'Confirmed',
+                                        'Shipped',
+                                        'Out for Delivery',
+                                        'Delivered'
+                                    ].forEach(st => { %>
+
+                                        <option
+                                            value="<%= st %>"
+                                            <%= item.status === st ? 'selected' : '' %>>
+
+                                            <%= st %>
+
+                                        </option>
+
                                     <% }) %>
+
                                 </select>
-                                <button type="submit" class="btn btn-sm btn-gold">Update</button>
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-sm btn-gold">
+
+                                    Update
+
+                                </button>
+
                             </form>
+
+                            <% } %>
+                           <!-- CANCELLATION REQUEST -->
+                            <% if(item.status === 'Cancellation Requested') { %>
+
+                            <div class="alert alert-warning mt-2 mb-0 small">
+
+                                <strong>
+                                    Cancellation Request
+                                </strong>
+
+                                <% if(item.cancelReason) { %>
+
+                                    <div class="mt-1">
+
+                                        Reason:
+                                        <%= item.cancelReason %>
+
+                                    </div>
+
+                                <% } %>
+
+                                <div class="d-flex gap-2 mt-2">
+
+                                    <!-- APPROVE -->
+                                    <form
+                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
+                                        method="POST">
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-success btn-sm">
+
+                                            Accept
+
+                                        </button>
+
+                                    </form>
+
+                                    <!-- REJECT -->
+                                    <form
+                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
+                                        method="POST">
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm">
+
+                                            Reject
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                            <% } %>
+                            <!-- RETURN REQUEST -->
+                            <% if(item.status === 'Return Requested') { %>
+
+                            <div class="alert alert-info mt-2 mb-0 small text-dark">
+
+                                <strong>
+                                    Return Request
+                                </strong>
+
+                                <% if(item.returnReason) { %>
+
+                                    <div class="mt-1">
+
+                                        Reason:
+                                        <%= item.returnReason %>
+
+                                    </div>
+
+                                <% } %>
+
+                                <!-- DAMAGE LABEL -->
+                                <% if(
+                                    item.returnReason &&
+                                    item.returnReason.toLowerCase().includes('damage')
+                                ) { %>
+
+                                    <div class="text-danger fw-bold mt-1">
+
+                                        Damaged Return
+                                        → Stock will NOT increase
+
+                                    </div>
+
+                                <% } %>
+
+                                <div class="d-flex gap-2 mt-2">
+
+                                    <!-- APPROVE -->
+                                    <form
+                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
+                                        method="POST">
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-success btn-sm">
+
+                                            Accept
+
+                                        </button>
+
+                                    </form>
+
+                                    <!-- REJECT -->
+                                    <form
+                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
+                                        method="POST">
+
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm">
+
+                                            Reject
+
+                                        </button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+
+                            <% } %>
+                            
                         </div>
 
                         <!-- Cancellation Reason -->
@@ -340,67 +383,117 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </tr>
 
             <% }) %>
+            <tr class="border-0">
+
+    <td></td>
+
+    <td></td>
+
+    <!-- BELOW PRICE COLUMN -->
+    <td colspan="2"class="pt-4">
+
+        <div class="d-flex
+                    justify-content-end
+                    align-items-center
+                    gap-4
+                    fw-bold fs-5">
+
+            <div>
+
+                Grand Total :
+
+                <span class="ms-1 text-dark">
+
+                    ₹<%= order.totalAmount.toLocaleString() %>
+
+                </span>
+
+            </div>
+
+            <span class="
+                badge
+                <%= order.orderStatus === 'Delivered'
+                    ? 'bg-success'
+                    : 'bg-warning text-dark' %>">
+
+                <%= order.orderStatus === 'Delivered'
+                    ? 'Paid'
+                    : 'Pending' %>
+
+            </span>
+
+        </div>
+
+    </td>
+
+</tr>
+
 
             </tbody>
 
         </table>
 
-        <!-- Dynamic Totals Summary -->
-        <% 
-            const dynamicSubtotal = order.items.reduce((sum, item) => sum + ((item.originalPrice || item.price || 0) * item.quantity), 0);
-            const dynamicDiscount = order.items.reduce((sum, item) => sum + ((item.productDiscount || 0) * item.quantity), 0);
-        %>
-        <div class="admin-order-total-section">
+       
+    </div>
+    </div>
+    <!--customer details-->
+     <div class="col-lg-3">
+        <div class="admin-order-detail-card h-100 ">
+            
+            <h3 class="admin-order-card-title">
 
-            <div class="admin-order-total-box">
+                Customer & Shipping
 
-                <div class="admin-order-total-row">
+            </h3>
 
-                    <span class="admin-order-total-label">
-                        Original Subtotal
-                    </span>
+            <div class="mb-4">
 
-                    <span class="admin-order-total-value">
+                <div class="admin-order-label">
+                    Customer
+                </div>
 
-                        ₹<%= dynamicSubtotal.toLocaleString() %>
+                <div class="admin-order-text">
 
-                    </span>
+                    <strong><%= order.userId?.name || 'Customer' %></strong><br>
+                    <%= order.userId?.email || '' %>
 
                 </div>
 
-                <div class="admin-order-total-row text-success">
+            </div>
 
-                    <span class="admin-order-total-label">
-                        Product Discount
-                    </span>
+            <div>
 
-                    <span class="admin-order-total-value">
-
-                        - ₹<%= dynamicDiscount.toLocaleString() %>
-
-                    </span>
-
+                <div class="admin-order-label">
+                    Shipping Address
                 </div>
 
-                <div class="admin-order-total-row
-                admin-order-grand">
+                <div class="admin-order-text">
 
-                    <span class="admin-order-total-label">
-                        Grand Total
-                    </span>
+                    <i class="fa-solid fa-location-dot me-2"
+                    style="color:#c26a00;"></i>
 
-                    <span class="admin-order-total-value">
+                    <%= order.shippingAddress.name %><br>
+                    <%= order.shippingAddress.street %>,
+                    <br>
 
-                        ₹<%= order.totalAmount
-                        .toLocaleString() %>
+                    <%= order.shippingAddress.city %>,
+                    <%= order.shippingAddress.state %>
 
-                    </span>
+                    -
+                    <%= order.shippingAddress.pincode %>
+
+                    <br>
+
+                    <%= order.shippingAddress.country %><br>
+                    Phone: <%= order.shippingAddress.phone %>
 
                 </div>
 
             </div>
 
         </div>
+
+    </div>
 
     </div>
 

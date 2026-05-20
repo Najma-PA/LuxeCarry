@@ -340,6 +340,13 @@
             </select>
             <i class="fa-solid fa-chevron-down select-caret"></i>
         </div>
+
+        <!-- Clear Button -->
+        <% if (search || (dateRange && dateRange !== 'All') || status) { %>
+            <a href="/admin/orders" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 18px; font-size: 0.9rem; text-decoration: none; color: #64748b; font-weight: 500; background-color: #ffffff; transition: all 0.2s;">
+                Clear
+            </a>
+        <% } %>
     </form>
 
     <!-- Orders Table Container -->
@@ -350,7 +357,7 @@
                     <th style="width: 18%;">ORDER ID</th>
                     <th style="width: 32%;">CUSTOMER</th>
                     <th style="width: 22%;">DATE</th>
-                    <th style="width: 18%;">STATUS</th>
+                    <!--<th style="width: 18%;">STATUS</th>-->
                     <th style="width: 10%;" class="text-center">ACTION</th>
                 </tr>
             </thead>
@@ -387,7 +394,7 @@
                                     year: 'numeric'
                                 }) %>
                             </td>
-                            <td>
+                            <!--<td>
                                 <% 
                                     let badgeClass = 'badge-pending';
                                     if (order.orderStatus === 'Shipped') badgeClass = 'badge-shipped';
@@ -400,7 +407,7 @@
                                     <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i>
                                     <%= order.orderStatus %>
                                 </span>
-                            </td>
+                            </td>-->
                             <td class="text-center">
                                 <a href="/admin/orders/<%= order._id %>" class="action-dropdown-btn">
                                     <i class="fa-solid fa-ellipsis"></i>

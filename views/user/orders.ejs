@@ -42,9 +42,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </div>
 
     <!-- Filters -->
-    <div class="orders-filter-bar">
+    <div class="orders-filter-bar d-flex align-items-center gap-3 flex-wrap">
 
-        <div class="orders-search-box">
+        <div class="orders-search-box flex-grow-1" style="min-width: 250px;">
 
             <input type="text"
                    id="orders-search-input"
@@ -54,18 +54,24 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
         </div>
 
-        <select id="orders-filter-select" class="orders-filter-select">
+        <div class="d-flex align-items-center gap-2">
+            <select id="orders-filter-select" class="orders-filter-select m-0">
 
-            <option value="All">All Orders</option>
-            <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Out for Delivery">Out for Delivery</option>
-            <option value="Delivered">Delivered</option>
-            <option value="Cancelled">Cancelled</option>
-            <option value="Returned">Returned</option>
+                <option value="All">All Orders</option>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+                <option value="Shipped">Shipped</option>
+                <option value="Out for Delivery">Out for Delivery</option>
+                <option value="Delivered">Delivered</option>
+                <option value="Cancelled">Cancelled</option>
+                <option value="Returned">Returned</option>
 
-        </select>
+            </select>
+
+            <button id="orders-clear-btn" class="btn btn-outline-secondary rounded-pill px-3 py-2" style="font-size: 14px; border: 1px solid #e5e7eb; border-radius: 12px; display: none;">
+                Clear
+            </button>
+        </div>
 
     </div>
     <div id="orders-list-container">
@@ -89,12 +95,31 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </small>
 
         </div>
-        <a href="/user/orders/invoice/<%= order._id %>"
+        <%
+const hasDeliveredItem = order.items.some(
+    item => item.status === 'Delivered'
+);
+%>
+
+<% if (hasDeliveredItem) { %>
+
+<a
+    href="/user/orders/invoice/<%= order._id %>"
+    class="btn btn-light border btn-sm rounded-pill text-secondary">
+
+    <i class="fa-solid fa-download me-1"></i>
+
+    Invoice
+
+</a>
+
+<% } %>
+        <!--<a href="/user/orders/invoice/<%= order._id %>"
             class="btn btn-light border btn-sm rounded-pill text-secondary">
             <i class="fa-solid fa-download me-1"></i>
             Invoice
             
-        </a>
+        </a>-->
 
     </div>
 
@@ -220,9 +245,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     <% } %>
     </div>
 
-        </div> <!-- Close col-lg-9 col-md-8 -->
-    </div> <!-- Close row -->
-</div> <!-- Close container -->
+        </div>
+    </div> 
+</div> 
 <%- include('../partials/user/footer-short') %>
 </div>
 
@@ -231,12 +256,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('orders-search-input');
     const filterSelect = document.getElementById('orders-filter-select');
     const listContainer = document.getElementById('orders-list-container');
+    const clearBtn = document.getElementById('orders-clear-btn');
 
     let debounceTimeout = null;
+
+    const updateClearButtonVisibility = () => {
+        if (searchInput.value.trim() !== '' || filterSelect.value !== 'All') {
+            clearBtn.style.display = 'inline-block';
+        } else {
+            clearBtn.style.display = 'none';
+        }
+    };
 
     const performFilter = async () => {
         const searchValue = searchInput.value.trim();
         const filterValue = filterSelect.value;
+        updateClearButtonVisibility();
 
         try {
             const response = await fetch(`/user/orders/filter?search=${encodeURIComponent(searchValue)}&status=${encodeURIComponent(filterValue)}`);
@@ -316,10 +351,18 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h5 class="mb-1">Order #${order.orderId}</h5>
                             <small class="text-muted">${orderDateStr}</small>
                         </div>
-                        <a href="/user/orders/invoice/${order._id}" class="btn btn-light border btn-sm rounded-pill text-secondary">
-                            <i class="fa-solid fa-download me-1"></i>
-                            Invoice
-                        </a>
+                      ${order.items
+    .some(item => item.status === 'Delivered')
+    ? `
+        <a href="/user/orders/invoice/${order._id}"
+           class="btn btn-light border btn-sm rounded-pill text-secondary">
+
+            <i class="fa-solid fa-download me-1"></i>
+
+            Invoice
+
+        </a>
+    `:''}
                     </div>
 
                     <!-- PRODUCTS -->
@@ -340,6 +383,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     filterSelect.addEventListener('change', performFilter);
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            filterSelect.value = 'All';
+            performFilter();
+        });
+    }
 });
 </script>
 
