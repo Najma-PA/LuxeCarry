@@ -191,12 +191,6 @@ Your return request is awaiting admin approval.
 </div>
 
 <% } %>
-        <div class="lc-tracking-note">
-
-            Your order is currently being processed and
-            prepared for shipment.
-
-        </div>
 
     </div>
 
@@ -320,14 +314,14 @@ Your return request is awaiting admin approval.
                         Payment Summary
                     </h4>
 
-                    <span class="payment-status-badge 
+                    <!--<span class="payment-status-badge 
                         <%= order.paymentStatus === 'Paid' 
                         ? 'status-paid'
                         : order.paymentStatus === 'Pending'
                         ? 'status-pending'
                         : 'status-failed' %>">
                         <%= order.paymentStatus %>
-                    </span>
+                    </span>-->
                 </div>
 
                 <div class="payment-summary-list">
@@ -379,7 +373,12 @@ Your return request is awaiting admin approval.
     </div>
 </div>
 
-<% if (item.status !== 'Delivered' && item.status !== 'Cancelled' && item.status!=='Returned' && item.status!=='Cancellation Requested') { %>
+<% if (item.status !== 'Delivered' && 
+        item.status !== 'Cancelled' 
+        && item.status!=='Returned' 
+        && item.status!=='Cancellation Requested'
+        &&item.status!=='Return Requested') 
+        { %>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"

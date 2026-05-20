@@ -134,7 +134,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
                     %>
                     <div class="small">
-                        <div class="fw-bold d-flex justify-content-between text-dark"><span>₹<%= tPrice.toLocaleString() %></span></div>
+                        <div class="fw-bold d-flex justify-content-between text-dark"><span>₹<%= fPrice.toLocaleString() %></span></div>
                     </div>
                    
 
@@ -158,10 +158,15 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                 <%= item.status %>
                             </span>
                             <!-- NORMAL STATUS UPDATE -->
-                             <% if (
-                                item.status !== 'Cancellation Requested' &&
-                                item.status !== 'Return Requested'
-                            ) { %>
+                            <%
+                            const isLockedStatus =
+                                item.status === 'Cancelled' ||
+                                item.status === 'Returned';
+                            %>
+
+                            <% if (!isLockedStatus &&
+                                   item.status !== 'Cancellation Requested' &&
+                                   item.status !== 'Return Requested') { %>
 
                             <form
                                 action="/admin/orders/<%= order._id %>/items/<%= item._id %>/status"
@@ -202,6 +207,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                 </button>
 
                             </form>
+
+                            <% } else if (isLockedStatus) { %>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-secondary"
+                                disabled
+                                style="opacity:0.6; cursor:not-allowed;">
+                                Update 
+                            </button>
 
                             <% } %>
                            <!-- CANCELLATION REQUEST -->
@@ -410,7 +425,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
             </div>
 
-            <span class="
+           <!-- <span class="
                 badge
                 <%= order.orderStatus === 'Delivered'
                     ? 'bg-success'
@@ -420,7 +435,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     ? 'Paid'
                     : 'Pending' %>
 
-            </span>
+            </span>-->
 
         </div>
 
