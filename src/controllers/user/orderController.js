@@ -35,42 +35,27 @@ exports.getUserOrders = async (req, res) => {
     res.redirect('/user/home');
   }
 };
-
 exports.filterOrders = async (req, res) => {
   try {
     const userId = req.user ? req.user._id : req.session.user.id;
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Unauthenticated' });
+      return res.status(401).json({
+        success: false,
+        message: 'Unauthorized',
+      });
     }
-
     const { search, status } = req.query;
-
-    const query = { userId };
-
-    if (status && status !== 'All' && status !== 'All Orders') {
-      query['items.status'] = status;
-    }
-
-    if (search) {
-      query.$or = [
-        { orderId: { $regex: search.trim(), $options: 'i' } },
-        { 'items.productName': { $regex: search.trim(), $options: 'i' } }
-      ];
-    }
-
-    const orders = await Order.find(query)
-      .populate('items.product')
-      .sort({ createdAt: -1 });
-
+    const orders = await orderService.filterOrders(userId, search, status);
     return res.json({
       success: true,
-      orders
+      orders,
     });
   } catch (error) {
     console.error('Error filtering orders:', error);
-    return res.status(500).json({ success: false, message: 'Internal Server Error' });
+    return res.status(500).json({ success: false, message: 'Internal server Error' });
   }
 };
+
 /*exports.getOrderDetails = async (req, res) => {
   try {
     const orderId = req.params.orderId;
@@ -116,6 +101,62 @@ exports.cancelOrder = async (req, res) => {
     const { orderId, itemId } = req.params;
     const { reason } = req.body;
     const userId = req.user?._id || req.session.user?.id;
+
+    const result = await orderService.cancelOrder(orderId, itemId, userId, reason);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Cancellation requested successfully',
+    });
+  } catch (error) {
+    console.error('Cancel order controller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error',
+    });
+  }
+};
+
+exports.returnOrder = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { reason, customReason } = req.body;
+    const userId = req.user?._id || req.session.user?.id;
+
+    const result = await orderService.returnOrder(orderId, itemId, userId, reason, customReason);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Return requested successfully',
+    });
+  } catch (error) {
+    console.error('Return order controller error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Server Error',
+    });
+  }
+};
+/*
+exports.cancelOrder = async (req, res) => {
+  try {
+    const { orderId, itemId } = req.params;
+    const { reason } = req.body;
+    const userId = req.user?._id || req.session.user?.id;
     const result = await orderService.cancelOrder(orderId, itemId, userId, reason);
     if (!result.success) {
       return res.status(400).json(result);
@@ -141,13 +182,48 @@ exports.returnOrder = async (req, res) => {
     res.status(500).json({ success: false });
   }
 };
-
+*/
 //invoice download
+exports.downloadInvoice = async (req, res) => {
+  const { orderId } = req.params;
+  const { itemId } = req.query;
+
+  const order = await Order.findById(orderId).populate('userId');
+
+  if (!order) {
+    return res.status(404).send('Order not found');
+  }
+
+  // FILTER ONLY DELIVERED ITEM
+  let invoiceItems = order.items;
+
+  if (itemId) {
+    invoiceItems = order.items.filter(
+      (item) => item._id.toString() === itemId && item.status === 'Delivered'
+    );
+  } else {
+    // FULL ORDER INVOICE ONLY IF ALL DELIVERED
+    invoiceItems = order.items.filter((item) => item.status === 'Delivered');
+  }
+
+  if (invoiceItems.length === 0) {
+    return res.status(400).send('No delivered items found');
+  }
+
+  // CALCULATE TOTAL
+  const invoiceTotal = invoiceItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+
+  res.render('user/invoice', {
+    order,
+    invoiceItems,
+    invoiceTotal,
+  });
+};
 exports.downloadInvoice = async (req, res) => {
   try {
     const orderId = req.params.id;
-
-    await invoiceService.generateInvoice(orderId, res);
+    const { itemId } = req.query;
+    await invoiceService.generateInvoice(orderId, itemId, res);
   } catch (error) {
     console.log(error);
 

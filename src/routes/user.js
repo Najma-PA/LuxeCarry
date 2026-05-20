@@ -95,8 +95,8 @@ router.get(
   orderController.getOrderedProductDetails
 );
 //router.get('/orders/:orderId', isUserAuth, orderController.getOrderDetails);
-router.patch('/orders/:orderId/items/:itemId/cancel', isUserAuth, orderController.cancelOrder);
-router.patch('/orders/:orderId/items/:itemId/return', isUserAuth, orderController.returnOrder);
+router.post('/orders/:orderId/items/cancel/:itemId', isUserAuth, orderController.cancelOrder);
+router.post('/orders/:orderId/items/return/:itemId', isUserAuth, orderController.returnOrder);
 
 // Update quantity
 router.patch('/cart/update/:id', isUserAuth, cartController.updateQuantity);

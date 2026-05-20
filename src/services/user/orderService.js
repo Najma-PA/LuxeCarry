@@ -4,6 +4,25 @@ exports.getUserOrders = async (userId) => {
   const orders = await Order.find({ userId }).populate('items.product').sort({ createdAt: -1 });
   return orders;
 };
+exports.filterOrders = async (userId, search, status) => {
+  const query = { userId };
+  if (status && status !== 'All' && status !== 'All Orders') {
+    query['items.status'] = status;
+  }
+  if (search && search.trim() !== '') {
+    let cleanSearch = search.trim();
+    if (cleanSearch.startsWith('#')) {
+      cleanSearch = cleanSearch.substring(1);
+    }
+    const searchRegex = new RegExp(cleanSearch, 'i');
+    query.$or = [{ orderId: searchRegex }, { 'items.productName': searchRegex }];
+    if (/^[0-9a-fA-F]{24}$/.test(cleanSearch)) {
+      query.$or.push({ _id: cleanSearch });
+    }
+  }
+  const orders = await Order.find(query).populate('items.product').sort({ createdAt: -1 });
+  return orders;
+};
 exports.getOrderById = async (orderId) => {
   const order = await Order.findById(orderId).populate('items.product');
   return order;
@@ -49,7 +68,7 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
     };
   }
 
-  const item = order.items.id(itemId) || order.items.find(i => i._id.toString() === itemId.toString());
+  const item = order.items.id(itemId);
 
   if (!item) {
     return {
@@ -58,46 +77,23 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
     };
   }
 
-  if (item.status !== 'Pending' && item.status !== 'Confirmed') {
+  if (item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned') {
     return { success: false, message: 'Item cannot be cancelled at this stage' };
   }
 
-  // Restore variant/product stock ONLY for this item
-  if (item.variant) {
-    await Product.updateOne(
-      {
-        _id: item.product,
-        'variants._id': item.variant,
-      },
-      {
-        $inc: {
-          'variants.$.stock': item.quantity,
-        },
-      }
-    );
-  } else {
-    await Product.updateOne(
-      { _id: item.product },
-      {
-        $inc: {
-          stock: item.quantity,
-        },
-      }
-    );
-  }
-
-  item.status = 'Cancelled';
+  item.previousStatus = item.status;
+  item.status = 'Cancellation Requested';
   item.cancelReason = reason || '';
   item.cancelledAt = new Date();
 
   // Refund fields
   if (order.paymentStatus === 'Paid') {
-    item.refundAmount = item.totalPrice || (item.finalPrice * item.quantity);
+    item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
     item.refundStatus = 'Pending';
   }
 
-  // Check if all items are cancelled to update the orderStatus
-  const allCancelled = order.items.every(i => i.status === 'Cancelled');
+  // Check if all items are cancelled
+  const allCancelled = order.items.every((i) => i.status === 'Cancelled');
   if (allCancelled) {
     order.orderStatus = 'Cancelled';
   }
@@ -113,7 +109,8 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
     return { success: false, message: 'Order not found' };
   }
 
-  const item = order.items.id(itemId) || order.items.find(i => i._id.toString() === itemId.toString());
+  const item =
+    order.items.id(itemId) || order.items.find((i) => i._id.toString() === itemId.toString());
 
   if (!item) {
     return { success: false, message: 'Item not found in order' };
@@ -127,12 +124,21 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
   if (reason === 'Other' && customReason) {
     finalReason = customReason;
   }
-
-  item.status = 'Returned';
+  item.previousStatus = item.status;
+  item.status = 'Return Requested';
   item.returnReason = finalReason || '';
   item.returnedAt = new Date();
-
-  // Restore stock ONLY for returned item, IF reason is NOT Damaged Product
+  if (!item.deliveredAt) {
+    return { success: false, message: 'Delivery date missing' };
+  }
+  const deliveredDate = new Date(item.deliveredAt);
+  const today = new Date();
+  const diffTime = today - deliveredDate;
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+  if (diffDays > 15) {
+    return { success: false, message: 'Return period expired' };
+  }
+  /* Restore stock 
   const isDamaged = finalReason === 'Damaged Product' || reason === 'Damaged Product';
   if (!isDamaged) {
     if (item.variant) {
@@ -158,19 +164,22 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
       );
     }
   }
+*/
 
-  // Refund fields
+  /* Refund fields
   if (order.paymentStatus === 'Paid') {
-    item.refundAmount = item.totalPrice || (item.finalPrice * item.quantity);
+    item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
     item.refundStatus = 'Pending';
   }
 
   // Check if all items are returned or cancelled to update global orderStatus
-  const allReturnedOrCancelled = order.items.every(i => i.status === 'Returned' || i.status === 'Cancelled');
+  const allReturnedOrCancelled = order.items.every(
+    (i) => i.status === 'Returned' || i.status === 'Cancelled'
+  );
   if (allReturnedOrCancelled) {
     order.orderStatus = 'Returned';
   }
-
+*/
   await order.save();
   return { success: true };
 };

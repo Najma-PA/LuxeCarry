@@ -96,9 +96,35 @@ router.delete('/banners/:id', noCache, isAdminAuth, bannerController.deleteBanne
 /* ORDER MANAGEMENT */
 router.get('/orders', noCache, isAdminAuth, orderController.getOrders);
 router.get('/orders/:orderId', noCache, isAdminAuth, orderController.getOrderDetails);
-router.post('/orders/:orderId/orderStatus', noCache, isAdminAuth, orderController.updateOrderStatus);
+router.post(
+  '/orders/:orderId/orderStatus',
+  noCache,
+  isAdminAuth,
+  orderController.updateOrderStatus
+);
 router.post('/orders/:orderId/payment', noCache, isAdminAuth, orderController.updateOrderPayment);
-router.post('/orders/:orderId/items/:itemId/status', noCache, isAdminAuth, orderController.updateItemStatus);
-router.post('/orders/:orderId/items/:itemId/refund', noCache, isAdminAuth, orderController.updateItemRefund);
-
+router.post(
+  '/orders/:orderId/items/:itemId/status',
+  noCache,
+  isAdminAuth,
+  orderController.updateItemStatus
+);
+router.post(
+  '/orders/:orderId/items/:itemId/refund',
+  noCache,
+  isAdminAuth,
+  orderController.updateItemRefund
+);
+router.post(
+  '/orders/:orderId/item/:itemId/approve',
+  noCache,
+  isAdminAuth,
+  orderController.approveOrderRequest
+);
+router.post(
+  '/orders/:orderId/item/:itemId/reject',
+  noCache,
+  isAdminAuth,
+  orderController.rejectOrderRequest
+);
 module.exports = router;

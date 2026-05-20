@@ -2,7 +2,7 @@ const PDFDocument = require('pdfkit');
 const path = require('path');
 const Order = require('../../models/orderModel');
 
-exports.generateInvoice = async (orderId, res) => {
+exports.generateInvoice = async (orderId, itemId, res) => {
   const order = await Order.findById(orderId).populate('userId').populate('items.product');
 
   if (!order) {
@@ -11,7 +11,17 @@ exports.generateInvoice = async (orderId, res) => {
       message: 'Order not found',
     };
   }
+  // ONLY DELIVERED ITEMS
+  const deliveredItems = order.items.filter(
+    (item) => item.status === 'Delivered' && (!itemId || item._id.toString() === itemId)
+  );
 
+  if (deliveredItems.length === 0) {
+    return {
+      success: false,
+      message: 'No delivered items found',
+    };
+  }
   // PDF
   const doc = new PDFDocument({
     margin: 50,
@@ -26,9 +36,7 @@ exports.generateInvoice = async (orderId, res) => {
 
   doc.pipe(res);
 
-  // ======================================================
   // HEADER
-  // ======================================================
 
   const logoPath = path.join(__dirname, '../../../public/images/logo.png');
 
@@ -61,9 +69,7 @@ exports.generateInvoice = async (orderId, res) => {
 
   doc.moveDown(2);
 
-  // ======================================================
   // ORDER DETAILS
-  // ======================================================
 
   const detailsTop = doc.y + 20;
 
@@ -76,9 +82,7 @@ exports.generateInvoice = async (orderId, res) => {
 
   doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 44);
 
-  // ======================================================
-  // SHIPPING ADDRESS (RIGHT TOP)
-  // ======================================================
+  // SHIPPING ADDRES
 
   const addressTop = detailsTop;
 
@@ -113,9 +117,7 @@ exports.generateInvoice = async (orderId, res) => {
     width: 200,
   });
 
-  // ======================================================
   // PRODUCTS TABLE
-  // ======================================================
 
   doc.y = addressTop + 170;
 
@@ -123,12 +125,12 @@ exports.generateInvoice = async (orderId, res) => {
 
   const tableLeft = 50;
 
-  const productX = tableLeft + 10; // 60
-  const qtyX = tableLeft + 150; // 200
-  const originalX = tableLeft + 190; // 240
-  const discountX = tableLeft + 270; // 320
-  const finalX = tableLeft + 350; // 400
-  const totalX = tableLeft + 430; // 480
+  const productX = tableLeft + 10;
+  const qtyX = tableLeft + 150;
+  const originalX = tableLeft + 190;
+  const discountX = tableLeft + 270;
+  const finalX = tableLeft + 350;
+  const totalX = tableLeft + 430;
 
   // TABLE HEADER
   doc.roundedRect(tableLeft, tableTop, 500, 35, 6).fill('#111');
@@ -168,7 +170,7 @@ exports.generateInvoice = async (orderId, res) => {
 
   let position = tableTop + 35;
 
-  order.items.forEach((item, index) => {
+  deliveredItems.forEach((item, index) => {
     // Zebra Rows
     if (index % 2 === 0) {
       doc.rect(tableLeft, position, 500, 45).fill('#f8f8f8');
@@ -181,7 +183,9 @@ exports.generateInvoice = async (orderId, res) => {
 
     // Product Name
     const pName = item.productName || item.product?.name || 'Product';
-    doc.text(pName, productX, position + 15, {
+    const variantValue = item.variantValue || '';
+    const displayName = variantValue ? `${pName} (${variantValue.charAt(0).toUpperCase()})` : pName;
+    doc.text(displayName, productX, position + 15, {
       width: 130,
     });
 
@@ -192,25 +196,25 @@ exports.generateInvoice = async (orderId, res) => {
     });
 
     // Original Price
-    doc.text(`₹ ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
+    doc.text(`RS. ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
       width: 70,
       align: 'right',
     });
 
     // Product Discount
-    doc.text(`₹ ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
+    doc.text(`Rs. ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
       width: 70,
       align: 'right',
     });
 
     // Final Price
-    doc.text(`₹ ${(item.finalPrice || 0).toLocaleString()}`, finalX, position + 15, {
+    doc.text(`Rs. ${(item.finalPrice || 0).toLocaleString()}`, finalX, position + 15, {
       width: 70,
       align: 'right',
     });
 
     // Total
-    doc.text(`₹ ${(item.totalPrice || 0).toLocaleString()}`, totalX, position + 15, {
+    doc.text(`Rs. ${(item.totalPrice || 0).toLocaleString()}`, totalX, position + 15, {
       width: 60,
       align: 'right',
     });
@@ -224,11 +228,11 @@ exports.generateInvoice = async (orderId, res) => {
 
   doc.font('Helvetica').fontSize(12).fillColor('#111');
 
-  const originalSubtotal = order.items.reduce(
+  const originalSubtotal = deliveredItems.reduce(
     (sum, item) => sum + (item.originalPrice || 0) * item.quantity,
     0
   );
-  const totalDiscount = order.items.reduce(
+  const totalDiscount = deliveredItems.reduce(
     (sum, item) => sum + (item.productDiscount || 0) * item.quantity,
     0
   );
@@ -236,7 +240,7 @@ exports.generateInvoice = async (orderId, res) => {
   // Subtotal
   doc.text('Subtotal', 330, position);
 
-  doc.text(`₹ ${originalSubtotal.toLocaleString()}`, 430, position, {
+  doc.text(`Rs. ${originalSubtotal.toLocaleString()}`, 430, position, {
     width: 110,
     align: 'right',
   });
@@ -246,7 +250,7 @@ exports.generateInvoice = async (orderId, res) => {
   // Discount
   doc.text('Discount', 330, position);
 
-  doc.text(`- ₹ ${totalDiscount.toLocaleString()}`, 430, position, {
+  doc.text(`- Rs. ${totalDiscount.toLocaleString()}`, 430, position, {
     width: 110,
     align: 'right',
   });
@@ -259,8 +263,8 @@ exports.generateInvoice = async (orderId, res) => {
   doc.fillColor('#fff').font('Helvetica-Bold').fontSize(16);
 
   doc.text('Grand Total', 315, position + 5);
-
-  doc.text(`₹ ${order.totalAmount.toLocaleString()}`, 415, position + 5, {
+  const invoiceTotal = deliveredItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  doc.text(`Rs. ${invoiceTotal.toLocaleString()}`, 415, position + 5, {
     width: 115,
     align: 'right',
   });

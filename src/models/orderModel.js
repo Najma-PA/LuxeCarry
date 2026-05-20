@@ -79,14 +79,36 @@ const orderSchema = new mongoose.Schema(
             'Shipped',
             'Out for Delivery',
             'Delivered',
+            'Cancellation Requested',
             'Cancelled',
+            'Return Requested',
             'Returned',
           ],
 
           default: 'Pending',
         },
+        previousStatus: {
+          type: String,
+        },
+        requestType: {
+          type: String,
+          enum: ['Cancel', 'Return'],
+        },
 
-        // Cancellation
+        requestStatus: {
+          type: String,
+          enum: ['None', 'Pending', 'Approved', 'Rejected'],
+          default: 'None',
+        },
+
+        adminResponse: {
+          type: String,
+          default: '',
+        },
+
+        requestProcessedAt: {
+          type: Date,
+        },
         cancelReason: {
           type: String,
           default: '',
@@ -96,7 +118,6 @@ const orderSchema = new mongoose.Schema(
           type: Date,
         },
 
-        // Return
         returnReason: {
           type: String,
           default: '',
@@ -106,7 +127,6 @@ const orderSchema = new mongoose.Schema(
           type: Date,
         },
 
-        // Refund
         refundAmount: {
           type: Number,
           default: 0,
@@ -126,54 +146,7 @@ const orderSchema = new mongoose.Schema(
         },
       },
     ],
-    /*items: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Product',
-          required: true,
-        },
-        variant: {
-          type: mongoose.Schema.Types.ObjectId,
-        },
-        variantValue: {
-          type: String,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-        price: {
-          type: Number,
-          required: true,
-        },
-        status: {
-          type: String,
 
-          enum: [
-            'Pending',
-            'Confirmed',
-            'Shipped',
-            'Out for Delivery',
-            'Delivered',
-            'Cancelled',
-            'Returned',
-          ],
-
-          default: 'Pending',
-        },
-        cancelReason: {
-          type: String,
-          default: '',
-        },
-
-        returnReason: {
-          type: String,
-          default: '',
-        },
-      },
-    ],*/
     shippingAddress: {
       name: {
         type: String,
@@ -226,15 +199,7 @@ const orderSchema = new mongoose.Schema(
       ],
       default: 'Pending',
     },
-    /*subtotal: {
-      type: Number,
-      required: true,
-    },
 
-    discount: {
-      type: Number,
-      default: 0,
-    },*/
     totalAmount: {
       type: Number,
       required: true,
