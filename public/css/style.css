@@ -2506,3 +2506,191 @@ body {
   border-radius: 20px;
   border: 1px solid #eee;
 }
+
+/* =========================================================
+   GLOBAL RESPONSIVE UTILITIES 
+   ========================================================= */
+
+@media (max-width: 992px) {
+}
+
+@media (max-width: 768px) {
+  /* Hero */
+  .hero img {
+    height: 300px;
+  }
+  .hero-text {
+    left: 20px;
+    right: 20px;
+    text-align: center;
+  }
+
+  /* Shop / Products */
+  .lc-product-order-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  .lc-product-order-card .d-flex.align-items-end {
+    align-items: flex-start !important;
+    width: 100%;
+  }
+
+  /* Cart */
+  .premium-cart-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .cart-item-img {
+    margin-bottom: 15px;
+  }
+  .cart-item-info {
+    padding-left: 0;
+  }
+  .btn-remove-item {
+    top: 10px;
+    right: 10px;
+  }
+  .pricing-block {
+    text-align: center;
+    margin-top: 15px;
+  }
+
+  /* Footer */
+  .footer-bottom {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+
+  /* Profile/Orders layout */
+  .orders-filter-bar {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  .orders-search-box {
+    width: 100%;
+  }
+  .lc-order-group-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-text h2 {
+    font-size: 1.5rem;
+  }
+  .category-section {
+    margin-top: -60px;
+  }
+
+  /* Form width adjustments */
+  .login-card,
+  .checkout-form {
+    width: 100%;
+    padding: 20px;
+  }
+
+  /* Orders */
+  .lc-single-product-card {
+    padding: 15px;
+  }
+  .lc-single-product-image {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* Ensure images don't overflow */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Table Responsive overrides */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Reusable Sticky Header */
+.sticky-order-header {
+  position: sticky;
+  top: 90px;
+  z-index: 999;
+
+  background: #f8f5ef;
+
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+/* Grid scroll */
+.address-cards-grid {
+  max-height: 250px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 6px;
+}
+
+/* Scrollbar */
+.address-cards-grid::-webkit-scrollbar {
+  width: 5px;
+}
+
+.address-cards-grid::-webkit-scrollbar-thumb {
+  background: #c7c7c7;
+  border-radius: 10px;
+}
+
+/* Column stretch */
+.address-cards-grid .col-md-6 {
+  display: flex;
+}
+
+/* Address card fixed size */
+.lc-checkout-address-card {
+  width: 100%;
+  min-height: 220px;
+  max-height: 220px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  overflow: hidden;
+
+  padding: 16px;
+  border-radius: 14px;
+  background: #fff;
+
+  transition: 0.3s ease;
+}
+
+/* Prevent text breaking layout */
+.lc-checkout-address-card p,
+.lc-checkout-address-card h6 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Footer align bottom */
+.lc-address-card-footer {
+  margin-top: auto;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .address-cards-grid {
+    max-height: 350px;
+  }
+
+  .lc-checkout-address-card {
+    min-height: 200px;
+    max-height: 200px;
+  }
+}
