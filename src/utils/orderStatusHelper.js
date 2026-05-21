@@ -1,14 +1,16 @@
 /**
  * Calculate the correct item status dynamically based on current values.
- * 
+ *
  * @param {Object} item - Mongoose item subdocument from order.items
  * @param {string} currentStatus - Current status of the item
  * @param {string} previousStatus - Fallback previous status
  * @returns {string} - The calculated status string
  */
 function calculateItemStatus(item, currentStatus, previousStatus) {
-  const hasPendingCancel = item.cancelRequests && item.cancelRequests.some(r => r.status === 'Pending');
-  const hasPendingReturn = item.returnRequests && item.returnRequests.some(r => r.status === 'Pending');
+  const hasPendingCancel =
+    item.cancelRequests && item.cancelRequests.some((r) => r.status === 'Pending');
+  const hasPendingReturn =
+    item.returnRequests && item.returnRequests.some((r) => r.status === 'Pending');
 
   if (hasPendingCancel) {
     return 'Cancellation Requested';
@@ -43,13 +45,15 @@ function calculateItemStatus(item, currentStatus, previousStatus) {
 
 /**
  * Synchronize the global orderStatus based on individual item statuses.
- * 
+ *
  * @param {Object} order - Mongoose order document
  */
 function updateGlobalOrderStatus(order) {
-  const allCancelled = order.items.every(i => i.status === 'Cancelled');
-  const allReturned = order.items.every(i => i.status === 'Returned');
-  const allCancelledOrReturned = order.items.every(i => i.status === 'Cancelled' || i.status === 'Returned');
+  const allCancelled = order.items.every((i) => i.status === 'Cancelled');
+  const allReturned = order.items.every((i) => i.status === 'Returned');
+  const allCancelledOrReturned = order.items.every(
+    (i) => i.status === 'Cancelled' || i.status === 'Returned'
+  );
 
   if (allCancelled) {
     order.orderStatus = 'Cancelled';
