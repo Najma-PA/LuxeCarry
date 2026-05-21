@@ -97,7 +97,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </div>
         <%
 const hasDeliveredItem = order.items.some(
-    item => item.status === 'Delivered'
+    item => ['Delivered', 'Partially Returned', 'Partially Cancelled'].includes(item.status) || (item.deliveredQty && item.deliveredQty > 0)
 );
 %>
 
@@ -352,7 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <small class="text-muted">${orderDateStr}</small>
                         </div>
                       ${order.items
-    .some(item => item.status === 'Delivered')
+    .some(item => ['Delivered', 'Partially Returned', 'Partially Cancelled'].includes(item.status) || (item.deliveredQty && item.deliveredQty > 0))
     ? `
         <a href="/user/orders/invoice/${order._id}"
            class="btn btn-light border btn-sm rounded-pill text-secondary">

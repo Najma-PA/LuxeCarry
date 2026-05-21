@@ -119,10 +119,18 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 </td>
 
-                <td class="fw-bold">
-
-                    × <%= item.quantity %>
-
+                <td>
+                    <div class="small">
+                        <div class="text-dark">Ordered: <strong><%= item.quantity %></strong></div>
+                        <% if(item.cancelledQty > 0) { %>
+                        <div class="text-danger">Cancelled: <strong><%= item.cancelledQty %></strong></div>
+                        <% } %>
+                        <% if(item.returnedQty > 0) { %>
+                        <div class="text-warning">Returned: <strong><%= item.returnedQty %></strong></div>
+                        <% } %>
+                        <% const activeQty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0); %>
+                        <div class="text-success">Active: <strong><%= activeQty %></strong></div>
+                    </div>
                 </td>
 
                 <td>
@@ -131,7 +139,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         const oPrice = item.originalPrice || item.price || 0;
                         const pDisc = item.productDiscount || 0;
                         const fPrice = item.finalPrice || item.price || 0;
-                        const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
+                        const tPrice = fPrice * activeQty;
                     %>
                     <div class="small">
                         <div class="fw-bold d-flex justify-content-between text-dark"><span>₹<%= fPrice.toLocaleString() %></span></div>
@@ -160,6 +168,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             <!-- NORMAL STATUS UPDATE -->
                             <%
                             const isLockedStatus =
+                                item.status ==='Delivered'||
                                 item.status === 'Cancelled' ||
                                 item.status === 'Returned';
                             %>
@@ -219,140 +228,67 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             </button>
 
                             <% } %>
-                           <!-- CANCELLATION REQUEST -->
-                            <% if(item.status === 'Cancellation Requested') { %>
-
-                            <div class="alert alert-warning mt-2 mb-0 small">
-
-                                <strong>
-                                    Cancellation Request
-                                </strong>
-
-                                <% if(item.cancelReason) { %>
-
-                                    <div class="mt-1">
-
-                                        Reason:
-                                        <%= item.cancelReason %>
-
+                            
+                           <!-- CANCELLATION REQUESTS -->
+                            <% if(item.cancelRequests && item.cancelRequests.some(r => r.status === 'Pending')) { %>
+                                <% item.cancelRequests.filter(r => r.status === 'Pending').forEach(req => { %>
+                                    <div class="alert alert-warning mt-2 mb-0 small w-100">
+                                        <strong>Cancellation Request (Qty: <%= req.quantity %>)</strong>
+                                        <% if(req.reason) { %>
+                                            <div class="mt-1 text-dark">Reason: <%= req.reason %></div>
+                                        <% } %>
+                                        <div class="mt-1 text-muted" style="font-size: 10px;">Requested: <%= new Date(req.requestedAt).toLocaleString() %></div>
+                                        <div class="d-flex gap-2 mt-2">
+                                            <!-- APPROVE -->
+                                            <form action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve" method="POST">
+                                                <input type="hidden" name="requestId" value="<%= req._id %>">
+                                                <button type="submit" class="btn btn-success btn-sm py-0 px-2" style="font-size: 11px;">Accept</button>
+                                            </form>
+                                            <!-- REJECT -->
+                                            <form action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject" method="POST">
+                                                <input type="hidden" name="requestId" value="<%= req._id %>">
+                                                <button type="submit" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 11px;">Reject</button>
+                                            </form>
+                                        </div>
                                     </div>
-
-                                <% } %>
-
-                                <div class="d-flex gap-2 mt-2">
-
-                                    <!-- APPROVE -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
-                                        method="POST">
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-success btn-sm">
-
-                                            Accept
-
-                                        </button>
-
-                                    </form>
-
-                                    <!-- REJECT -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
-                                        method="POST">
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-danger btn-sm">
-
-                                            Reject
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </div>
-
+                                <% }) %>
                             <% } %>
-                            <!-- RETURN REQUEST -->
-                            <% if(item.status === 'Return Requested') { %>
 
-                            <div class="alert alert-info mt-2 mb-0 small text-dark">
-
-                                <strong>
-                                    Return Request
-                                </strong>
-
-                                <% if(item.returnReason) { %>
-
-                                    <div class="mt-1">
-
-                                        Reason:
-                                        <%= item.returnReason %>
-
+                            <!-- RETURN REQUESTS -->
+                            <% if(item.returnRequests && item.returnRequests.some(r => r.status === 'Pending')) { %>
+                                <% item.returnRequests.filter(r => r.status === 'Pending').forEach(req => { %>
+                                    <div class="alert alert-info mt-2 mb-0 small text-dark w-100">
+                                        <strong>Return Request (Qty: <%= req.quantity %>)</strong>
+                                        <% if(req.reason) { %>
+                                            <div class="mt-1">Reason: <%= req.reason %></div>
+                                        <% } %>
+                                        <div class="mt-1 text-muted" style="font-size: 10px;">Requested: <%= new Date(req.requestedAt).toLocaleString() %></div>
+                                        <!-- DAMAGE LABEL -->
+                                        <% if(req.reason && req.reason.toLowerCase().includes('damage')) { %>
+                                            <div class="text-danger fw-bold mt-1" style="font-size: 10px;">
+                                                Damaged Return → Stock will NOT increase
+                                            </div>
+                                        <% } %>
+                                        <div class="d-flex gap-2 mt-2">
+                                            <!-- APPROVE -->
+                                            <form action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve" method="POST">
+                                                <input type="hidden" name="requestId" value="<%= req._id %>">
+                                                <button type="submit" class="btn btn-success btn-sm py-0 px-2" style="font-size: 11px;">Accept</button>
+                                            </form>
+                                            <!-- REJECT -->
+                                            <form action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject" method="POST">
+                                                <input type="hidden" name="requestId" value="<%= req._id %>">
+                                                <button type="submit" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 11px;">Reject</button>
+                                            </form>
+                                        </div>
                                     </div>
-
-                                <% } %>
-
-                                <!-- DAMAGE LABEL -->
-                                <% if(
-                                    item.returnReason &&
-                                    item.returnReason.toLowerCase().includes('damage')
-                                ) { %>
-
-                                    <div class="text-danger fw-bold mt-1">
-
-                                        Damaged Return
-                                        → Stock will NOT increase
-
-                                    </div>
-
-                                <% } %>
-
-                                <div class="d-flex gap-2 mt-2">
-
-                                    <!-- APPROVE -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
-                                        method="POST">
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-success btn-sm">
-
-                                            Accept
-
-                                        </button>
-
-                                    </form>
-
-                                    <!-- REJECT -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
-                                        method="POST">
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-danger btn-sm">
-
-                                            Reject
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </div>
-
+                                <% }) %>
                             <% } %>
                             
                         </div>
 
-                        <!-- Cancellation Reason -->
-                        <% if (item.status === 'Cancelled' && item.cancelReason) { %>
+                        <!-- Cancellation Reason (Legacy) -->
+                        <% if (item.status === 'Cancelled' && item.cancelReason && (!item.cancelRequests || item.cancelRequests.length === 0)) { %>
                             <div class="alert alert-danger p-2 mb-0 mt-1 small">
                                 <strong>Cancel Reason:</strong> <%= item.cancelReason %>
                                 <% if (item.cancelledAt) { %>
@@ -361,12 +297,35 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             </div>
                         <% } %>
 
-                        <!-- Return Reason -->
-                        <% if (item.status === 'Returned' && item.returnReason) { %>
+                        <!-- Return Reason (Legacy) -->
+                        <% if (item.status === 'Returned' && item.returnReason && (!item.returnRequests || item.returnRequests.length === 0)) { %>
                             <div class="alert alert-warning p-2 mb-0 mt-1 small text-dark">
                                 <strong>Return Reason:</strong> <%= item.returnReason %>
                                 <% if (item.returnedAt) { %>
                                     <div class="text-muted text-end mt-1" style="font-size: 10px;">At: <%= new Date(item.returnedAt).toLocaleString() %></div>
+                                <% } %>
+                            </div>
+                        <% } %>
+
+                        <!-- Requests History -->
+                        <% if ((item.cancelRequests && item.cancelRequests.some(r => r.status !== 'Pending')) || (item.returnRequests && item.returnRequests.some(r => r.status !== 'Pending'))) { %>
+                            <div class="mt-2 small bg-light p-2 rounded border text-dark">
+                                <strong class="text-muted small d-block mb-1">Quantity Requests History:</strong>
+                                <% if (item.cancelRequests) { %>
+                                    <% item.cancelRequests.filter(r => r.status !== 'Pending').forEach(r => { %>
+                                        <div class="mt-1 border-bottom pb-1" style="font-size: 11px;">
+                                            <span class="badge <%= r.status === 'Approved' ? 'bg-success' : 'bg-danger' %>" style="font-size: 9px;"><%= r.status %></span> Cancel Qty: <strong><%= r.quantity %></strong>
+                                            <% if (r.reason) { %><div class="text-muted text-truncate" style="font-size: 10px;">Reason: <%= r.reason %></div><% } %>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                                <% if (item.returnRequests) { %>
+                                    <% item.returnRequests.filter(r => r.status !== 'Pending').forEach(r => { %>
+                                        <div class="mt-1 border-bottom pb-1" style="font-size: 11px;">
+                                            <span class="badge <%= r.status === 'Approved' ? 'bg-success' : 'bg-danger' %>" style="font-size: 9px;"><%= r.status %></span> Return Qty: <strong><%= r.quantity %></strong>
+                                            <% if (r.reason) { %><div class="text-muted text-truncate" style="font-size: 10px;">Reason: <%= r.reason %></div><% } %>
+                                        </div>
+                                    <% }) %>
                                 <% } %>
                             </div>
                         <% } %>
@@ -400,48 +359,48 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             <% }) %>
             <tr class="border-0">
 
-    <td></td>
+                <td></td>
 
-    <td></td>
+                <td></td>
 
-    <!-- BELOW PRICE COLUMN -->
-    <td colspan="2"class="pt-4">
+                <!-- BELOW PRICE COLUMN -->
+                <td colspan="2"class="pt-4">
 
-        <div class="d-flex
-                    justify-content-end
-                    align-items-center
-                    gap-4
-                    fw-bold fs-5">
+                    <div class="d-flex
+                                justify-content-end
+                                align-items-center
+                                gap-4
+                                fw-bold fs-5">
 
-            <div>
+                        <div>
 
-                Grand Total :
+                            Grand Total :
 
-                <span class="ms-1 text-dark">
+                            <span class="ms-1 text-dark">
 
-                    ₹<%= order.totalAmount.toLocaleString() %>
+                                ₹<%= order.totalAmount.toLocaleString() %>
 
-                </span>
+                            </span>
 
-            </div>
+                        </div>
 
-           <!-- <span class="
-                badge
-                <%= order.orderStatus === 'Delivered'
-                    ? 'bg-success'
-                    : 'bg-warning text-dark' %>">
+                    <!-- <span class="
+                            badge
+                            <%= order.orderStatus === 'Delivered'
+                                ? 'bg-success'
+                                : 'bg-warning text-dark' %>">
 
-                <%= order.orderStatus === 'Delivered'
-                    ? 'Paid'
-                    : 'Pending' %>
+                            <%= order.orderStatus === 'Delivered'
+                                ? 'Paid'
+                                : 'Pending' %>
 
-            </span>-->
+                        </span>-->
 
-        </div>
+                    </div>
 
-    </td>
+                </td>
 
-</tr>
+            </tr>
 
 
             </tbody>

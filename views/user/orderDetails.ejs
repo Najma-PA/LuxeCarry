@@ -226,12 +226,24 @@ Your return request is awaiting admin approval.
             <% } %>
 
             <div class="text-muted mb-2">
+                Ordered Qty: <strong><%= item.quantity %></strong>
+            </div>
 
-                Quantity:
-                <strong>
-                    <%= item.quantity %>
-                </strong>
+            <% if (item.cancelledQty > 0) { %>
+            <div class="text-muted mb-2 text-danger">
+                Cancelled Qty: <strong><%= item.cancelledQty %></strong>
+            </div>
+            <% } %>
 
+            <% if (item.returnedQty > 0) { %>
+            <div class="text-muted mb-2 text-warning">
+                Returned Qty: <strong><%= item.returnedQty %></strong>
+            </div>
+            <% } %>
+
+            <% const activeQty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0); %>
+            <div class="text-muted mb-2 text-success">
+                Active Qty: <strong><%= activeQty %></strong>
             </div>
 
             <div class="fw-bold fs-4 mt-3">
@@ -332,15 +344,15 @@ Your return request is awaiting admin approval.
                     </div>
 
                     <div class="payment-summary-item">
-                        <span>Quantity</span>
-                        <strong><%= item.quantity %></strong>
+                        <span>Active Quantity</span>
+                        <strong><%= activeQty %></strong>
                     </div>
 
                     <% 
                         const oPrice = item.originalPrice || item.price || 0;
                         const pDisc = item.productDiscount || 0;
                         const fPrice = item.finalPrice || item.price || 0;
-                        const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
+                        const tPrice = fPrice * activeQty;
                     %>
 
                     <div class="payment-summary-item">
@@ -373,12 +385,23 @@ Your return request is awaiting admin approval.
     </div>
 </div>
 
-<% if (item.status !== 'Delivered' && 
-        item.status !== 'Cancelled' 
-        && item.status!=='Returned' 
-        && item.status!=='Cancellation Requested'
-        &&item.status!=='Return Requested') 
-        { %>
+<%
+  const pendingCancelQty = item.cancelRequests
+    ? item.cancelRequests.filter(r => r.status === 'Pending').reduce((sum, r) => sum + r.quantity, 0)
+    : 0;
+  const availableCancelQty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0) - pendingCancelQty;
+  
+  const pendingReturnQty = item.returnRequests
+    ? item.returnRequests.filter(r => r.status === 'Pending').reduce((sum, r) => sum + r.quantity, 0)
+    : 0;
+  const deliveredQty = item.deliveredQty || (item.quantity - (item.cancelledQty || 0));
+  const availableReturnQty = deliveredQty - (item.returnedQty || 0) - pendingReturnQty;
+%>
+
+<% 
+  const allowedCancelStatuses = ['Pending', 'Confirmed', 'Shipped', 'Out for Delivery', 'Cancellation Requested'];
+  if (allowedCancelStatuses.includes(item.status) && availableCancelQty > 0) { 
+%>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"
@@ -398,7 +421,7 @@ const diffDays = deliveredDate
   : 999;
 %>
 
-<% if (item.status === 'Delivered'&& diffDays <= 15) { %>
+<% if (['Delivered', 'Partially Returned', 'Return Requested'].includes(item.status) && diffDays <= 15 && availableReturnQty > 0) { %>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"
@@ -449,6 +472,14 @@ const diffDays = deliveredDate
                 </div>
 
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Quantity to Cancel</label>
+                        <select name="quantity" class="form-select" id="cancelQtySelect" required>
+                            <% for(let i = 1; i <= availableCancelQty; i++) { %>
+                                <option value="<%= i %>"><%= i %></option>
+                            <% } %>
+                        </select>
+                    </div>
 
                     <label class="form-label">
                         Cancellation Reason (Optional)
@@ -523,6 +554,14 @@ const diffDays = deliveredDate
                 </div>
 
                 <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Quantity to Return</label>
+                        <select name="quantity" class="form-select" id="returnQtySelect" required>
+                            <% for(let i = 1; i <= availableReturnQty; i++) { %>
+                                <option value="<%= i %>"><%= i %></option>
+                            <% } %>
+                        </select>
+                    </div>
 
                     <label class="form-label">
                         Return Reason
@@ -627,6 +666,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (submitBtn) submitBtn.disabled = true;
 
             const reason = cancelForm.querySelector('textarea[name="reason"]').value;
+            const quantity = document.getElementById('cancelQtySelect').value;
 
             try {
                 const response = await fetch(cancelForm.action, {
@@ -634,7 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ reason })
+                    body: JSON.stringify({ reason, quantity })
                 });
 
                 const data = await response.json();
@@ -685,6 +725,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const reason = document.getElementById('returnReasonSelect').value;
             const customReason = document.getElementById('customReasonBox').value;
+            const quantity = document.getElementById('returnQtySelect').value;
 
             try {
                 const response = await fetch(returnForm.action, {
@@ -692,7 +733,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ reason, customReason })
+                    body: JSON.stringify({ reason, customReason, quantity })
                 });
 
                 const data = await response.json();
