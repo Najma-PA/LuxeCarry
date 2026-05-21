@@ -81,10 +81,8 @@ const orderSchema = new mongoose.Schema(
             'Delivered',
             'Cancellation Requested',
             'Cancelled',
-            'Partially Cancelled',
             'Return Requested',
             'Returned',
-            'Partially Returned',
           ],
 
           default: 'Pending',
@@ -146,64 +144,6 @@ const orderSchema = new mongoose.Schema(
         deliveredAt: {
           type: Date,
         },
-
-        // New Quantity-based tracking fields
-        cancelledQty: {
-          type: Number,
-          default: 0,
-        },
-        returnedQty: {
-          type: Number,
-          default: 0,
-        },
-        deliveredQty: {
-          type: Number,
-          default: 0,
-        },
-
-        // New Request tracking arrays
-        cancelRequests: [
-          {
-            quantity: {
-              type: Number,
-              required: true,
-            },
-            reason: {
-              type: String,
-              default: '',
-            },
-            status: {
-              type: String,
-              enum: ['Pending', 'Approved', 'Rejected'],
-              default: 'Pending',
-            },
-            requestedAt: {
-              type: Date,
-              default: Date.now,
-            },
-          },
-        ],
-        returnRequests: [
-          {
-            quantity: {
-              type: Number,
-              required: true,
-            },
-            reason: {
-              type: String,
-              default: '',
-            },
-            status: {
-              type: String,
-              enum: ['Pending', 'Approved', 'Rejected'],
-              default: 'Pending',
-            },
-            requestedAt: {
-              type: Date,
-              default: Date.now,
-            },
-          },
-        ],
       },
     ],
 

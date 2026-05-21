@@ -134,8 +134,8 @@ exports.updateItemRefund = async (req, res) => {
 exports.approveOrderRequest = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
-    const { adminResponse, requestId } = req.body;
-    const result = await orderService.approveOrderRequest(orderId, itemId, requestId, adminResponse);
+    const { adminResponse } = req.body;
+    const result = await orderService.approveOrderRequest(orderId, itemId, adminResponse);
     if (!result.success) {
       return res.status(400).json({
         success: false,
@@ -151,9 +151,10 @@ exports.approveOrderRequest = async (req, res) => {
 exports.rejectOrderRequest = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
-    const { adminResponse, requestId } = req.body;
 
-    const result = await orderService.rejectOrderRequest(orderId, itemId, requestId, adminResponse);
+    const { adminResponse } = req.body;
+
+    const result = await orderService.rejectOrderRequest(orderId, itemId, adminResponse);
 
     if (!result.success) {
       return res.status(400).json({
