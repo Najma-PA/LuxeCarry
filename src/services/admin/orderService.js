@@ -103,6 +103,8 @@ exports.updateOrderPayment = async (orderId, paymentStatus) => {
   return order;
 };
 
+const { calculateItemStatus, updateGlobalOrderStatus } = require('../../utils/orderStatusHelper');
+
 exports.updateItemStatus = async (orderId, itemId, status) => {
   const order = await Order.findById(orderId);
   if (!order) throw new Error('Order not found');
@@ -127,28 +129,19 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
   if (status === 'Cancelled') {
     item.cancelledAt = new Date();
     item.cancelReason = 'Cancelled by Administrator';
+    item.cancelledQty = item.quantity;
   } else if (status === 'Returned') {
     item.returnedAt = new Date();
     item.returnReason = 'Returned by Administrator';
+    item.returnedQty = item.quantity;
   } else if (status === 'Delivered') {
     item.deliveredAt = new Date();
+    item.deliveredQty = item.quantity - item.cancelledQty;
   }
-  /*
-  // Check if all items are cancelled or returned to auto-sync global order status
-  const allCancelled = order.items.every((i) => i.status === 'Cancelled');
-  const allReturned = order.items.every((i) => i.status === 'Returned');
-  const allCancelledOrReturned = order.items.every(
-    (i) => i.status === 'Cancelled' || i.status === 'Returned'
-  );
 
-  if (allCancelled) {
-    order.orderStatus = 'Cancelled';
-  } else if (allReturned) {
-    order.orderStatus = 'Returned';
-  } else if (allCancelledOrReturned) {
-    order.orderStatus = 'Returned';
-  }
-*/
+  // Check if all items are cancelled or returned to auto-sync global order status
+  updateGlobalOrderStatus(order);
+
   await order.save();
   return order;
 };
@@ -166,7 +159,8 @@ exports.updateItemRefund = async (orderId, itemId, refundAmount, refundStatus) =
   await order.save();
   return order;
 };
-exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
+
+exports.approveOrderRequest = async (orderId, itemId, requestId, adminResponse = '') => {
   const order = await Order.findById(orderId);
   if (!order) {
     return {
@@ -182,21 +176,55 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
       message: 'Item not found',
     };
   }
-  if (item.requestStatus === 'Approved') {
+
+  // Find specific request
+  let request = null;
+  let requestType = null; // 'Cancel' or 'Return'
+
+  if (item.cancelRequests) {
+    request = item.cancelRequests.id(requestId) || item.cancelRequests.find(r => r._id.toString() === requestId?.toString());
+    if (request) requestType = 'Cancel';
+  }
+  if (!request && item.returnRequests) {
+    request = item.returnRequests.id(requestId) || item.returnRequests.find(r => r._id.toString() === requestId?.toString());
+    if (request) requestType = 'Return';
+  }
+
+  // Fallback if no requestId was supplied
+  if (!request) {
+    const pendingCancel = item.cancelRequests && item.cancelRequests.find(r => r.status === 'Pending');
+    if (pendingCancel) {
+      request = pendingCancel;
+      requestType = 'Cancel';
+    } else {
+      const pendingReturn = item.returnRequests && item.returnRequests.find(r => r.status === 'Pending');
+      if (pendingReturn) {
+        request = pendingReturn;
+        requestType = 'Return';
+      }
+    }
+  }
+
+  if (!request) {
     return {
       success: false,
-      message: 'Request already approved',
+      message: 'No pending request found for this item',
     };
   }
-  //cancellation approval
-  if (item.status === 'Cancellation Requested') {
-    item.status = 'Cancelled';
-    item.requestStatus = 'Approved';
-    item.adminResponse = adminResponse;
-    item.requestProcessedAt = new Date();
-    item.cancelledAt = new Date();
 
-    //stock update
+  if (request.status !== 'Pending') {
+    return {
+      success: false,
+      message: `This request has already been ${request.status.toLowerCase()}`,
+    };
+  }
+
+  // Process based on request type
+  if (requestType === 'Cancel') {
+    request.status = 'Approved';
+    item.cancelledQty = (item.cancelledQty || 0) + request.quantity;
+
+    // Restore stock
     if (item.variant) {
       await Product.updateOne(
         {
@@ -205,8 +233,8 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
         },
         {
           $inc: {
-            stock: item.quantity,
-            'variants.$.stock': item.quantity,
+            stock: request.quantity,
+            'variants.$.stock': request.quantity,
           },
         }
       );
@@ -217,30 +245,23 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
         },
         {
           $inc: {
-            stock: item.quantity,
+            stock: request.quantity,
           },
         }
       );
     }
-    //refund
+
+    // Refund calculation
     if (order.paymentStatus === 'Paid') {
-      item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
+      item.refundAmount = (item.refundAmount || 0) + item.finalPrice * request.quantity;
       item.refundStatus = 'Pending';
     }
-  } else if (item.status === 'Return Requested') {
-    item.status = 'Returned';
+  } else if (requestType === 'Return') {
+    request.status = 'Approved';
+    item.returnedQty = (item.returnedQty || 0) + request.quantity;
 
-    item.requestStatus = 'Approved';
-
-    item.adminResponse = adminResponse;
-
-    item.requestProcessedAt = new Date();
-
-    item.returnedAt = new Date();
-
-    // damage check
-    const isDamaged = item.returnReason && item.returnReason.toLowerCase().includes('damage');
-
+    // Damage check: do not restore stock if returned as Damaged Product
+    const isDamaged = request.reason && request.reason.toLowerCase().includes('damage');
     if (!isDamaged) {
       if (item.variant) {
         await Product.updateOne(
@@ -250,8 +271,8 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
           },
           {
             $inc: {
-              stock: item.quantity,
-              'variants.$.stock': item.quantity,
+              stock: request.quantity,
+              'variants.$.stock': request.quantity,
             },
           }
         );
@@ -262,37 +283,28 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
           },
           {
             $inc: {
-              stock: item.quantity,
+              stock: request.quantity,
             },
           }
         );
       }
     }
 
-    // REFUND
+    // Refund calculation
     if (order.paymentStatus === 'Paid') {
-      item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
-
+      item.refundAmount = (item.refundAmount || 0) + item.finalPrice * request.quantity;
       item.refundStatus = 'Pending';
     }
-  } else {
-    return {
-      success: false,
-      message: 'Invalid request status',
-    };
   }
 
-  // AUTO ORDER STATUS
+  // Update request response meta
+  item.adminResponse = adminResponse;
+  item.requestProcessedAt = new Date();
+  item.requestStatus = 'Approved'; // For backward compatibility
 
-  const allCancelled = order.items.every((i) => i.status === 'Cancelled');
-
-  const allReturned = order.items.every((i) => i.status === 'Returned');
-
-  if (allCancelled) {
-    order.orderStatus = 'Cancelled';
-  } else if (allReturned) {
-    order.orderStatus = 'Returned';
-  }
+  // Calculate dynamic status and sync global order status
+  item.status = calculateItemStatus(item, item.status, item.previousStatus);
+  updateGlobalOrderStatus(order);
 
   await order.save();
 
@@ -302,7 +314,7 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
   };
 };
 
-exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
+exports.rejectOrderRequest = async (orderId, itemId, requestId, adminResponse = '') => {
   const order = await Order.findById(orderId);
 
   if (!order) {
@@ -321,33 +333,54 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     };
   }
 
-  // PREVENT DOUBLE REJECTION
-  if (item.requestStatus === 'Rejected') {
+  // Find specific request
+  let request = null;
+
+  if (item.cancelRequests) {
+    request = item.cancelRequests.id(requestId) || item.cancelRequests.find(r => r._id.toString() === requestId?.toString());
+  }
+  if (!request && item.returnRequests) {
+    request = item.returnRequests.id(requestId) || item.returnRequests.find(r => r._id.toString() === requestId?.toString());
+  }
+
+  // Fallback if no requestId was supplied
+  if (!request) {
+    const pendingCancel = item.cancelRequests && item.cancelRequests.find(r => r.status === 'Pending');
+    if (pendingCancel) {
+      request = pendingCancel;
+    } else {
+      const pendingReturn = item.returnRequests && item.returnRequests.find(r => r.status === 'Pending');
+      if (pendingReturn) {
+        request = pendingReturn;
+      }
+    }
+  }
+
+  if (!request) {
     return {
       success: false,
-      message: 'Request already rejected',
+      message: 'No pending request found for this item',
     };
   }
 
-  // ONLY REQUEST STATUSES CAN BE REJECTED
-  if (item.status !== 'Cancellation Requested' && item.status !== 'Return Requested') {
+  if (request.status !== 'Pending') {
     return {
       success: false,
-      message: 'Invalid request status',
+      message: `This request has already been ${request.status.toLowerCase()}`,
     };
   }
 
-  // RESTORE PREVIOUS STATUS
-  item.status = item.previousStatus || 'Delivered';
+  // Reject the request
+  request.status = 'Rejected';
 
-  item.requestStatus = 'Rejected';
-
+  // Update request response meta
   item.adminResponse = adminResponse;
-
   item.requestProcessedAt = new Date();
+  item.requestStatus = 'Rejected'; // For backward compatibility
 
-  // CLEAR REQUEST TYPE
-  item.requestType = undefined;
+  // Calculate dynamic status and sync global order status
+  item.status = calculateItemStatus(item, item.status, item.previousStatus);
+  updateGlobalOrderStatus(order);
 
   await order.save();
 

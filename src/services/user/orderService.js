@@ -55,7 +55,9 @@ exports.getOrderedProductDetails = async (orderId, itemId, userId) => {
     item: orderedItem,
   };
 };
-exports.cancelOrder = async (orderId, itemId, userId, reason) => {
+const { calculateItemStatus, updateGlobalOrderStatus } = require('../../utils/orderStatusHelper');
+
+exports.cancelOrder = async (orderId, itemId, userId, reason, requestedQty) => {
   const order = await Order.findOne({
     _id: orderId,
     userId,
@@ -77,32 +79,57 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
     };
   }
 
-  if (item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned') {
+  // Pre-delivery status check
+  const cannotCancelStatuses = ['Delivered', 'Returned', 'Partially Returned'];
+  if (cannotCancelStatuses.includes(item.status)) {
     return { success: false, message: 'Item cannot be cancelled at this stage' };
   }
 
+  const qty = Number(requestedQty) || 0;
+  if (qty <= 0) {
+    return { success: false, message: 'Invalid quantity requested for cancellation' };
+  }
+
+  // Calculate available cancel quantity
+  const pendingCancelQty = item.cancelRequests
+    ? item.cancelRequests.filter(r => r.status === 'Pending').reduce((sum, r) => sum + r.quantity, 0)
+    : 0;
+
+  const availableCancelQty = item.quantity - item.cancelledQty - item.returnedQty - pendingCancelQty;
+
+  if (qty > availableCancelQty) {
+    return {
+      success: false,
+      message: `Only ${availableCancelQty} item(s) are available to cancel. You may have other pending cancellation requests.`,
+    };
+  }
+
+  // Push new cancellation request
+  if (!item.cancelRequests) {
+    item.cancelRequests = [];
+  }
+  item.cancelRequests.push({
+    quantity: qty,
+    reason: reason || '',
+    status: 'Pending',
+    requestedAt: new Date(),
+  });
+
   item.previousStatus = item.status;
-  item.status = 'Cancellation Requested';
   item.cancelReason = reason || '';
   item.cancelledAt = new Date();
+  
+  // Calculate dynamic item status
+  item.status = calculateItemStatus(item, item.status, item.previousStatus);
 
-  // Refund fields
-  if (order.paymentStatus === 'Paid') {
-    item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
-    item.refundStatus = 'Pending';
-  }
-
-  // Check if all items are cancelled
-  const allCancelled = order.items.every((i) => i.status === 'Cancelled');
-  if (allCancelled) {
-    order.orderStatus = 'Cancelled';
-  }
+  // Sync global orderStatus if applicable
+  updateGlobalOrderStatus(order);
 
   await order.save();
   return { success: true };
 };
 
-exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
+exports.returnOrder = async (orderId, itemId, userId, reason, customReason, requestedQty) => {
   const order = await Order.findOne({ _id: orderId, userId });
 
   if (!order) {
@@ -116,18 +143,12 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
     return { success: false, message: 'Item not found in order' };
   }
 
-  if (item.status !== 'Delivered') {
+  // Must be delivered to initiate return
+  const allowedReturnStatuses = ['Delivered', 'Partially Returned', 'Return Requested'];
+  if (!allowedReturnStatuses.includes(item.status)) {
     return { success: false, message: 'Return not allowed for this item status' };
   }
 
-  let finalReason = reason;
-  if (reason === 'Other' && customReason) {
-    finalReason = customReason;
-  }
-  item.previousStatus = item.status;
-  item.status = 'Return Requested';
-  item.returnReason = finalReason || '';
-  item.returnedAt = new Date();
   if (!item.deliveredAt) {
     return { success: false, message: 'Delivery date missing' };
   }
@@ -136,49 +157,54 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
   const diffTime = today - deliveredDate;
   const diffDays = diffTime / (1000 * 60 * 60 * 24);
   if (diffDays > 15) {
-    return { success: false, message: 'Return period expired' };
+    return { success: false, message: 'Return period expired (maximum 15 days from delivery)' };
   }
-  /* Restore stock 
-  const isDamaged = finalReason === 'Damaged Product' || reason === 'Damaged Product';
-  if (!isDamaged) {
-    if (item.variant) {
-      await Product.updateOne(
-        {
-          _id: item.product,
-          'variants._id': item.variant,
-        },
-        {
-          $inc: {
-            'variants.$.stock': item.quantity,
-          },
-        }
-      );
-    } else {
-      await Product.updateOne(
-        { _id: item.product },
-        {
-          $inc: {
-            stock: item.quantity,
-          },
-        }
-      );
-    }
-  }
-*/
 
-  /* Refund fields
-  if (order.paymentStatus === 'Paid') {
-    item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
-    item.refundStatus = 'Pending';
+  const qty = Number(requestedQty) || 0;
+  if (qty <= 0) {
+    return { success: false, message: 'Invalid quantity requested for return' };
   }
-*/
-  // Check if all items are returned or cancelled to update global orderStatus
-  const allReturnedOrCancelled = order.items.every(
-    (i) => i.status === 'Returned' || i.status === 'Cancelled'
-  );
-  if (allReturnedOrCancelled) {
-    order.orderStatus = 'Returned';
+
+  // Calculate available return quantity
+  const pendingReturnQty = item.returnRequests
+    ? item.returnRequests.filter(r => r.status === 'Pending').reduce((sum, r) => sum + r.quantity, 0)
+    : 0;
+
+  const deliveredQty = item.deliveredQty || (item.quantity - item.cancelledQty);
+  const availableReturnQty = deliveredQty - item.returnedQty - pendingReturnQty;
+
+  if (qty > availableReturnQty) {
+    return {
+      success: false,
+      message: `Only ${availableReturnQty} item(s) are available to return. You may have other pending return requests.`,
+    };
   }
+
+  let finalReason = reason;
+  if (reason === 'Other' && customReason) {
+    finalReason = customReason;
+  }
+
+  // Push new return request
+  if (!item.returnRequests) {
+    item.returnRequests = [];
+  }
+  item.returnRequests.push({
+    quantity: qty,
+    reason: finalReason || '',
+    status: 'Pending',
+    requestedAt: new Date(),
+  });
+
+  item.previousStatus = item.status;
+  item.returnReason = finalReason || '';
+  item.returnedAt = new Date();
+
+  // Calculate dynamic item status
+  item.status = calculateItemStatus(item, item.status, item.previousStatus);
+
+  // Sync global orderStatus if applicable
+  updateGlobalOrderStatus(order);
 
   await order.save();
   return { success: true };

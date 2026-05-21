@@ -11,10 +11,13 @@ exports.generateInvoice = async (orderId, itemId, res) => {
       message: 'Order not found',
     };
   }
-  // ONLY DELIVERED ITEMS
-  const deliveredItems = order.items.filter(
-    (item) => item.status === 'Delivered' && (!itemId || item._id.toString() === itemId)
-  );
+  // ONLY DELIVERED / ACTIVE ITEMS
+  const deliveredItems = order.items.filter((item) => {
+    const isStatusMatch = ['Delivered', 'Partially Returned', 'Partially Cancelled'].includes(item.status) || (item.deliveredQty && item.deliveredQty > 0);
+    const invoiceQty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0);
+    const isItemMatch = !itemId || item._id.toString() === itemId;
+    return isStatusMatch && invoiceQty > 0 && isItemMatch;
+  });
 
   if (deliveredItems.length === 0) {
     return {
@@ -190,31 +193,37 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     });
 
     // Qty
-    doc.text(item.quantity.toString(), qtyX, position + 15, {
+    const invoiceQty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0);
+    const oPrice = item.originalPrice || item.price || 0;
+    const pDisc = item.productDiscount || 0;
+    const fPrice = item.finalPrice || item.price || 0;
+    const rowTotal = fPrice * invoiceQty;
+
+    doc.text(invoiceQty.toString(), qtyX, position + 15, {
       width: 30,
       align: 'center',
     });
 
     // Original Price
-    doc.text(`RS. ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
+    doc.text(`RS. ${oPrice.toLocaleString()}`, originalX, position + 15, {
       width: 70,
       align: 'right',
     });
 
     // Product Discount
-    doc.text(`Rs. ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
+    doc.text(`Rs. ${pDisc.toLocaleString()}`, discountX, position + 15, {
       width: 70,
       align: 'right',
     });
 
     // Final Price
-    doc.text(`Rs. ${(item.finalPrice || 0).toLocaleString()}`, finalX, position + 15, {
+    doc.text(`Rs. ${fPrice.toLocaleString()}`, finalX, position + 15, {
       width: 70,
       align: 'right',
     });
 
     // Total
-    doc.text(`Rs. ${(item.totalPrice || 0).toLocaleString()}`, totalX, position + 15, {
+    doc.text(`Rs. ${rowTotal.toLocaleString()}`, totalX, position + 15, {
       width: 60,
       align: 'right',
     });
@@ -228,14 +237,15 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   doc.font('Helvetica').fontSize(12).fillColor('#111');
 
-  const originalSubtotal = deliveredItems.reduce(
-    (sum, item) => sum + (item.originalPrice || 0) * item.quantity,
-    0
-  );
-  const totalDiscount = deliveredItems.reduce(
-    (sum, item) => sum + (item.productDiscount || 0) * item.quantity,
-    0
-  );
+  const originalSubtotal = deliveredItems.reduce((sum, item) => {
+    const qty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0);
+    return sum + (item.originalPrice || item.price || 0) * qty;
+  }, 0);
+
+  const totalDiscount = deliveredItems.reduce((sum, item) => {
+    const qty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0);
+    return sum + (item.productDiscount || 0) * qty;
+  }, 0);
 
   // Subtotal
   doc.text('Subtotal', 330, position);
@@ -263,7 +273,11 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.fillColor('#fff').font('Helvetica-Bold').fontSize(16);
 
   doc.text('Grand Total', 315, position + 5);
-  const invoiceTotal = deliveredItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  const invoiceTotal = deliveredItems.reduce((sum, item) => {
+    const qty = item.quantity - (item.cancelledQty || 0) - (item.returnedQty || 0);
+    const fPrice = item.finalPrice || item.price || 0;
+    return sum + fPrice * qty;
+  }, 0);
   doc.text(`Rs. ${invoiceTotal.toLocaleString()}`, 415, position + 5, {
     width: 115,
     align: 'right',

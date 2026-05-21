@@ -99,10 +99,10 @@ exports.getOrderedProductDetails = async (req, res) => {
 exports.cancelOrder = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
-    const { reason } = req.body;
+    const { reason, quantity } = req.body;
     const userId = req.user?._id || req.session.user?.id;
 
-    const result = await orderService.cancelOrder(orderId, itemId, userId, reason);
+    const result = await orderService.cancelOrder(orderId, itemId, userId, reason, quantity);
 
     if (!result.success) {
       return res.status(400).json({
@@ -127,10 +127,10 @@ exports.cancelOrder = async (req, res) => {
 exports.returnOrder = async (req, res) => {
   try {
     const { orderId, itemId } = req.params;
-    const { reason, customReason } = req.body;
+    const { reason, customReason, quantity } = req.body;
     const userId = req.user?._id || req.session.user?.id;
 
-    const result = await orderService.returnOrder(orderId, itemId, userId, reason, customReason);
+    const result = await orderService.returnOrder(orderId, itemId, userId, reason, customReason, quantity);
 
     if (!result.success) {
       return res.status(400).json({
