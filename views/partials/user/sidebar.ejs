@@ -31,6 +31,26 @@
         font-size: 0.95rem;
         margin: 0;
     }
+    .account-container,
+.row,
+.col-lg-3,
+.col-md-4 {
+    overflow: visible !important;
+}
+
+.user-dashboard-sidebar {
+    position: sticky;
+    top: 110px;
+    align-self: flex-start;
+    z-index: 100;
+    height: fit-content;
+}
+
+@media (max-width: 991px) {
+    .user-dashboard-sidebar {
+        position: static !important;
+    }
+}
 </style>
 <div class="col-lg-3 col-md-4 mb-4 user-dashboard-sidebar">
   <div class="lc-sidebar-card">

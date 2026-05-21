@@ -48,22 +48,24 @@
 <!-- Table -->
 <div class="card p-3">
 
-  <table class="table align-middle">
-    <thead>
-      <tr>
-        <th>User</th>
-        <th>Email</th>
-        <th>Orders</th>
-        <th>Joined</th>
-        <th>Status</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Email</th>
+          <th>Orders</th>
+          <th>Joined</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
 
-    <tbody id="user-table-body">
-      <%- include('../partials/admin/user-table') %>
-    </tbody>
-  </table>
+      <tbody id="user-table-body">
+        <%- include('../partials/admin/user-table') %>
+      </tbody>
+    </table>
+  </div>
 
   <!-- Pagination -->
   <div class="d-flex justify-content-center mt-3" id="pagination-container">

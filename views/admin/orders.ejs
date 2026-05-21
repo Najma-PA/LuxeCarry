@@ -244,6 +244,7 @@
         background-color: #f1f5f9;
         color: #475569;
     }
+    
 </style>
 </head>
 
@@ -357,7 +358,7 @@
                     <th style="width: 18%;">ORDER ID</th>
                     <th style="width: 32%;">CUSTOMER</th>
                     <th style="width: 22%;">DATE</th>
-                    <!--<th style="width: 18%;">STATUS</th>-->
+                   <!-- <th style="width: 18%;">STATUS</th>-->
                     <th style="width: 10%;" class="text-center">ACTION</th>
                 </tr>
             </thead>
@@ -373,6 +374,15 @@
                                 .join('')
                                 .toUpperCase();
                         %>
+                        <%
+                        const hasPendingCancelRequest = order.items?.some(item =>
+                            item.cancelRequests?.some(req => req.status === 'Pending')
+                        );
+
+                        const hasPendingReturnRequest = order.items?.some(item =>
+                            item.returnRequests?.some(req => req.status === 'Pending')
+                        );
+                        %>
                         <tr>
                             <td>
                                 <a href="/admin/orders/<%= order._id %>" class="order-id-link">
@@ -384,6 +394,7 @@
                                     <div class="avatar-circle">
                                         <%= initials %>
                                     </div>
+                                   
                                     <span class="customer-name"><%= customerName %></span>
                                 </div>
                             </td>

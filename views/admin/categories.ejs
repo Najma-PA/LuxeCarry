@@ -58,20 +58,22 @@
         </div>
       </div>
 
-      <table class="table table-hover mb-0">
-        <thead>
-          <tr>
-            <th>CATEGORY NAME</th>
-            <th>OFFER</th>
-            <th>PRODUCT COUNT</th>
-            <th>STATUS</th>
-            <th>ACTIONS</th>
-          </tr>
-        </thead>
-        <tbody id="category-table-body">
-          <%- include('../partials/admin/category-table') %>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead>
+            <tr>
+              <th>CATEGORY NAME</th>
+              <th>OFFER</th>
+              <th>PRODUCT COUNT</th>
+              <th>STATUS</th>
+              <th>ACTIONS</th>
+            </tr>
+          </thead>
+          <tbody id="category-table-body">
+            <%- include('../partials/admin/category-table') %>
+          </tbody>
+        </table>
+      </div>
 
       <!-- Pagination -->
       <div class="pagination-wrapper" id="pagination-container">

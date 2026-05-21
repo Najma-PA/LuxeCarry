@@ -16,14 +16,14 @@
 <%- include('../partials/user/navbar') %>
 
 <div class="container account-container">
-    <div class="row">
+    <div class="row align-items-start">
         <%- include('../partials/user/sidebar',{
             user,activePage:'wishlist'
         }) %>
     
     <div class="col-lg-9 col-md-8">
     <div class="dashboard-page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
+        <div class="sticky-order-header">
             <h1 class="dashboard-page-title">
                 Wishlist
             </h1>
