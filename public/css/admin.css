@@ -1063,3 +1063,32 @@ body {
   background: #eff6ff;
   color: #1d4ed8;
 }
+
+/* Frontend Feedback Classes */
+.error-text {
+  color: #dc3545;
+  font-size: 0.875em;
+  margin-top: 0.25rem;
+  display: block;
+}
+.error-box {
+  background: #f8d7da;
+  color: #842029;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+.success-box {
+  background: #d1e7dd;
+  color: #0f5132;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
+.warning-box {
+  background: #fff3cd;
+  color: #664d03;
+  padding: 1rem;
+  border-radius: 0.25rem;
+  margin-bottom: 1rem;
+}
