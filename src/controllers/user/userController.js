@@ -36,7 +36,8 @@ exports.googleSuccess = (req, res) => {
       role: req.user.role || 'user',
     };
   }
-  const redirectUrl = req.query.state || '/user/home';
+  const redirectUrl = req.session.returnTo || '/user/home';
+  delete req.session.returnTo;
   res.redirect(redirectUrl);
 };
 

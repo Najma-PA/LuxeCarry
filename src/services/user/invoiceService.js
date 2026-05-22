@@ -72,17 +72,17 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   // ORDER DETAILS
 
   const detailsTop = doc.y + 20;
-
+  const invoiceNumber = `INV-${order._id.toString().slice(-6).toUpperCase()}`;
   doc.fontSize(12).font('Helvetica').fillColor('#333');
 
   // LEFT COLUMN
   doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 70, detailsTop);
+  doc.text(`Invoice No: ${invoiceNumber}`, 70, detailsTop + 22);
 
-  doc.text(`Order ID: ${order.orderId || order._id}`, 70, detailsTop + 22);
+  doc.text(`Order ID: ${order.orderId || order._id}`, 70, detailsTop + 44);
 
-  doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 44);
-  doc.text(`Name: ${order.userId.name}`, 70, detailsTop + 75);
-  doc.text(`Email: ${order.userId.email}`, 70, detailsTop + 97);
+  doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 68);
+
   // SHIPPING ADDRES
 
   const addressTop = detailsTop;
@@ -113,7 +113,9 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.text(`${order.shippingAddress.country}`, 340, addressTop + 82);
 
   doc.text(`Phone: ${order.shippingAddress.phone}`, 340, addressTop + 100);
-
+  doc.text(`Email: ${order.userId.email}`, 340, addressTop + 118, {
+    width: 200,
+  });
   // PRODUCTS TABLE
 
   doc.y = addressTop + 170;
