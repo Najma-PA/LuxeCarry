@@ -201,7 +201,7 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     });
 
     // Product Discount
-    doc.text(`Rs. ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
+    doc.text(`- Rs. ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
       width: 70,
       align: 'right',
     });

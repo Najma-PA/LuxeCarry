@@ -119,15 +119,6 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
   if (item.status !== 'Delivered') {
     return { success: false, message: 'Return not allowed for this item status' };
   }
-
-  let finalReason = reason;
-  if (reason === 'Other' && customReason) {
-    finalReason = customReason;
-  }
-  item.previousStatus = item.status;
-  item.status = 'Return Requested';
-  item.returnReason = finalReason || '';
-  item.returnedAt = new Date();
   if (!item.deliveredAt) {
     return { success: false, message: 'Delivery date missing' };
   }
@@ -138,6 +129,24 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
   if (diffDays > 15) {
     return { success: false, message: 'Return period expired' };
   }
+  if (!reason || reason.trim() === '') {
+    return { success: false, message: 'Please select a return reason' };
+  }
+  let finalReason = reason.trim();
+  if (reason === 'Other') {
+    if (!customReason || customReason.trim() === '') {
+      return {
+        success: false,
+        message: 'Please enter custom return reason',
+      };
+    }
+    finalReason = customReason.trim();
+  }
+
+  item.previousStatus = item.status;
+  item.status = 'Return Requested';
+  item.returnReason = finalReason || '';
+  item.returnedAt = new Date();
 
   // Check if all items are returned or cancelled
   const allReturnedOrCancelled = order.items.every(
