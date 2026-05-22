@@ -532,7 +532,7 @@ const diffDays = deliveredDate
                         name="reason"
                         id="returnReasonSelect"
                         class="form-select"
-                        required
+                    
                     >
                         <option value="">
                             Select Reason
@@ -570,7 +570,7 @@ const diffDays = deliveredDate
                         rows="4"
                         placeholder="Enter custom reason..."
                     ></textarea>
-
+                    <p id="return ErrorMessage" class="text-dnager mt-2 small"></p>
                 </div>
 
                 <div class="modal-footer">
@@ -650,6 +650,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         window.location.reload();
                     });
                 } else {
+                   
                     Swal.fire({
                         icon: 'error',
                         title: 'Failed',
@@ -680,6 +681,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (returnForm) {
         returnForm.addEventListener('submit', async function (e) {
             e.preventDefault();
+            const errorBox= document.getElementById('returnErrorMsg');
+            if(errorBox){
+                errorBox.textContent='';
+            }
             const submitBtn = returnForm.querySelector('button[type="submit"]');
             if (submitBtn) submitBtn.disabled = true;
 
