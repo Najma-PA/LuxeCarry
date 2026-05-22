@@ -13,6 +13,7 @@ const adminRoutes = require('./src/routes/admin');
 const noCache = require('./src/middleware/noCache');
 const errorHandler = require('./src/middleware/errorHandler');
 const methodOverride = require('method-override');
+const flash = require('connect-flash');
 const app = express();
 
 /* VIEW ENGINE */
@@ -37,6 +38,7 @@ app.use(userSession);
 /* PASSPORT */
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(flash());
 const cartService = require('./src/services/user/cartService');
 const userService = require('./src/services/user/userService');
 
@@ -71,6 +73,10 @@ app.use(async (req, res, next) => {
     res.locals.user = null;
     res.locals.cartCount = 0;
   }
+  
+  res.locals.success_msg = req.flash('success');
+  res.locals.error_msg = req.flash('error');
+  
   next();
 });
 
