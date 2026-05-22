@@ -95,31 +95,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </small>
 
         </div>
-        <%
-const hasDeliveredItem = order.items.some(
-    item => item.status === 'Delivered'
-);
-%>
-
-<% if (hasDeliveredItem) { %>
-
-<a
-    href="/user/orders/invoice/<%= order._id %>"
-    class="btn btn-light border btn-sm rounded-pill text-secondary">
-
-    <i class="fa-solid fa-download me-1"></i>
-
-    Invoice
-
-</a>
-
-<% } %>
-        <!--<a href="/user/orders/invoice/<%= order._id %>"
-            class="btn btn-light border btn-sm rounded-pill text-secondary">
-            <i class="fa-solid fa-download me-1"></i>
-            Invoice
-            
-        </a>-->
 
     </div>
 
@@ -184,13 +159,37 @@ const hasDeliveredItem = order.items.some(
         <%=item.status %>
 
     </div>
+    <div class="d-flex align-items-center gap-2">
+
     <a
-        href="/user/orders/<%= order._id %>/product/<%= item.id %>"
+        href="/user/orders/<%= order._id %>/product/<%= item._id %>"
         class="btn btn-view-details btn-sm rounded-pill">
 
         View Details
 
     </a>
+
+    <% if (
+        item.status === 'Confirmed' ||
+        item.status === 'Shipped' ||
+        item.status === 'Out for Delivery' ||
+        item.status === 'Delivered'
+    ) { %>
+
+        <a
+            href="/user/orders/invoice/<%= order._id %>/<%= item._id %>"
+            class="btn btn-light border btn-sm rounded-pill text-secondary">
+
+            <i class="fa-solid fa-download me-1"></i>
+
+            Invoice
+
+        </a>
+
+    <% } %>
+
+</div>
+   
 
 </div>
    
@@ -330,9 +329,37 @@ document.addEventListener('DOMContentLoaded', () => {
                                 <div class="lc-order-status-badge ${badgeClass}">
                                     ${item.status}
                                 </div>
-                                <a href="/user/orders/${order._id}/product/${itemId}" class="btn btn-view-details btn-sm rounded-pill">
+                                
+                                <div class="d-flex align-items-center gap-2">
+
+                                 <a href="/user/orders/${order._id}/product/${itemId}"
+                                    class="btn btn-view-details btn-sm rounded-pill">
+
                                     View Details
+
                                 </a>
+
+                                    ${
+                                    (
+                                        item.status === 'Confirmed' ||
+                                        item.status === 'Shipped' ||
+                                        item.status === 'Out for Delivery' ||
+                                        item.status === 'Delivered'
+                                    )
+                                    ? `
+                                        <a href="/user/orders/invoice/${order._id}/${itemId}"
+                                        class="btn btn-light border btn-sm rounded-pill text-secondary">
+
+                                            <i class="fa-solid fa-download me-1"></i>
+
+                                            Invoice
+
+                                        </a>
+                                    `
+                                    : ''
+                                    }
+
+                                </div>
                             </div>
 
                             <!-- PRICE -->
@@ -354,18 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h5 class="mb-1">Order #${order.orderId}</h5>
                             <small class="text-muted">${orderDateStr}</small>
                         </div>
-                      ${order.items
-    .some(item => item.status === 'Delivered')
-    ? `
-        <a href="/user/orders/invoice/${order._id}"
-           class="btn btn-light border btn-sm rounded-pill text-secondary">
-
-            <i class="fa-solid fa-download me-1"></i>
-
-            Invoice
-
-        </a>
-    `:''}
+    
                     </div>
 
                     <!-- PRODUCTS -->

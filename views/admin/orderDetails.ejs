@@ -173,7 +173,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                 action="/admin/orders/<%= order._id %>/items/<%= item._id %>/status"
                                 method="POST"
                                 class="d-flex gap-1 align-items-center"
-                                onsubmit="confirmSubmit(event, 'Are you sure you want to update this item status?')">
+                                >
 
                                 <select
                                     name="status"
@@ -246,8 +246,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     <!-- APPROVE -->
                                     <form
                                         action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
-                                        method="POST"
-                                        onsubmit="confirmSubmit(event, 'Approve cancellation request?')">
+                                        method="POST">
 
                                         <button
                                             type="submit"
@@ -262,8 +261,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     <!-- REJECT -->
                                     <form
                                         action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
-                                        method="POST"
-                                        onsubmit="confirmSubmit(event, 'Reject cancellation request?')">
+                                        method="POST">
 
                                         <button
                                             type="submit"
@@ -317,8 +315,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     <!-- APPROVE -->
                                     <form
                                         action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
-                                        method="POST"
-                                        onsubmit="confirmSubmit(event, 'Approve return request?')">
+                                        method="POST">
 
                                         <button
                                             type="submit"
@@ -333,8 +330,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     <!-- REJECT -->
                                     <form
                                         action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
-                                        method="POST"
-                                        onsubmit="confirmSubmit(event, 'Reject return request?')">
+                                        method="POST">
 
                                         <button
                                             type="submit"
