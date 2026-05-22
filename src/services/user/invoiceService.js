@@ -81,7 +81,8 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.text(`Order ID: ${order.orderId || order._id}`, 70, detailsTop + 22);
 
   doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 44);
-
+  doc.text(`Name: ${order.userId.name}`, 70, detailsTop + 75);
+  doc.text(`Email: ${order.userId.email}`, 70, detailsTop + 97);
   // SHIPPING ADDRES
 
   const addressTop = detailsTop;
@@ -112,10 +113,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.text(`${order.shippingAddress.country}`, 340, addressTop + 82);
 
   doc.text(`Phone: ${order.shippingAddress.phone}`, 340, addressTop + 100);
-
-  doc.text(`Email: ${order.userId.email}`, 340, addressTop + 118, {
-    width: 200,
-  });
 
   // PRODUCTS TABLE
 

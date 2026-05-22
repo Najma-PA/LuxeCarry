@@ -1,6 +1,7 @@
 const checkoutService = require('../../services/user/checkoutService');
+const mongoose = require('mongoose');
 
-exports.getCheckoutPage = async (req, res) => {
+exports.getCheckoutPage = async (req, res, next) => {
   try {
     const userId = req.user ? req.user._id : req.session.user ? req.session.user.id : null;
 
@@ -11,7 +12,8 @@ exports.getCheckoutPage = async (req, res) => {
     const result = await checkoutService.getCheckoutData(userId);
 
     if (!result.success) {
-      return res.redirect(result.redirect);
+      if (result.message) req.flash('error', result.message);
+      return res.redirect(result.redirect || '/user/cart');
     }
 
     res.render('user/checkout', {
@@ -21,24 +23,26 @@ exports.getCheckoutPage = async (req, res) => {
       user: req.session.user,
     });
   } catch (error) {
-    console.error('Checkout Page Error:', error);
-
-    res.status(500).send('Server Error');
+    next(error);
   }
 };
 
-exports.placeOrder = async (req, res) => {
+exports.placeOrder = async (req, res, next) => {
   try {
     const userId = req.user ? req.user._id : req.session.user ? req.session.user.id : null;
 
     if (!userId) {
-      return res.redirect('/user/login');
+      return res.status(401).json({ success: false, message: 'Session expired. Please log in again.', redirect: '/user/login' });
     }
 
     const { addressId, paymentMethod } = req.body;
 
     if (!addressId) {
-      return res.status(400).send('Shipping address is required');
+      return res.status(400).json({ success: false, message: 'Please select a shipping address' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(addressId)) {
+      return res.status(400).json({ success: false, message: 'Invalid shipping address' });
     }
 
     const result = await checkoutService.createOrder({
@@ -48,17 +52,22 @@ exports.placeOrder = async (req, res) => {
     });
 
     if (!result.success) {
-      if (result.redirect) {
-        return res.redirect(result.redirect);
-      }
-
-      return res.status(result.status || 400).send(result.message);
+      return res.status(result.status || 400).json({
+        success: false,
+        message: result.message,
+        redirect: result.redirect
+      });
     }
 
-    res.redirect(`/user/order-success/${result.order._id}`);
+    return res.json({
+      success: true,
+      message: 'Order placed successfully',
+      data: {
+        orderId: result.order._id,
+        redirect: `/user/order-success/${result.order._id}`
+      }
+    });
   } catch (error) {
-    console.error('Order Placement Error:', error);
-
-    res.status(500).send('Failed to place order');
+    next(error);
   }
 };
