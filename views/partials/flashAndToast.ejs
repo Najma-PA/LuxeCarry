@@ -1,0 +1,51 @@
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+  // Reusable Toast System using SweetAlert2 Toast Mode
+  const Toast = Swal.mixin({
+    toast: true,
+    position: 'top-end',
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.onmouseenter = Swal.stopTimer;
+      toast.onmouseleave = Swal.resumeTimer;
+    }
+  });
+
+  window.showToast = function(type, message) {
+    Toast.fire({
+      icon: type, // 'success', 'error', 'warning', 'info'
+      title: message
+    });
+  };
+
+  // Reusable Confirmation System
+  window.showConfirm = function(title, text, icon = 'warning', confirmText = 'Yes') {
+    return Swal.fire({
+      title: title,
+      text: text,
+      icon: icon,
+      showCancelButton: true,
+      confirmButtonColor: '#c26a00',
+      cancelButtonColor: '#d33',
+      confirmButtonText: confirmText
+    });
+  };
+
+  // Automatically show flash messages if they exist from the backend
+  document.addEventListener('DOMContentLoaded', () => {
+    const successMsg = "<%= typeof success_msg !== 'undefined' && success_msg.length > 0 ? success_msg[0] : '' %>";
+    const errorMsg = "<%= typeof error_msg !== 'undefined' && error_msg.length > 0 ? error_msg[0] : (typeof error !== 'undefined' && error.length > 0 ? error[0] : '') %>";
+
+    if (successMsg) {
+      showToast('success', successMsg);
+    }
+    
+    if (errorMsg) {
+      showToast('error', errorMsg);
+    }
+  });
+</script>
