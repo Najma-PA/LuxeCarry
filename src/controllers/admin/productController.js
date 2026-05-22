@@ -58,9 +58,15 @@ exports.addProduct = async (req, res) => {
     let variants = [];
 
     if (req.body.variantType) {
-      const types = Array.isArray(req.body.variantType) ? req.body.variantType : [req.body.variantType];
-      const values = Array.isArray(req.body.variantValue) ? req.body.variantValue : [req.body.variantValue];
-      const stocks = Array.isArray(req.body.variantStock) ? req.body.variantStock : [req.body.variantStock];
+      const types = Array.isArray(req.body.variantType)
+        ? req.body.variantType
+        : [req.body.variantType];
+      const values = Array.isArray(req.body.variantValue)
+        ? req.body.variantValue
+        : [req.body.variantValue];
+      const stocks = Array.isArray(req.body.variantStock)
+        ? req.body.variantStock
+        : [req.body.variantStock];
 
       variants = types.map((type, i) => ({
         type,
@@ -106,10 +112,20 @@ exports.updateProduct = async (req, res) => {
     let variants = [];
 
     if (req.body.variantType) {
-      const types = Array.isArray(req.body.variantType) ? req.body.variantType : [req.body.variantType];
-      const values = Array.isArray(req.body.variantValue) ? req.body.variantValue : [req.body.variantValue];
-      const stocks = Array.isArray(req.body.variantStock) ? req.body.variantStock : [req.body.variantStock];
-      const ids = Array.isArray(req.body.variantId) ? req.body.variantId : (req.body.variantId ? [req.body.variantId] : []);
+      const types = Array.isArray(req.body.variantType)
+        ? req.body.variantType
+        : [req.body.variantType];
+      const values = Array.isArray(req.body.variantValue)
+        ? req.body.variantValue
+        : [req.body.variantValue];
+      const stocks = Array.isArray(req.body.variantStock)
+        ? req.body.variantStock
+        : [req.body.variantStock];
+      const ids = Array.isArray(req.body.variantId)
+        ? req.body.variantId
+        : req.body.variantId
+          ? [req.body.variantId]
+          : [];
 
       variants = types.map((type, i) => {
         const variantObj = {

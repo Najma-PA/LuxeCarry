@@ -11,18 +11,24 @@ exports.generateInvoice = async (orderId, itemId, res) => {
       message: 'Order not found',
     };
   }
-  // ONLY DELIVERED ITEMS
-  const deliveredItems = order.items.filter(
-    (item) => item.status === 'Delivered' && (!itemId || item._id.toString() === itemId)
+
+  // ITEM-WISE INVOICE ITEMS
+
+  const invoiceItems = order.items.filter(
+    (item) =>
+      ['Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'].includes(item.status) &&
+      (!itemId || item._id.toString() === itemId)
   );
 
-  if (deliveredItems.length === 0) {
+  if (invoiceItems.length === 0) {
     return {
       success: false,
-      message: 'No delivered items found',
+      message: 'No invoice items found',
     };
   }
+
   // PDF
+
   const doc = new PDFDocument({
     margin: 50,
     size: 'A4',
@@ -72,18 +78,22 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   // ORDER DETAILS
 
   const detailsTop = doc.y + 20;
-  const invoiceNumber = `INV-${order._id.toString().slice(-6).toUpperCase()}`;
+
+  const invoiceNumber = `INV-${itemId.toString().slice(-6).toUpperCase()}`;
+
   doc.fontSize(12).font('Helvetica').fillColor('#333');
 
   // LEFT COLUMN
+
   doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 70, detailsTop);
+
   doc.text(`Invoice No: ${invoiceNumber}`, 70, detailsTop + 22);
 
   doc.text(`Order ID: ${order.orderId || order._id}`, 70, detailsTop + 44);
 
   doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 68);
 
-  // SHIPPING ADDRES
+  // SHIPPING ADDRESS
 
   const addressTop = detailsTop;
 
@@ -113,9 +123,11 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.text(`${order.shippingAddress.country}`, 340, addressTop + 82);
 
   doc.text(`Phone: ${order.shippingAddress.phone}`, 340, addressTop + 100);
+
   doc.text(`Email: ${order.userId.email}`, 340, addressTop + 118, {
     width: 200,
   });
+
   // PRODUCTS TABLE
 
   doc.y = addressTop + 170;
@@ -125,19 +137,19 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   const tableLeft = 50;
 
   const productX = tableLeft + 10;
-  const qtyX = tableLeft + 150;
-  const originalX = tableLeft + 190;
-  const discountX = tableLeft + 270;
-  const finalX = tableLeft + 350;
-  const totalX = tableLeft + 430;
+  const qtyX = tableLeft + 170;
+  const originalX = tableLeft + 240;
+  const discountX = tableLeft + 330;
+  const finalX = tableLeft + 430;
 
   // TABLE HEADER
+
   doc.roundedRect(tableLeft, tableTop, 500, 35, 6).fill('#111');
 
   doc.fillColor('#fff').font('Helvetica-Bold').fontSize(11);
 
   doc.text('Product', productX, tableTop + 11, {
-    width: 130,
+    width: 150,
   });
 
   doc.text('Qty', qtyX, tableTop + 11, {
@@ -155,13 +167,8 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     align: 'right',
   });
 
-  doc.text('Final', finalX, tableTop + 11, {
+  doc.text('Total', finalX, tableTop + 11, {
     width: 70,
-    align: 'right',
-  });
-
-  doc.text('Total', totalX, tableTop + 11, {
-    width: 60,
     align: 'right',
   });
 
@@ -169,52 +176,56 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   let position = tableTop + 35;
 
-  deliveredItems.forEach((item, index) => {
-    // Zebra Rows
+  invoiceItems.forEach((item, index) => {
+    // ZEBRA ROWS
+
     if (index % 2 === 0) {
       doc.rect(tableLeft, position, 500, 45).fill('#f8f8f8');
     }
 
-    // Row Border
+    // ROW BORDER
+
     doc.rect(tableLeft, position, 500, 45).stroke('#e5e5e5');
 
     doc.fillColor('#111').font('Helvetica').fontSize(10);
 
-    // Product Name
+    // PRODUCT NAME
+
     const pName = item.productName || item.product?.name || 'Product';
+
     const variantValue = item.variantValue || '';
-    const displayName = variantValue ? `${pName} (${variantValue.charAt(0).toUpperCase()})` : pName;
+
+    const displayName = variantValue ? `${pName} (${variantValue})` : pName;
+
     doc.text(displayName, productX, position + 15, {
-      width: 130,
+      width: 150,
     });
 
-    // Qty
+    // QTY
+
     doc.text(item.quantity.toString(), qtyX, position + 15, {
       width: 30,
       align: 'center',
     });
 
-    // Original Price
-    doc.text(`RS. ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
+    // ORIGINAL PRICE
+
+    doc.text(`Rs. ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
       width: 70,
       align: 'right',
     });
 
-    // Product Discount
+    // DISCOUNT
+
     doc.text(`- Rs. ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
       width: 70,
       align: 'right',
     });
 
-    // Final Price
-    doc.text(`Rs. ${(item.finalPrice || 0).toLocaleString()}`, finalX, position + 15, {
-      width: 70,
-      align: 'right',
-    });
+    // TOTAL
 
-    // Total
-    doc.text(`Rs. ${(item.totalPrice || 0).toLocaleString()}`, totalX, position + 15, {
-      width: 60,
+    doc.text(`Rs. ${(item.totalPrice || 0).toLocaleString()}`, finalX, position + 15, {
+      width: 70,
       align: 'right',
     });
 
@@ -227,16 +238,20 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   doc.font('Helvetica').fontSize(12).fillColor('#111');
 
-  const originalSubtotal = deliveredItems.reduce(
+  const originalSubtotal = invoiceItems.reduce(
     (sum, item) => sum + (item.originalPrice || 0) * item.quantity,
     0
   );
-  const totalDiscount = deliveredItems.reduce(
+
+  const totalDiscount = invoiceItems.reduce(
     (sum, item) => sum + (item.productDiscount || 0) * item.quantity,
     0
   );
 
-  // Subtotal
+  const invoiceTotal = invoiceItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+
+  // SUBTOTAL
+
   doc.text('Subtotal', 330, position);
 
   doc.text(`Rs. ${originalSubtotal.toLocaleString()}`, 430, position, {
@@ -246,7 +261,8 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   position += 22;
 
-  // Discount
+  // DISCOUNT
+
   doc.text('Discount', 330, position);
 
   doc.text(`- Rs. ${totalDiscount.toLocaleString()}`, 430, position, {
@@ -257,20 +273,35 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   position += 35;
 
   // GRAND TOTAL BOX
+
   doc.roundedRect(300, position - 8, 240, 40, 6).fill('#111');
 
   doc.fillColor('#fff').font('Helvetica-Bold').fontSize(16);
 
   doc.text('Grand Total', 315, position + 5);
-  const invoiceTotal = deliveredItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+
   doc.text(`Rs. ${invoiceTotal.toLocaleString()}`, 415, position + 5, {
     width: 115,
     align: 'right',
   });
 
+  // PAYMENT DETAILS
+
+  position += 70;
+
+  doc.fillColor('#444').font('Helvetica').fontSize(11);
+
+  doc.text(`Payment Method: ${order.paymentMethod}`, 50, position);
+
+  doc.text(
+    `Payment Status: ${order.paymentMethod === 'COD' ? 'Pending' : 'Paid'}`,
+    50,
+    position + 18
+  );
+
   // FOOTER
 
-  position += 80;
+  position += 70;
 
   doc
     .fillColor('gray')
@@ -282,6 +313,7 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     });
 
   // END PDF
+
   doc.end();
 
   return {

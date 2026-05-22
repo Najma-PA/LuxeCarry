@@ -191,6 +191,7 @@ exports.returnOrder = async (req, res) => {
   }
 };
 */
+/*
 exports.downloadInvoice = async (req, res, next) => {
   try {
     const orderId = req.params.id;
@@ -208,5 +209,26 @@ exports.downloadInvoice = async (req, res, next) => {
     await invoiceService.generateInvoice(orderId, itemId, res);
   } catch (error) {
     next(error);
+  }
+};*/
+exports.downloadInvoice = async (req, res, next) => {
+  try {
+    const { orderId, itemId } = req.params;
+
+    // VALIDATE IDS
+
+    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+      return res.status(400).send('Invalid Order or Item ID');
+    }
+
+    const result = await invoiceService.generateInvoice(orderId, itemId, res);
+
+    if (!result.success) {
+      return res.status(404).send(result.message);
+    }
+  } catch (error) {
+    console.error('Invoice Download Error:', error);
+
+    return res.status(500).send('Failed to generate invoice');
   }
 };

@@ -88,7 +88,7 @@ router.post('/order-place', isUserAuth, checkoutController.placeOrder);
 router.get('/order-success/:orderId', isUserAuth, orderController.getOrderSuccessPage);
 router.get('/orders/filter', isUserAuth, orderController.filterOrders);
 router.get('/orders', isUserAuth, orderController.getUserOrders);
-router.get('/orders/invoice/:id', isUserAuth, orderController.downloadInvoice);
+router.get('/orders/invoice/:orderId/:itemId', isUserAuth, orderController.downloadInvoice);
 router.get(
   '/orders/:orderId/product/:itemId',
   isUserAuth,
