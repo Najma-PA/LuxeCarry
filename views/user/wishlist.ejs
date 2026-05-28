@@ -105,6 +105,7 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     // Shared functionality for Shop and Wishlist
@@ -123,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // Toggle Wishlist (Shop/Product Page)
+        // Toggle Wishlist 
         const wishlistToggle = e.target.closest('.wishlist-toggle');
         if (wishlistToggle) {
             e.preventDefault();
@@ -143,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // Add to Cart (Shop Page)
+        // Add to Cart 
         const addToCartBtn = e.target.closest('.add-to-cart-btn');
         if (addToCartBtn) {
             const productId = addToCartBtn.dataset.id;
@@ -187,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success) {
                 removeWishlistItemDOM(productId);
-                showToast('Removed from wishlist');
+                showToast('Removed from wishlist','error');
             }
         } catch (err) {
             console.error(err);
@@ -226,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             } else {
                 if (data.message === "Please select a variant" || data.message === "Please select a product option") {
-                    // Redirect to product page so they can choose their size/color
+            
                     window.location.href = `/user/product/${productId}`;
                     return;
                 }
@@ -278,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 el.remove();
                 if (document.querySelectorAll('.wishlist-card').length === 0) {
-                    location.reload(); // Fallback to show empty state
+                    location.reload(); 
                 }
             }, 300);
         }
@@ -295,10 +296,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function showToast(msg, type = 'success') {
         Toastify({
             text: msg,
-            duration: 2500,
+            duration: 4500,
             gravity: "top",
             position: "right",
-            background: type === 'success' ? "#b78846" : "#dc3545",
+            style:{
+                background:type==='success'?'#c26a00':'#fde2e2',
+                color:type==='success'?'#fff':'#b91c1c',
+                borderRadius:'10px'
+                
+            }
+            //background: type === 'success' ? '#c26a00' : '#dc3545',
         }).showToast();
     }
 });

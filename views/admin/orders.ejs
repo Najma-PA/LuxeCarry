@@ -315,7 +315,9 @@
 
         <!-- Date Range Filter -->
         <div class="select-wrapper">
+
             <i class="fa-solid fa-calendar select-icon"></i>
+            
             <select name="dateRange" class="filter-select" onchange="this.form.submit()">
                 <option value="All" <%= dateRange === 'All' ? 'selected' : '' %>>Date Range</option>
                 <option value="Today" <%= dateRange === 'Today' ? 'selected' : '' %>>Today</option>
@@ -325,6 +327,7 @@
             </select>
             <i class="fa-solid fa-chevron-down select-caret"></i>
         </div>
+     
 
         <!-- Status Filter -->
         <div class="select-wrapper">
@@ -355,10 +358,12 @@
         <table class="table table-hover orders-table align-middle">
             <thead>
                 <tr>
-                    <th style="width: 18%;">ORDER ID</th>
-                    <th style="width: 32%;">CUSTOMER</th>
+                    <th style="width: 15%;">ORDER ID</th>
+                    <th style="width: 30%;">CUSTOMER</th>
                     <th style="width: 22%;">DATE</th>
-                   <!-- <th style="width: 18%;">STATUS</th>-->
+                    <th style="width:15%;">PAYMENT METHOD</th>
+                    <th style="width: 22%;">AMOUNT</th>
+                    <th style="width: 18%;">STATUS</th>
                     <th style="width: 10%;" class="text-center">ACTION</th>
                 </tr>
             </thead>
@@ -375,10 +380,7 @@
                                 .toUpperCase();
                         %>
                         <%
-                        const hasPendingCancelRequest = order.items?.some(item =>
-                            item.cancelRequests?.some(req => req.status === 'Pending')
-                        );
-
+                      
                         const hasPendingReturnRequest = order.items?.some(item =>
                             item.returnRequests?.some(req => req.status === 'Pending')
                         );
@@ -405,7 +407,9 @@
                                     year: 'numeric'
                                 }) %>
                             </td>
-                            <!--<td>
+                            <td class="payment-mthd"><%=order.paymentMethod  %></td>
+                            <td class="payment-mthd">RS.<%=order.totalAmount  %></td>
+                            <td>
                                 <% 
                                     let badgeClass = 'badge-pending';
                                     if (order.orderStatus === 'Shipped') badgeClass = 'badge-shipped';
@@ -418,11 +422,33 @@
                                     <i class="fa-solid fa-circle" style="font-size: 0.5rem;"></i>
                                     <%= order.orderStatus %>
                                 </span>
-                            </td>-->
-                            <td class="text-center">
+                            </td>
+                            <!-- <td class="text-center"> 
                                 <a href="/admin/orders/<%= order._id %>" class="action-dropdown-btn">
                                     <i class="fa-solid fa-ellipsis"></i>
                                 </a>
+                            </td>-->
+                            <td class="text-center">
+                                <% 
+                                    const hasReturnRequest=order.items.some(
+                                        item=> item.status ==='Return Requested'
+                                    );
+                                 %>
+                                 <a href="/admin/orders/<%= order._id %>"
+                                    class="action-dropdown-btn">
+                                <% if(hasReturnRequest) {%>
+                                <span style="
+                                    color: #dc2626;
+                                    font-weight: 700;
+                                    font-size: 13px;
+                                ">
+                                    Action Required
+                                </span>
+                            <% }else{ %>
+                                 <i class="fa-solid fa-ellipsis"></i>
+
+                            <% } %>
+                            </a>
                             </td>
                         </tr>
                     <% }) %>
@@ -436,8 +462,11 @@
                 <% } %>
             </tbody>
         </table>
+ <div class="pagination-wrapper d-flex gap-1 align-items-center" id="pagination-container">
+        <%- include('../partials/admin/pagination') %>
+      </div>
+        <!-- State-Preserving Pagination 
 
-        <!-- State-Preserving Pagination -->
         <% if (totalPages > 1) { %>
         <div class="d-flex justify-content-end p-4 border-top bg-light align-items-center">
             <nav aria-label="Page navigation">
@@ -469,7 +498,7 @@
             </nav>
         </div>
         <% } %>
-    </div>
+    </div>-->
 
 </div>
 

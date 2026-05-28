@@ -172,15 +172,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 </div>
 
-<% if(item.status === 'Cancellation Requested'){ %>
-
-<div class="alert alert-warning mt-3">
-
-Your cancellation request is awaiting admin approval.
-
-</div>
-
-<% } %>
 
 <% if(item.status === 'Return Requested'){ %>
 
@@ -373,8 +364,10 @@ Your return request is awaiting admin approval.
     </div>
 </div>
 
-<% if (item.status !== 'Delivered' && 
-        item.status !== 'Cancelled' 
+<% if (item.status !== 'Shipped'
+        &&item.status !== 'Out for Delivery'
+        &&item.status !== 'Delivered'  
+        &&item.status !== 'Cancelled' 
         && item.status!=='Returned' 
         && item.status!=='Cancellation Requested'
         &&item.status!=='Return Requested') 
@@ -643,7 +636,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     Swal.fire({
                         icon: 'success',
                         title: 'Success!',
-                        text: data.message || 'Order cancellation request submitted.',
+                        text: data.message || 'Item cancelled',
                         showConfirmButton: false,
                         timer: 1500
                     }).then(() => {
@@ -711,13 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(errorBox){
                     errorBox.textContent='Please select a return  reason '
                 }
-                /*
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Reason Required',
-                    text: 'Please select a return reason.'
-                });
-                */
+              
                 if (submitBtn) {
                     submitBtn.disabled = false;
                 }
@@ -732,13 +719,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(errorBox){
                     errorBox.textContent='Please enter your return reason'
                 }
-                /*
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Custom Reason Required',
-                    text: 'Please enter your return reason.'
-                });
-                 */       
+                    
                 if (submitBtn) {
                     submitBtn.disabled = false;
                 }

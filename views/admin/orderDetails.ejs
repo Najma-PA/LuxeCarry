@@ -166,7 +166,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             %>
 
                             <% if (!isLockedStatus &&
-                                   item.status !== 'Cancellation Requested' &&
                                    item.status !== 'Return Requested') { %>
 
                             <form
@@ -186,6 +185,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                         'Shipped',
                                         'Out for Delivery',
                                         'Delivered'
+                                        
                                     ].forEach(st => { %>
 
                                         <option
@@ -221,63 +221,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             </button>
 
                             <% } %>
-                           <!-- CANCELLATION REQUEST -->
-                            <% if(item.status === 'Cancellation Requested') { %>
-
-                            <div class="alert alert-warning mt-2 mb-0 small">
-
-                                <strong>
-                                    Cancellation Request
-                                </strong>
-
-                                <% if(item.cancelReason) { %>
-
-                                    <div class="mt-1">
-
-                                        Reason:
-                                        <%= item.cancelReason %>
-
-                                    </div>
-
-                                <% } %>
-
-                                <div class="d-flex gap-2 mt-2">
-
-                                    <!-- APPROVE -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/approve"
-                                        method="POST">
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-success btn-sm">
-
-                                            Accept
-
-                                        </button>
-
-                                    </form>
-
-                                    <!-- REJECT -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
-                                        method="POST">
-
-                                        <button
-                                            type="submit"
-                                            class="btn btn-danger btn-sm">
-
-                                            Reject
-
-                                        </button>
-
-                                    </form>
-
-                                </div>
-
-                            </div>
-
-                            <% } %>
+                         
                             <!-- RETURN REQUEST -->
                             <% if(item.status === 'Return Requested') { %>
 
