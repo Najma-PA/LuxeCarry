@@ -94,7 +94,6 @@ router.get(
   isUserAuth,
   orderController.getOrderedProductDetails
 );
-//router.get('/orders/:orderId', isUserAuth, orderController.getOrderDetails);
 router.post('/orders/:orderId/items/cancel/:itemId', isUserAuth, orderController.cancelOrder);
 router.post('/orders/:orderId/items/return/:itemId', isUserAuth, orderController.returnOrder);
 

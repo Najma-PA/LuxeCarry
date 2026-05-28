@@ -60,23 +60,6 @@ exports.filterOrders = async (req, res, next) => {
   }
 };
 
-/*exports.getOrderDetails = async (req, res) => {
-  try {
-    const orderId = req.params.orderId;
-    const order = await orderService.getOrderById(orderId);
-    if (!order) {
-      return res.redirect('/user/orders');
-    }
-    res.render('user/orderDetails', {
-      order,
-
-      user: req.session.user,
-    });
-  } catch (error) {
-    console.error('Order page error:', error);
-    res.redirect('/user/orders');
-  }
-};*/
 exports.getOrderedProductDetails = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
@@ -125,7 +108,7 @@ exports.cancelOrder = async (req, res, next) => {
 
     return res.status(200).json({
       success: true,
-      message: 'Cancellation requested successfully',
+      message: 'Item cancelled successfully',
     });
   } catch (error) {
     next(error);
@@ -159,63 +142,10 @@ exports.returnOrder = async (req, res, next) => {
     next(error);
   }
 };
-/*
-exports.cancelOrder = async (req, res) => {
-  try {
-    const { orderId, itemId } = req.params;
-    const { reason } = req.body;
-    const userId = req.user?._id || req.session.user?.id;
-    const result = await orderService.cancelOrder(orderId, itemId, userId, reason);
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-    return res.redirect(`/user/orders/${orderId}/product/${itemId}`);
-  } catch (error) {
-    console.error(error);
-    return res.redirect('/user/orders');
-  }
-};
-exports.returnOrder = async (req, res) => {
-  try {
-    const { orderId, itemId } = req.params;
-    const { reason, customReason } = req.body;
-    const userId = req.user?._id || req.session.user?.id;
-    const result = await orderService.returnOrder(orderId, itemId, userId, reason, customReason);
-    if (!result.success) {
-      return res.status(400).json(result);
-    }
-    res.redirect(`/user/orders/${orderId}/product/${itemId}`);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false });
-  }
-};
-*/
-/*
-exports.downloadInvoice = async (req, res, next) => {
-  try {
-    const orderId = req.params.id;
-    const { itemId } = req.query;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
-      req.flash('error', 'Invalid Order ID');
-      return res.redirect('back');
-    }
-    if (itemId && !mongoose.Types.ObjectId.isValid(itemId)) {
-      req.flash('error', 'Invalid Item ID');
-      return res.redirect('back');
-    }
-
-    await invoiceService.generateInvoice(orderId, itemId, res);
-  } catch (error) {
-    next(error);
-  }
-};*/
 exports.downloadInvoice = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
-
-    // VALIDATE IDS
 
     if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
       return res.status(400).send('Invalid Order or Item ID');

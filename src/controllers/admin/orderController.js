@@ -9,7 +9,6 @@ exports.getOrders = async (req, res, next) => {
     const search = req.query.search || '';
     const status = req.query.status || '';
     const dateRange = req.query.dateRange || 'All';
-
     const result = await orderService.getOrders({ page, limit, search, status, dateRange });
 
     res.render('admin/orders', {
@@ -70,6 +69,7 @@ exports.updateOrderStatus = async (req, res, next) => {
     req.flash('success', 'Order status updated successfully');
     res.redirect(`/admin/orders/${orderId}`);
   } catch (error) {
+    res.json({ success: false, message: 'Use proper status flow' });
     next(error);
   }
 };
@@ -127,6 +127,7 @@ exports.updateItemRefund = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.approveOrderRequest = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
@@ -142,7 +143,6 @@ exports.approveOrderRequest = async (req, res, next) => {
       req.flash('error', result.message);
       return res.redirect(`/admin/orders/${orderId}`);
     }
-    
     req.flash('success', result.message);
     return res.redirect(`/admin/orders/${orderId}`);
   } catch (error) {

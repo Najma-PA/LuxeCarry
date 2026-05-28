@@ -9,6 +9,7 @@ const getWishlist = async (userId) => {
   if (!wishlist) {
     return { items: [] };
   }
+  wishlist.items = wishlist.items.filter((item) => item.product);
   return wishlist;
 };
 

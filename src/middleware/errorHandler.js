@@ -5,8 +5,7 @@ const errorHandler = (err, req, res, next) => {
 
   let statusCode = err.statusCode || 500;
 
-  let message =
-    statusCode === 500 ? 'Something went wrong while processing your request' : err.message;
+  let message = statusCode === 500 ? 'Smething went wrong' : err.message;
 
   // Mongoose Validation Error
   if (err.name === 'ValidationError') {

@@ -82,9 +82,33 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
   }
 
   item.previousStatus = item.status;
-  item.status = 'Cancellation Requested';
-  item.cancelReason = reason || '';
+  item.status = 'Cancelled';
+  item.cancelReason = reason?.trim() || 'Cancelled by customer';
   item.cancelledAt = new Date();
+  item.requestStatus = 'Approved';
+  if (item.variant) {
+    await Product.updateOne(
+      {
+        _id: item.product,
+        'variants._id': item.variant,
+      },
+      {
+        $inc: {
+          stock: item.quantity,
+          'variants.$.stock': item.quantity,
+        },
+      }
+    );
+  } else {
+    await Product.updateOne(
+      { _id: item.product._id },
+      {
+        $inc: {
+          stock: item.quantity,
+        },
+      }
+    );
+  }
 
   // Refund fields
   if (order.paymentStatus === 'Paid') {
