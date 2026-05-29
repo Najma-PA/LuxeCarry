@@ -22,13 +22,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 <div class="container py-5">
     <div class="row">
-        <!-- Sidebar -->
+        
         <%- include("../partials/user/sidebar", { user, activePage: 'orders' }) %>
 
         <!-- Main Content Column -->
         <div class="col-lg-9 col-md-8">
 
-            <!-- Header -->
+            
             <div class="dashboard-page-header">
 
                 <h1 class="dashboard-page-title">
@@ -80,7 +80,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
     <div class="lc-order-group-card">
 
-    <!-- ORDER HEADER -->
+    
     <div class="lc-order-group-header">
 
         <div>
@@ -173,8 +173,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         item.status === 'Confirmed' ||
         item.status === 'Shipped' ||
         item.status === 'Out for Delivery' ||
-        item.status === 'Delivered'|| 
-        item.status === 'Cancelled'
+        item.status === 'Delivered' 
     ) { %>
 
         <a

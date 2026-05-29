@@ -347,7 +347,9 @@
 
         <!-- Clear Button -->
         <% if (search || (dateRange && dateRange !== 'All') || status) { %>
-            <a href="/admin/orders" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 18px; font-size: 0.9rem; text-decoration: none; color: #64748b; font-weight: 500; background-color: #ffffff; transition: all 0.2s;">
+            <a href="/admin/orders" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" 
+            style="border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 18px; font-size: 0.9rem; 
+            text-decoration: none; color: #64748b; font-weight: 500; background-color: #ffffff; transition: all 0.2s;">
                 Clear
             </a>
         <% } %>
@@ -429,11 +431,11 @@
                                 </a>
                             </td>-->
                             <td class="text-center">
-                                <% 
-                                    const hasReturnRequest=order.items.some(
-                                        item=> item.status ==='Return Requested'
+                               <%
+                                    const hasReturnRequest = order.items?.some(
+                                    item => item.status === 'Return Requested'
                                     );
-                                 %>
+                                    %>
                                  <a href="/admin/orders/<%= order._id %>"
                                     class="action-dropdown-btn">
                                 <% if(hasReturnRequest) {%>
@@ -465,40 +467,7 @@
  <div class="pagination-wrapper d-flex gap-1 align-items-center" id="pagination-container">
         <%- include('../partials/admin/pagination') %>
       </div>
-        <!-- State-Preserving Pagination 
-
-        <% if (totalPages > 1) { %>
-        <div class="d-flex justify-content-end p-4 border-top bg-light align-items-center">
-            <nav aria-label="Page navigation">
-                <ul class="pagination mb-0 gap-1">
-                    <% if (currentPage > 1) { %>
-                        <li class="page-item">
-                            <a class="page-link border-0 text-muted rounded-3" href="?page=<%= currentPage - 1 %>&search=<%= encodeURIComponent(search) %>&status=<%= status %>&dateRange=<%= dateRange %>" aria-label="Previous">
-                                <i class="fa-solid fa-chevron-left small"></i>
-                            </a>
-                        </li>
-                    <% } %>
-
-                    <% for (let i = 1; i <= totalPages; i++) { %>
-                        <li class="page-item">
-                            <a class="page-link border border-0 rounded-3 px-3 py-2 <%= currentPage === i ? 'bg-warning text-dark fw-bold' : 'text-muted bg-transparent' %>" href="?page=<%= i %>&search=<%= encodeURIComponent(search) %>&status=<%= status %>&dateRange=<%= dateRange %>">
-                                <%= i %>
-                            </a>
-                        </li>
-                    <% } %>
-
-                    <% if (currentPage < totalPages) { %>
-                        <li class="page-item">
-                            <a class="page-link border-0 text-muted rounded-3" href="?page=<%= currentPage + 1 %>&search=<%= encodeURIComponent(search) %>&status=<%= status %>&dateRange=<%= dateRange %>" aria-label="Next">
-                                <i class="fa-solid fa-chevron-right small"></i>
-                            </a>
-                        </li>
-                    <% } %>
-                </ul>
-            </nav>
-        </div>
-        <% } %>
-    </div>-->
+       
 
 </div>
 
