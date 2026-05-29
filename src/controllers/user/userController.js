@@ -1,6 +1,7 @@
 const userService = require('../../services/user/userService');
 const emailService = require('../../services/user/emailService');
 const Address = require('../../models/addressModel');
+const addressService = require('../../services/user/addressService');
 const bcrypt = require('bcryptjs');
 const fs = require('fs');
 const path = require('path');
@@ -441,7 +442,6 @@ exports.updateProfilePic = async (req, res) => {
     const updatedUser = await userService.updateUser(userId, { profilePic: imagePath });
     debugLog('DB Updated for user: ' + userId);
 
-    // Important: Update the current session so the UI reflects changes immediately
     req.session.user.profilePic = updatedUser.profilePic;
 
     res.json({ success: true, path: imagePath });
@@ -546,44 +546,41 @@ exports.loadAddresses = async (req, res) => {
 exports.loadAddAddress = (req, res) => {
   const user = req.session.user;
   const redirect = req.query.redirect || '';
-  res.render('user/addAddress', { user, redirect });
-};
 
+  res.render('user/addAddress', {
+    user,
+    redirect,
+    errors: {},
+    formData: {},
+  });
+};
 exports.addAddress = async (req, res) => {
   try {
-    const userId = req.session.user.id;
-    const isDefaultChecked = req.body.defaultAddress === 'on';
+    const user = req.session.user;
+    const redirect = req.query.redirect || '';
 
-    //Check if user already has address
-    const existingAddresses = await Address.find({ userId });
+    // VALIDATION
+    const errors = addressService.validateAddressData(req.body);
 
-    let isDefault = false;
-
-    // Case 1: First address → auto default
-    if (existingAddresses.length === 0) {
-      isDefault = true;
+    if (Object.keys(errors).length > 0) {
+      return res.render('user/addAddress', {
+        user,
+        redirect,
+        errors,
+        formData: req.body,
+      });
     }
 
-    // Case 2: User selected default
-    if (isDefaultChecked) {
-      isDefault = true;
+    await addressService.createAddress(req.session.user.id, req.body);
 
-      await Address.updateMany({ userId }, { $set: { isDefault: false } });
+    if (redirect === 'checkout') {
+      return res.redirect('/user/checkout');
     }
 
-    await Address.create({
-      ...req.body,
-      userId,
-      isDefault,
-    });
-
-    if (req.query.redirect === 'checkout') {
-      res.redirect('/user/checkout');
-    } else {
-      res.redirect('/user/addresses');
-    }
+    res.redirect('/user/addresses');
   } catch (error) {
     console.error(error);
+
     res.status(500).send('Something went wrong');
   }
 };
@@ -598,92 +595,69 @@ exports.loadEditAddress = async (req, res) => {
 
     const user = req.session.user;
     const redirect = req.query.redirect || '';
-    res.render('user/editAddress', { address, user, redirect });
+
+    res.render('user/editAddress', {
+      address,
+      user,
+      redirect,
+      errors: {},
+    });
   } catch (error) {
     console.error(error);
+
     res.redirect('/user/addresses');
   }
 };
-
 exports.updateAddress = async (req, res) => {
   try {
-    const userId = req.session.user.id;
-    const isDefaultChecked = req.body.defaultAddress === 'on';
+    const user = req.session.user;
+    const redirect = req.query.redirect || '';
 
-    let updateData = { ...req.body };
-    updateData.isDefault = isDefaultChecked;
+    //validaation
+    const errors = addressService.validateAddressData(req.body);
 
-    const existingAddress = await Address.findById(req.params.id);
+    const address = await Address.findById(req.params.id);
 
-    // If user is removing the default status from the currently default address
-    if (!isDefaultChecked && existingAddress.isDefault) {
-      // Find other addresses sorted by latest first
-      const remainingAddresses = await Address.find({ userId, _id: { $ne: req.params.id } }).sort({
-        createdAt: -1,
+    if (Object.keys(errors).length > 0) {
+      return res.render('user/editAddress', {
+        user,
+        redirect,
+        address: {
+          ...address.toObject(),
+          ...req.body,
+        },
+        errors,
       });
-
-      if (remainingAddresses.length > 0) {
-        // Make the most recently added address the new default
-        const latest = remainingAddresses[0];
-        await Address.updateOne({ _id: latest._id }, { $set: { isDefault: true } });
-      } else {
-        // If it's the only address, force it to remain default
-        updateData.isDefault = true;
-      }
-    } else if (isDefaultChecked) {
-      // If setting this as default, remove default from all others
-      await Address.updateMany(
-        { userId, _id: { $ne: req.params.id } },
-        { $set: { isDefault: false } }
-      );
     }
 
-    await Address.findByIdAndUpdate(req.params.id, updateData);
+    await addressService.updateAddress(req.session.user.id, req.params.id, req.body);
 
-    if (req.query.redirect === 'checkout') {
-      res.redirect('/user/checkout');
-    } else {
-      res.redirect('/user/addresses');
+    if (redirect === 'checkout') {
+      return res.redirect('/user/checkout');
     }
+
+    res.redirect('/user/addresses');
   } catch (error) {
     console.error(error);
+
     res.status(500).send('Something went wrong');
   }
 };
-
 exports.deleteAddress = async (req, res) => {
   try {
-    const userId = req.session.user.id;
+    await addressService.deleteAddress(req.session.user.id, req.params.id);
 
-    // Find the address to delete
-    const address = await Address.findOne({
-      _id: req.params.id,
-      userId,
+    res.json({
+      success: true,
+      message: 'Address deleted successfully',
     });
-
-    //Delete it
-    await Address.findOneAndDelete({
-      _id: req.params.id,
-      userId,
-    });
-
-    // If deleted was default
-    if (address?.isDefault) {
-      // Get ALL remaining addresses sorted
-      const remainingAddresses = await Address.find({ userId }).sort({ createdAt: -1 });
-
-      if (remainingAddresses.length > 0) {
-        // Pick latest
-        const latest = remainingAddresses[0];
-
-        //Force update
-        await Address.updateOne({ _id: latest._id }, { $set: { isDefault: true } });
-      }
-    }
-    res.json({ success: true, message: 'Address deleted successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: 'Something went wrong' });
+
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Something went wrong',
+    });
   }
 };
 

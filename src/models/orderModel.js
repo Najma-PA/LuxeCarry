@@ -188,6 +188,7 @@ const orderSchema = new mongoose.Schema(
     orderStatus: {
       type: String,
       enum: [
+        'Partially Pending',
         'Pending',
         'Partially Confirmed',
         'Confirmed',

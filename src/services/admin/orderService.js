@@ -323,10 +323,12 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     message: 'Request rejected successfully',
   };
 };
+/*
 const calculateOrderStatus = (items) => {
   const statuses = items.map((item) => item.status);
-
-  // ALL SAME STATUS
+  const activeStatuses = statuses.filter(
+    (status) => status !== 'Cancelled' && status !== 'Returned'
+  );
   if (statuses.every((s) => s === 'Pending')) {
     return 'Pending';
   }
@@ -354,8 +356,12 @@ const calculateOrderStatus = (items) => {
   if (statuses.every((s) => s === 'Returned')) {
     return 'Returned';
   }
-
-  // PARTIAL STATUSES
+  if (statuses.every((s) => s === 'Cancelled' || s === 'Returned')) {
+    return 'Closed';
+  }
+  if (activeStatuses.length === 0) {
+    return 'Closed';
+  }
   if (statuses.includes('Delivered')) {
     return 'Partially Delivered';
   }
@@ -378,6 +384,81 @@ const calculateOrderStatus = (items) => {
 
   if (statuses.includes('Returned')) {
     return 'Partially Returned';
+  }
+  if (statuses.includes('Pending')) {
+    return 'Partially Pending ';
+  }
+  return 'Pending';
+};
+*/
+const calculateOrderStatus = (items) => {
+  const statuses = items.map((item) => item.status);
+
+  // ACTIVE ITEMS ONLY
+  const activeStatuses = statuses.filter(
+    (status) => status !== 'Cancelled' && status !== 'Returned'
+  );
+
+  // ALL CANCELLED
+  if (statuses.every((status) => status === 'Cancelled')) {
+    return 'Cancelled';
+  }
+
+  // ALL RETURNED
+  if (statuses.every((status) => status === 'Returned')) {
+    return 'Returned';
+  }
+
+  // ALL CLOSED
+  if (statuses.every((status) => status === 'Cancelled' || status === 'Returned')) {
+    return 'Closed';
+  }
+
+  // If no active items remain
+  if (activeStatuses.length === 0) {
+    return 'Closed';
+  }
+
+  // ALL ACTIVE ITEMS DELIVERED
+  if (activeStatuses.every((status) => status === 'Delivered')) {
+    return 'Delivered';
+  }
+
+  // ALL ACTIVE ITEMS OUT FOR DELIVERY
+  if (activeStatuses.every((status) => status === 'Out for Delivery')) {
+    return 'Out for Delivery';
+  }
+
+  // ALL ACTIVE ITEMS SHIPPED
+  if (activeStatuses.every((status) => status === 'Shipped')) {
+    return 'Shipped';
+  }
+
+  // ALL ACTIVE ITEMS CONFIRMED
+  if (activeStatuses.every((status) => status === 'Confirmed')) {
+    return 'Confirmed';
+  }
+
+  // ALL ACTIVE ITEMS PENDING
+  if (activeStatuses.every((status) => status === 'Pending')) {
+    return 'Pending';
+  }
+
+  // PARTIAL STATES
+  if (activeStatuses.includes('Delivered')) {
+    return 'Partially Delivered';
+  }
+
+  if (activeStatuses.includes('Out for Delivery')) {
+    return 'Partially Out for Delivery';
+  }
+
+  if (activeStatuses.includes('Shipped')) {
+    return 'Partially Shipped';
+  }
+
+  if (activeStatuses.includes('Confirmed')) {
+    return 'Partially Confirmed';
   }
 
   return 'Pending';
