@@ -130,7 +130,7 @@
                 </div>
 
                 <div class="summary-row savings" id="discount-row"
-                     style="<%= cart.totalDiscount > 0 ? '' : 'display:none;' %>">
+                     style =" <%= cart.totalDiscount > 0 ? '' : 'display:none;' %>">
                     <span>Savings</span>
                     <span id="cart-discount">
                         -₹<%= cart.totalDiscount.toLocaleString() %>.00

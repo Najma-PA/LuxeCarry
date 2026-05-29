@@ -66,54 +66,54 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     <div class="order-tracking-card">
         <div class="lc-tracking-steps">
 
-    <!-- Order Placed -->
+    
 
-<div class="lc-tracking-step active">
+        <div class="lc-tracking-step active">
 
-    <div class="lc-tracking-icon
-        <%= item.status === 'Cancelled'
-            ? 'bg-danger text-white'
-            : item.status === 'Returned'
-            ? 'bg-warning text-dark'
-            : '' %>">
+            <div class="lc-tracking-icon
+                <%= item.status === 'Cancelled'
+                    ? 'bg-danger text-white'
+                    : item.status === 'Returned'
+                    ? 'bg-warning text-dark'
+                    : '' %>">
 
-        <% if(item.status === 'Cancelled'){ %>
+                <% if(item.status === 'Cancelled'){ %>
 
-            <i class="fa-solid fa-circle-xmark"></i>
+                    <i class="fa-solid fa-circle-xmark"></i>
 
-        <% } else if(item.status === 'Returned'){ %>
+                <% } else if(item.status === 'Returned'){ %>
 
-            <i class="fa-solid fa-rotate-left"></i>
+                    <i class="fa-solid fa-rotate-left"></i>
 
-        <% } else { %>
+                <% } else { %>
 
-            <i class="fa-solid fa-circle-check"></i>
+                    <i class="fa-solid fa-circle-check"></i>
 
-        <% } %>
+                <% } %>
 
-    </div>
+            </div>
 
-    <div class="lc-tracking-label">
+            <div class="lc-tracking-label">
 
-        <% if(item.status === 'Cancelled'){ %>
+                <% if(item.status === 'Cancelled'){ %>
 
-            Cancelled
+                    Cancelled
 
-        <% } else if(item.status === 'Returned'){ %>
+                <% } else if(item.status === 'Returned'){ %>
 
-            Returned
+                    Returned
 
-        <% } else { %>
+                <% } else { %>
 
-            Order Placed
+                    Order Placed
 
-        <% } %>
+                <% } %>
 
-    </div>
+            </div>
 
-</div>
+        </div>
    
-    <!-- Confirmed -->
+    
     <div class="lc-tracking-step
         <%= ['Confirmed','Shipped','Out for Delivery','Delivered']
             .includes(item.status) ? 'active' : '' %>">
@@ -127,7 +127,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </div>
     </div>
 
-    <!-- Shipped -->
+    
     <div class="lc-tracking-step
         <%= ['Shipped','Out for Delivery','Delivered']
             .includes(item.status) ? 'active' : '' %>">
@@ -141,7 +141,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </div>
     </div>
 
-    <!-- Out For Delivery -->
+    
     <div class="lc-tracking-step
         <%= ['Out for Delivery','Delivered']
             .includes(item.status) ? 'active' : '' %>">
@@ -155,7 +155,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </div>
     </div>
 
-    <!-- Delivered -->
+    
     <div class="lc-tracking-step
         <%= item.status === 'Delivered'
             ? 'active'
@@ -177,7 +177,37 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 <div class="alert alert-warning mt-3">
 
-Your return request is awaiting admin approval.
+    <strong>
+        Return Request Submitted
+    </strong>
+
+    <div class="mt-1">
+        Your return request is awaiting admin approval.
+    </div>
+
+</div>
+
+<% } %>
+
+
+<% if(item.requestStatus === 'Rejected'){ %>
+
+<div class="alert alert-danger mt-3">
+
+    <strong>
+        Return Request Rejected
+    </strong>
+
+    <% if(item.adminResponse){ %>
+
+        <div class="mt-2">
+
+            Reason:
+            <%= item.adminResponse %>
+
+        </div>
+
+    <% } %>
 
 </div>
 
@@ -391,7 +421,9 @@ const diffDays = deliveredDate
   : 999;
 %>
 
-<% if (item.status === 'Delivered'&& diffDays <= 15) { %>
+<% if (item.status === 'Delivered'&& 
+diffDays <= 15 &&
+item.requestStatus!=='Rejected') { %>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"

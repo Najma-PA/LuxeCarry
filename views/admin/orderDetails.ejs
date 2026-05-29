@@ -272,19 +272,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     </form>
 
                                     <!-- REJECT -->
-                                    <form
-                                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
-                                        method="POST">
-
-                                        <button
+                
+                                     <button
                                             type="submit"
-                                            class="btn btn-danger btn-sm">
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#rejectModal-<%=item._id %>">
 
                                             Reject
 
-                                        </button>
-
-                                    </form>
+                                    </button>
 
                                 </div>
 
@@ -339,6 +336,78 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                 </td>
 
             </tr>
+            <div
+                class="modal fade"
+                id="rejectModal-<%= item._id %>"
+                tabindex="-1"
+                aria-hidden="true"
+                >
+                
+                <div class="modal-dialog">
+
+                    <div class="modal-content">
+
+                    <div class="modal-header">
+
+                        <h5 class="modal-title">
+                        Reject Return Request
+                        </h5>
+
+                        <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        ></button>
+
+                    </div>
+
+                    <form
+                        action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
+                        method="POST"
+                    >
+
+                        <div class="modal-body">
+
+                        <label class="form-label">
+                            Rejection Reason
+                        </label>
+
+                        <textarea
+                            name="adminResponse"
+                            class="form-control"
+                            rows="4"
+                            placeholder="Enter rejection reason..."
+                            required
+                        ></textarea>
+
+                        </div>
+
+                        <div class="modal-footer">
+
+                        <button
+                            type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal"
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            type="submit"
+                            class="btn btn-danger"
+                        >
+                            Reject Request
+                        </button>
+
+                        </div>
+
+                    </form>
+
+                    </div>
+
+                </div>
+
+                </div>
 
             <% }) %>
             <tr class="border-0">
@@ -347,7 +416,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 <td></td>
 
-                <!-- BELOW PRICE COLUMN -->
+                
                 <td colspan="2"class="pt-4">
 
                     <div class="d-flex
@@ -368,17 +437,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                         </div>
 
-                    <!-- <span class="
-                            badge
-                            <%= order.orderStatus === 'Delivered'
-                                ? 'bg-success'
-                                : 'bg-warning text-dark' %>">
-
-                            <%= order.orderStatus === 'Delivered'
-                                ? 'Paid'
-                                : 'Pending' %>
-
-                        </span>-->
 
                     </div>
 
@@ -470,5 +528,6 @@ async function confirmSubmit(event, message) {
     }
 }
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
