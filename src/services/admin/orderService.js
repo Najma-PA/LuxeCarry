@@ -119,7 +119,7 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
   const newIndex = statusFlow.indexOf(status);
   const restricedStatuses = ['Cancelled', 'Returned', 'Return Requested'];
   if (restricedStatuses.includes(status)) {
-    throw new Error('Use approval flow for cancellation and return');
+    throw new Error('Use approval flow for return');
   }
   if (currentIndex !== -1 && newIndex !== -1 && newIndex < currentIndex) {
     const error = new Error('Status cannot be updated backwards');
@@ -137,22 +137,7 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
   } else if (status === 'Delivered') {
     item.deliveredAt = new Date();
   }
-  /*
-  // Check if all items are cancelled or returned to auto-sync global order status
-  const allCancelled = order.items.every((i) => i.status === 'Cancelled');
-  const allReturned = order.items.every((i) => i.status === 'Returned');
-  const allCancelledOrReturned = order.items.every(
-    (i) => i.status === 'Cancelled' || i.status === 'Returned'
-  );
 
-  if (allCancelled) {
-    order.orderStatus = 'Cancelled';
-  } else if (allReturned) {
-    order.orderStatus = 'Returned';
-  } else if (allCancelledOrReturned) {
-    order.orderStatus = 'Returned';
-  }
-*/
   await order.save();
   return order;
 };
@@ -249,8 +234,6 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
     };
   }
 
-  // AUTO ORDER STATUS
-
   const allCancelled = order.items.every((i) => i.status === 'Cancelled');
 
   const allReturned = order.items.every((i) => i.status === 'Returned');
@@ -288,7 +271,6 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     };
   }
 
-  // PREVENT DOUBLE REJECTION
   if (item.requestStatus === 'Rejected') {
     return {
       success: false,
@@ -296,7 +278,6 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     };
   }
 
-  // ONLY REQUEST STATUSES CAN BE REJECTED
   if (item.status !== 'Return Requested') {
     return {
       success: false,
@@ -304,16 +285,16 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     };
   }
 
-  // RESTORE PREVIOUS STATUS
-  item.status = item.previousStatus || 'Delivered';
+  //restore previous status
+  item.status = 'Delivered';
 
   item.requestStatus = 'Rejected';
 
   item.adminResponse = adminResponse;
 
   item.requestProcessedAt = new Date();
+  item.requestRejectedAt = new Date();
 
-  // CLEAR REQUEST TYPE
   item.requestType = undefined;
 
   await order.save();
@@ -323,31 +304,11 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     message: 'Request rejected successfully',
   };
 };
-/*
+
 const calculateOrderStatus = (items) => {
   const statuses = items.map((item) => item.status);
-  const activeStatuses = statuses.filter(
-    (status) => status !== 'Cancelled' && status !== 'Returned'
-  );
-  if (statuses.every((s) => s === 'Pending')) {
-    return 'Pending';
-  }
 
-  if (statuses.every((s) => s === 'Confirmed')) {
-    return 'Confirmed';
-  }
-
-  if (statuses.every((s) => s === 'Shipped')) {
-    return 'Shipped';
-  }
-
-  if (statuses.every((s) => s === 'Out for Delivery')) {
-    return 'Out for Delivery';
-  }
-
-  if (statuses.every((s) => s === 'Delivered')) {
-    return 'Delivered';
-  }
+  const activeStatuses = statuses.filter((s) => s !== 'Cancelled' && s !== 'Returned');
 
   if (statuses.every((s) => s === 'Cancelled')) {
     return 'Cancelled';
@@ -356,91 +317,36 @@ const calculateOrderStatus = (items) => {
   if (statuses.every((s) => s === 'Returned')) {
     return 'Returned';
   }
+
   if (statuses.every((s) => s === 'Cancelled' || s === 'Returned')) {
     return 'Closed';
   }
-  if (activeStatuses.length === 0) {
-    return 'Closed';
-  }
-  if (statuses.includes('Delivered')) {
-    return 'Partially Delivered';
-  }
 
-  if (statuses.includes('Out for Delivery')) {
-    return 'Partially Out for Delivery';
-  }
-
-  if (statuses.includes('Shipped')) {
-    return 'Partially Shipped';
-  }
-
-  if (statuses.includes('Confirmed')) {
-    return 'Partially Confirmed';
-  }
-
-  if (statuses.includes('Cancelled')) {
-    return 'Partially Cancelled';
-  }
-
-  if (statuses.includes('Returned')) {
-    return 'Partially Returned';
-  }
-  if (statuses.includes('Pending')) {
-    return 'Partially Pending ';
-  }
-  return 'Pending';
-};
-*/
-const calculateOrderStatus = (items) => {
-  const statuses = items.map((item) => item.status);
-
-  // ACTIVE ITEMS ONLY
-  const activeStatuses = statuses.filter(
-    (status) => status !== 'Cancelled' && status !== 'Returned'
-  );
-
-  // ALL CANCELLED
-  if (statuses.every((status) => status === 'Cancelled')) {
-    return 'Cancelled';
-  }
-
-  // ALL RETURNED
-  if (statuses.every((status) => status === 'Returned')) {
-    return 'Returned';
-  }
-
-  // ALL CLOSED
-  if (statuses.every((status) => status === 'Cancelled' || status === 'Returned')) {
-    return 'Closed';
-  }
-
-  // If no active items remain
   if (activeStatuses.length === 0) {
     return 'Closed';
   }
 
-  // ALL ACTIVE ITEMS DELIVERED
-  if (activeStatuses.every((status) => status === 'Delivered')) {
+  if (activeStatuses.every((s) => s === 'Delivered')) {
     return 'Delivered';
   }
 
   // ALL ACTIVE ITEMS OUT FOR DELIVERY
-  if (activeStatuses.every((status) => status === 'Out for Delivery')) {
+  if (activeStatuses.every((s) => s === 'Out for Delivery')) {
     return 'Out for Delivery';
   }
 
   // ALL ACTIVE ITEMS SHIPPED
-  if (activeStatuses.every((status) => status === 'Shipped')) {
+  if (activeStatuses.every((s) => s === 'Shipped')) {
     return 'Shipped';
   }
 
   // ALL ACTIVE ITEMS CONFIRMED
-  if (activeStatuses.every((status) => status === 'Confirmed')) {
+  if (activeStatuses.every((s) => s === 'Confirmed')) {
     return 'Confirmed';
   }
 
   // ALL ACTIVE ITEMS PENDING
-  if (activeStatuses.every((status) => status === 'Pending')) {
+  if (activeStatuses.every((s) => s === 'Pending')) {
     return 'Pending';
   }
 

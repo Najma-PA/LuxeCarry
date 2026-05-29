@@ -159,8 +159,12 @@ exports.rejectOrderRequest = async (req, res, next) => {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/admin/orders');
     }
+    if (!adminResponse?.trim()) {
+      req.flash('error', 'Rejection reason required');
+      return res.redirect(`/admin/orders/${orderId}`);
+    }
 
-    const result = await orderService.rejectOrderRequest(orderId, itemId, adminResponse);
+    const result = await orderService.rejectOrderRequest(orderId, itemId, adminResponse.trim());
 
     if (!result.success) {
       req.flash('error', result.message);
