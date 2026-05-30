@@ -73,125 +73,141 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </button>
         </div>
 
-    </div>
-    <div id="orders-list-container">
-    <% if(orders.length > 0){ %>
-    <% orders.forEach(order => { %>
+        </div>
+        <div id="orders-list-container">
+        <% if(orders.length > 0){ %>
+        <% orders.forEach(order => { %>
 
-    <div class="lc-order-group-card">
+        <div class="lc-order-group-card">
 
-    
-    <div class="lc-order-group-header">
+        
+        <div class="lc-order-group-header">
 
-        <div>
+            <div>
 
-            <h5 class="mb-1">
-                Order #<%= order.orderId %>
-            </h5>
+                <h5 class="mb-1">
+                    Order #<%= order.orderId %>
+                </h5>
 
-            <small class="text-muted">
-                <%= new Date(order.createdAt)
-                    .toDateString() %>
-            </small>
+                <small class="text-muted">
+                    <%= new Date(order.createdAt)
+                        .toDateString() %>
+                </small>
+
+            </div>
 
         </div>
 
-    </div>
+        <!-- PRODUCTS -->
+        <div class="d-flex flex-column gap-3">
 
-    <!-- PRODUCTS -->
-    <div class="d-flex flex-column gap-3">
+            <% order.items.forEach(item => { %>
 
-        <% order.items.forEach(item => { %>
+            <div class="lc-product-order-card">
 
-        <div class="lc-product-order-card">
+                <!-- LEFT -->
+                <div class="d-flex gap-3 align-items-center">
 
-            <!-- LEFT -->
-            <div class="d-flex gap-3 align-items-center">
+                    <img
+                        src="<%= item.product?.thumbnail?.url || '/images/no-image.png' %>"
+                        class="lc-product-order-image">
 
-                <img
-                    src="<%= item.product?.thumbnail?.url || '/images/no-image.png' %>"
-                    class="lc-product-order-image">
+                    <div>
 
-                <div>
+                        <h6 class="mb-1">
+                            <%= item.product?.name %>
+                        </h6>
 
-                    <h6 class="mb-1">
-                        <%= item.product?.name %>
-                    </h6>
+                        <div class="text-muted small mb-1">
 
-                    <div class="text-muted small mb-1">
+                            Variant:
+                            <%= item.variantValue || '-' %>
 
-                        Variant:
-                        <%= item.variantValue || '-' %>
+                        </div>
 
-                    </div>
+                        <div class="text-muted small">
 
-                    <div class="text-muted small">
+                            Qty:
+                            <%= item.quantity %>
 
-                        Qty:
-                        <%= item.quantity %>
+                        </div>
 
                     </div>
 
                 </div>
 
-            </div>
-
-           <!-- RIGHT -->
-<div
-    class="d-flex flex-column
-    align-items-end
-    justify-content-between
-    h-100">
-
-   
-<div
-    class="d-flex
-    align-items-center
-    gap-3">
+            <!-- RIGHT -->
+    <div
+        class="d-flex flex-column
+        align-items-end
+        justify-content-between
+        h-100">
 
     
     <div
-        class="lc-order-status-badge
-        <%= item.status
-            .toLowerCase()
-            .replace(/\s+/g,'-') %>">
+        class="d-flex
+        align-items-center
+        gap-3">
+        
+        <% let displayStatus=item.status;
+        let badgeClass=item.status
+        .toLowerCase()
+        .replace(/\s+/g,'-');
+        if (
+            item.requestStatus==='Rejceted'
+        ) {
+            displayStatus ='Return Rejected';
+            badgeClass='return-rejected'
+            
+        } %>
+        <div class="lc-order-status-badge <%=badgeClass  %>">
+            <%= displayStatus %>
 
-        <%=item.status %>
+        </div>
+        
+        <!-- <div 
+            class="lc-order-status-badge
+            <%= item.status
+                .toLowerCase()
+                .replace(/\s+/g,'-') %>">
 
-    </div>
-    <div class="d-flex align-items-center gap-2">
+            <%=item.status %>
 
-    <a
-        href="/user/orders/<%= order._id %>/product/<%= item._id %>"
-        class="btn btn-view-details btn-sm rounded-pill">
-
-        View Details
-
-    </a>
-
-    <% if (
-        item.status === 'Confirmed' ||
-        item.status === 'Shipped' ||
-        item.status === 'Out for Delivery' ||
-        item.status === 'Delivered' 
-    ) { %>
+        </div>-->
+        <div class="d-flex align-items-center gap-2">
 
         <a
-            href="/user/orders/invoice/<%= order._id %>/<%= item._id %>"
-            class="btn btn-light border btn-sm rounded-pill text-secondary">
+            href="/user/orders/<%= order._id %>/product/<%= item._id %>"
+            class="btn btn-view-details btn-sm rounded-pill">
 
-            <i class="fa-solid fa-download me-1"></i>
-
-            Invoice
+            View Details
 
         </a>
 
-    <% } %>
+        <% if (
+            item.status === 'Confirmed' ||
+            item.status === 'Shipped' ||
+            item.status === 'Out for Delivery' ||
+            item.status === 'Delivered' ||
+            item.requestStatus==='Rejected'
+        ) { %>
 
-</div>
-   
+            <a
+                href="/user/orders/invoice/<%= order._id %>/<%= item._id %>"
+                class="btn btn-light border btn-sm rounded-pill text-secondary">
 
-</div>
+                <i class="fa-solid fa-download me-1"></i>
+
+                Invoice
+
+            </a>
+
+        <% } %>
+
+    </div>
+    
+
+    </div>
    
 
        

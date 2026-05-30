@@ -145,7 +145,33 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     <div class="d-flex flex-column gap-2">
                         <!-- Current status badge -->
                         <div class="d-flex align-items-center justify-content-between">
-                            <span class="order-badge
+                            <%
+                            let displayStatus = item.status;
+
+                            let badgeClass =
+                                item.status === 'Pending'
+                                    ? 'order-pending'
+                                    : item.status === 'Confirmed'
+                                    ? 'order-processing'
+                                    : item.status === 'Shipped' || item.status === 'Out for Delivery'
+                                    ? 'order-shipped'
+                                    : item.status === 'Delivered'
+                                    ? 'order-delivered'
+                                    : 'order-cancelled';
+
+                            if (
+                                item.requestType === 'Return' &&
+                                item.requestStatus === 'Rejected'
+                            ) {
+                                displayStatus = 'Return Rejected';
+                                badgeClass = 'order-cancelled';
+                            }
+                            %>
+
+                            <span class="order-badge <%= badgeClass %>">
+                                <%= displayStatus %>
+                            </span>
+                            <!-- <span class="order-badge
                                 <%= item.status === 'Pending'
                                     ? 'order-pending'
                                     : item.status === 'Confirmed'
@@ -156,7 +182,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     ? 'order-delivered'
                                     : 'order-cancelled' %>">
                                 <%= item.status %>
-                            </span>
+                            </span> -->
                             <!-- NORMAL STATUS UPDATE -->
                             <%
                             const isLockedStatus =
@@ -310,7 +336,24 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                 <% } %>
                             </div>
                         <% } %>
+                           <!--Rejected Reason-->
+                           <%if (
+                            item.requestStatus ==='Rejected'
+                           ) {%>
+                            <div class="alert alert-danger p-2 mb-0 mt-1 small">
+                                <strong>Return Rejected</strong><br>
+                                Reason:
+                                <%= item.adminResponse || 'No reason provided' %>
+                                <%if(item.requestProcessedAt){%>
+                                    <div class="text-muted text-end mt-1 " style="font: size 10px;">
+                                        At:
+                                        <%= new Date(item.requestProcessedAt).toLocaleString()%>
+                                        </div>
+                                <%}%>
+                            </div>
+                            
 
+                          <% } %>
                         <!-- Refund Manager 
                         <div class="bg-light p-2 rounded mt-1 border">
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -361,7 +404,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                     </div>
 
-                    <form
+                    <form id="rejectForm-<%=item._id %>"
                         action="/admin/orders/<%= order._id %>/item/<%= item._id %>/reject"
                         method="POST"
                     >
@@ -374,12 +417,13 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                         <textarea
                             name="adminResponse"
-                            class="form-control"
+                            class="form-control reject-reason"
                             rows="4"
                             placeholder="Enter rejection reason..."
-                            required
+                        required    
                         ></textarea>
-
+                        <p  class="text-danger mt-2 small reject-error
+                        "></p>
                         </div>
 
                         <div class="modal-footer">
@@ -527,6 +571,49 @@ async function confirmSubmit(event, message) {
         form.submit();
     }
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const rejectForms =
+        document.querySelectorAll('[id^="rejectForm-"]');
+
+    rejectForms.forEach(form => {
+
+        form.addEventListener('submit', function(e) {
+
+            const textarea =
+                form.querySelector('.reject-reason');
+
+            const errorBox =
+                form.querySelector('.reject-error');
+
+            // RESET
+            errorBox.textContent = '';
+
+            textarea.classList.remove('is-invalid');
+
+            // VALIDATION
+            if (!textarea.value.trim()) {
+
+                e.preventDefault();
+
+                errorBox.textContent =
+                    'Please enter rejection reason';
+
+                textarea.classList.add('is-invalid');
+
+                return;
+
+            }
+
+        });
+
+    });
+
+});
+
+
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>

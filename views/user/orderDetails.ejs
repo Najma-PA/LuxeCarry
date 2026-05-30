@@ -421,9 +421,13 @@ const diffDays = deliveredDate
   : 999;
 %>
 
-<% if (item.status === 'Delivered'&& 
-diffDays <= 15 &&
-item.requestStatus!=='Rejected') { %>
+<% if (
+    item.status === 'Delivered'&& 
+    diffDays <= 15 &&
+    item.requestStatus!=='Pending'&&
+    item.requestStatus!=='Approved'&&
+    item.requestStatus!=='Rejected'
+) { %>
     <div class="d-flex justify-content-end mt-4">
         <button
           class="btn btn-danger px-4 py-2 rounded-pill"
