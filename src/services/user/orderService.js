@@ -172,7 +172,6 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
   item.returnReason = finalReason || '';
   item.returnedAt = new Date();
 
-  // Check if all items are returned or cancelled
   const allReturnedOrCancelled = order.items.every(
     (i) => i.status === 'Returned' || i.status === 'Cancelled'
   );

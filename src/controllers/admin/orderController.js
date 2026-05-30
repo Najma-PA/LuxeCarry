@@ -160,9 +160,13 @@ exports.rejectOrderRequest = async (req, res, next) => {
       return res.redirect('/admin/orders');
     }
     if (!adminResponse?.trim()) {
-      req.flash('error', 'Rejection reason required');
       return res.redirect(`/admin/orders/${orderId}`);
     }
+    /*
+    if (!adminResponse?.trim()) {
+      req.json({ success: false, message: 'Rejection reason required' });
+      return res.redirect(`/admin/orders/${orderId}`);
+    }*/
 
     const result = await orderService.rejectOrderRequest(orderId, itemId, adminResponse.trim());
 
