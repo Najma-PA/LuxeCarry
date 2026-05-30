@@ -2479,6 +2479,10 @@ body {
   background: #ffe5d0;
   color: #a14b00;
 }
+.lc-order-status-badge.return-rejected {
+  background: #f9c8b9;
+  color: #a13000;
+}
 .btn-view-details {
   border: 1px solid #a14b00;
   background: #fff;
