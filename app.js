@@ -13,6 +13,7 @@ const adminRoutes = require('./src/routes/admin');
 const noCache = require('./src/middleware/noCache');
 const errorHandler = require('./src/middleware/errorHandler');
 const methodOverride = require('method-override');
+const globalLocals = require('./src/middleware/globalLocals');
 const flash = require('connect-flash');
 const app = express();
 
@@ -39,10 +40,11 @@ app.use(userSession);
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-const cartService = require('./src/services/user/cartService');
+app.use(globalLocals);
+/*const cartService = require('./src/services/user/cartService');
 const userService = require('./src/services/user/userService');
 
-/* GLOBAL LOCALS */
+/* GLOBAL LOCALS 
 app.use(async (req, res, next) => {
   try {
     const sessionUser = req.user || req.session?.user || null;
@@ -79,7 +81,7 @@ app.use(async (req, res, next) => {
   
   next();
 });
-
+*/
 app.use('/admin', adminRoutes);
 app.use('/user', noCache, userRoutes);
 
