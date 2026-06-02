@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>My Wallet | LuxeCarry</title>
+
+<link
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+rel="stylesheet">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+
+<%- include('../partials/user/navbar') %>
+
+<div class="orders-page-wrapper">
+
+<div class="container py-5">
+
+<div class="row">
+
+    <!-- SIDEBAR -->
+    <%- include("../partials/user/sidebar", {
+        user,
+        activePage: 'wallet'
+    }) %>
+
+    <!-- MAIN CONTENT -->
+    <div class="col-lg-9 col-md-8">
+
+        <!-- PAGE HEADER -->
+        <div class="dashboard-page-header">
+
+            <h1 class="dashboard-page-title">
+                My Wallet
+            </h1>
+
+            <p class="dashboard-page-subtitle">
+                Manage your premium credits and payment methods
+            </p>
+
+        </div>
+
+        <!-- BALANCE CARD -->
+        <div class="wallet-balance-card">
+
+            <div class="wallet-balance-label">
+                TOTAL AVAILABLE BALANCE
+            </div>
+
+            <div class="wallet-balance-amount">
+
+                ₹<%= wallet.balance.toFixed(2) %>
+
+            </div>
+
+        </div>
+
+        <!-- TRANSACTION HEADER -->
+        <div class="wallet-transaction-header">
+
+            <h3 class="wallet-section-title">
+                Recent Transactions
+            </h3>
+
+            <a href="/user/wallet/history"
+               class="wallet-view-all">
+
+                View All
+
+            </a>
+
+        </div>
+
+        <!-- TRANSACTION TABLE -->
+        <div class="wallet-transaction-table">
+
+            <!-- HEADER -->
+            <div class="wallet-table-head">
+
+                <div>Description</div>
+                <div>Date</div>
+                <div>Amount</div>
+                <div>Status</div>
+
+            </div>
+
+            <!-- ROWS -->
+            <% wallet.transactions.forEach(transaction => { %>
+
+            <div class="wallet-table-row">
+
+                <!-- DESCRIPTION -->
+                <div class="wallet-transaction-info">
+
+                    <div class="wallet-transaction-icon">
+
+                        <% if(transaction.type === 'credit'){ %>
+
+                            <i class="fa-solid fa-plus"></i>
+
+                        <% } else { %>
+
+                            <i class="fa-solid fa-bag-shopping"></i>
+
+                        <% } %>
+
+                    </div>
+
+                    <div>
+
+                        <h6 class="mb-1">
+                            <%= transaction.title %>
+                        </h6>
+
+                        <small class="text-muted">
+
+                            <%= transaction.description %>
+
+                        </small>
+
+                    </div>
+
+                </div>
+
+                <!-- DATE -->
+                <div class="wallet-date">
+
+                    <%= transaction.date %>
+
+                </div>
+
+                <!-- AMOUNT -->
+                <div class="
+                    wallet-amount
+                    <%= transaction.type === 'credit'
+                    ? 'wallet-credit'
+                    : 'wallet-debit' %>
+                ">
+
+                    <%= transaction.type === 'credit'
+                    ? '+'
+                    : '-' %>
+
+                    ₹<%= transaction.amount %>
+
+                </div>
+
+                <!-- STATUS -->
+                <div>
+
+                    <span class="wallet-status-badge">
+
+                        <%= transaction.status %>
+
+                    </span>
+
+                </div>
+
+            </div>
+
+            <% }) %>
+
+        </div>
+
+    </div>
+
+</div>
+</div>
+
+<%- include('../partials/user/footer-short') %>
+
+</div>
+
+</body>
+</html>
