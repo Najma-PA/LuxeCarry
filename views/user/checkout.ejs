@@ -143,6 +143,10 @@
                                         Color: <%= item.variantDetail ? item.variantDetail.value : '-' %> | Qty: <%= item.quantity %>
                                     </div>
                                     <div class="price">₹<%= item.finalPrice.toLocaleString() %></div>
+                                    <div id="stock-error-<%= item._id %>"
+                             class="text-danger fw-bold mb-2"
+                             style="font-size: 10px;">
+                        </div>
                                 </div>
                             </div>
                         <% }) %>
@@ -208,7 +212,43 @@
             selectedCard.classList.add('selected');
         }
     }
+    function clearStockErrors() {
 
+    document.querySelectorAll('[id^="stock-error-"]').forEach(el => {
+        el.innerHTML = '';
+    });
+
+}
+
+
+function showStockErrors(errors) {
+
+    errors.forEach(err => {
+
+        const errorBox = document.getElementById(
+            `stock-error-${err.id}`
+        );
+
+        if (errorBox) {
+
+            errorBox.innerHTML = `
+                <i class="fa-solid fa-circle-exclamation"></i>
+                ${err.message}
+            `;
+        }
+    });
+       const firstError = document.querySelector(
+        '[id^="stock-error-"]:not(:empty)'
+    );
+
+    if (firstError) {
+
+        firstError.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+    }
+}
     document.getElementById('checkoutForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         
@@ -251,7 +291,29 @@
                     window.location.href = result.data ? result.data.redirect : `/user/order-success/${result.orderId}`;
                 });
             } else {
+                clearStockErrors();
+
+                if (result.errors && Array.isArray(result.errors)) {
+
+                    showStockErrors(result.errors);
+
+                   /* Swal.fire({
+                        icon: 'warning',
+                        title: 'Some items need attention',
+                        text: 'Please review the highlighted products.',
+                        confirmButtonColor: '#b78846'
+                    });*/
+
+                    return;
+                }
+/*
                 Swal.fire({
+                    icon: 'error',
+                    title: 'Checkout Failed',
+                    text: result.message || 'There was an issue processing your order.',
+                    confirmButtonColor: '#b78846'
+                });*/
+                /*Swal.fire({
                     icon: 'error',
                     title: 'Checkout Failed',
                     text: result.message || 'There was an issue processing your order.',
@@ -260,7 +322,7 @@
                     if (result.redirect) {
                         window.location.href = result.redirect;
                     }
-                });
+                });*/
             }
         } catch (error) {
             console.error(error);
@@ -274,6 +336,7 @@
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
         }
+        
     });
 </script>
 <%- include('../partials/flashAndToast') %>
