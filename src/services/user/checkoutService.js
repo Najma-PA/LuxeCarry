@@ -71,7 +71,7 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
   if (!validation.success) {
     return {
       success: false,
-      redirect: '/user/cart',
+      errors: validation.errors || [],
       message: validation.message,
     };
   }

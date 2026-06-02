@@ -77,7 +77,13 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
     };
   }
 
-  if (item.status === 'Delivered' || item.status === 'Cancelled' || item.status === 'Returned') {
+  if (
+    item.status === 'Shipped' ||
+    item.status === 'Out for Delivery' ||
+    item.status === 'Delivered' ||
+    item.status === 'Cancelled' ||
+    item.status === 'Returned'
+  ) {
     return { success: false, message: 'Item cannot be cancelled at this stage' };
   }
 

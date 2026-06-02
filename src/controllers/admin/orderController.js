@@ -160,6 +160,7 @@ exports.rejectOrderRequest = async (req, res, next) => {
       return res.redirect('/admin/orders');
     }
     if (!adminResponse?.trim()) {
+      req.flash('error', 'Rejection reason required');
       return res.redirect(`/admin/orders/${orderId}`);
     }
     /*

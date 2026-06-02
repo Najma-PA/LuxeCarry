@@ -32,7 +32,11 @@ exports.placeOrder = async (req, res, next) => {
     const userId = req.user ? req.user._id : req.session.user ? req.session.user.id : null;
 
     if (!userId) {
-      return res.status(401).json({ success: false, message: 'Session expired. Please log in again.', redirect: '/user/login' });
+      return res.status(401).json({
+        success: false,
+        message: 'Session expired. Please log in again.',
+        redirect: '/user/login',
+      });
     }
 
     const { addressId, paymentMethod } = req.body;
@@ -55,7 +59,8 @@ exports.placeOrder = async (req, res, next) => {
       return res.status(result.status || 400).json({
         success: false,
         message: result.message,
-        redirect: result.redirect
+        errors: result.errors || [],
+        redirect: result.redirect,
       });
     }
 
@@ -64,8 +69,8 @@ exports.placeOrder = async (req, res, next) => {
       message: 'Order placed successfully',
       data: {
         orderId: result.order._id,
-        redirect: `/user/order-success/${result.order._id}`
-      }
+        redirect: `/user/order-success/${result.order._id}`,
+      },
     });
   } catch (error) {
     next(error);

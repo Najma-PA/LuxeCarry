@@ -85,28 +85,7 @@ exports.getProducts = async (query) => {
     inventoryValue,
   };
 };
-/*
-//File save
-const saveFile = async (file) => {
-  const filename = `product-${Date.now()}-${file.fieldname}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-  const uploadDir = path.join('public', 'uploads');
-  const outputPath = path.join(uploadDir, filename);
 
-  if (!fs.existsSync(uploadDir)) {
-    await fs.promises.mkdir(uploadDir, { recursive: true });
-  }
-
-  try {
-    await fs.promises.rename(file.path, outputPath);
-  } catch (err) {
-    // Fallback if cross-device rename fails
-    await fs.promises.copyFile(file.path, outputPath);
-    await fs.promises.unlink(file.path);
-  }
-
-  return `/uploads/${filename}`;
-};
-*/
 exports.addProduct = async (data, files, variants) => {
   variants = variants || [];
   let thumbnail = null;
