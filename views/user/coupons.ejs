@@ -1,0 +1,233 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0">
+
+  <title>
+    My Coupons | LuxeCarry
+  </title>
+
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet">
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <link
+    rel="stylesheet"
+    href="/css/style.css">
+
+</head>
+
+<body>
+
+<%- include('../partials/user/navbar') %>
+
+<div class="orders-page-wrapper">
+
+<div class="container py-5">
+
+<div class="row">
+
+  <!-- SIDEBAR -->
+
+  <%- include(
+    '../partials/user/sidebar',
+    {
+      user,
+      activePage: 'coupons'
+    }
+  ) %>
+
+  <!-- MAIN CONTENT -->
+
+  <div class="col-lg-9 col-md-8">
+
+    <!-- HEADER -->
+
+    <div class="user-coupon-header">
+
+      <h1 class="user-coupon-title">
+        Available Coupons
+      </h1>
+
+      <p class="user-coupon-subtitle">
+
+        Enhance your luxury collection with
+        our exclusive seasonal offers and
+        limited-time rewards.
+
+      </p>
+
+    </div>
+
+    <!-- GRID -->
+
+    <div class="row g-4">
+
+      <% coupons.forEach(coupon => { %>
+
+      <div class="col-lg-4 col-md-6">
+
+        <div class="
+          user-coupon-card
+          <%= !coupon.isActive ||
+              coupon.expiryDate < new Date()
+              ? 'coupon-disabled'
+              : '' %>
+        ">
+
+          <!-- TOP -->
+
+          <div class="user-coupon-top">
+
+            <i class="
+              fa-solid
+              <%= coupon.discountType === 'PERCENTAGE'
+                  ? 'fa-gift'
+                  : 'fa-gem' %>
+            "></i>
+
+          </div>
+
+          <!-- BODY -->
+
+          <div class="user-coupon-body">
+
+            <h3 class="user-coupon-code">
+              <%= coupon.code %>
+            </h3>
+
+            <div class="user-coupon-offer">
+
+              <% if (
+                coupon.discountType ===
+                'PERCENTAGE'
+              ) { %>
+
+                <%= coupon.discountValue %>% OFF
+
+              <% } else { %>
+
+                ₹<%= coupon.discountValue %> OFF
+
+              <% } %>
+
+            </div>
+
+            <div class="user-coupon-meta">
+
+              <p>
+
+                <i class="fa-solid fa-cart-shopping"></i>
+
+                Min order ₹<%= coupon.minimumOrderAmount %>
+
+              </p>
+
+              <p>
+
+                <i class="fa-regular fa-calendar"></i>
+
+                Expires on
+
+                <%= new Date(
+                  coupon.expiryDate
+                ).toLocaleDateString('en-IN') %>
+
+              </p>
+
+            </div>
+
+            <!-- ACTIONS -->
+
+            <button
+              class="user-coupon-copy-btn"
+              onclick="copyCoupon('<%= coupon.code %>')">
+
+              <i class="fa-regular fa-copy"></i>
+
+              Copy Code
+
+            </button>
+
+            <button
+              class="user-coupon-apply-btn"
+
+              onclick="applyCoupon('<%= coupon.code %>')"
+
+              <%= !coupon.isActive ||
+                  coupon.expiryDate < new Date()
+                  ? 'disabled'
+                  : '' %>>
+
+              <i class="fa-solid fa-circle-check"></i>
+
+              Apply
+
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <% }) %>
+
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+<%- include('../partials/user/footer-short') %>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+function copyCoupon(code) {
+
+  navigator.clipboard.writeText(code);
+
+  Swal.fire({
+
+    icon: 'success',
+
+    title: 'Copied',
+
+    text: `${code} copied successfully`,
+
+    timer: 1500,
+
+    showConfirmButton: false,
+
+  });
+
+}
+
+function applyCoupon(code) {
+
+  window.location.href =
+    `/user/checkout?coupon=${code}`;
+
+}
+
+</script>
+
+</body>
+</html>

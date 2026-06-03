@@ -354,26 +354,43 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             
 
                           <% } %>
-                        <!-- Refund Manager 
                         <div class="bg-light p-2 rounded mt-1 border">
+
                             <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span class="small text-muted">Refund Amount:</span>
-                                <span class="fw-bold small text-dark">₹<%= (item.refundAmount || 0).toLocaleString() %></span>
+
+                                <span class="small text-muted">
+                                    Refund Amount:
+                                </span>
+
+                                <span class="fw-bold small text-dark">
+
+                                    ₹<%= (item.refundAmount || 0)
+                                        .toLocaleString() %>
+
+                                </span>
+
                             </div>
+
                             <div class="d-flex justify-content-between align-items-center">
-                                <span class="small text-muted">Refund Status:</span>
-                                <span class="badge bg-secondary mb-1" style="font-size: 10px;"><%= item.refundStatus %></span>
+
+                                <span class="small text-muted">
+                                    Refund Status:
+                                </span>
+
+                                <span class="
+                                    badge
+                                    <%= item.refundStatus === 'Processed'
+                                    ? 'bg-success'
+                                    : 'bg-secondary' %>
+                                ">
+
+                                    <%= item.refundStatus %>
+
+                                </span>
+
                             </div>
-                            <form action="/admin/orders/<%= order._id %>/items/<%= item._id %>/refund" method="POST" class="d-flex gap-1 align-items-center mt-1">
-                                <input type="number" name="refundAmount" value="<%= item.refundAmount || 0 %>" class="form-control form-control-sm" style="width: 70px;" placeholder="Amount">
-                                <select name="refundStatus" class="form-select form-select-sm" style="width: 110px; font-size: 11px;">
-                                    <% ['Not Requested', 'Pending', 'Processed', 'Completed'].forEach(rs => { %>
-                                        <option value="<%= rs %>" <%= item.refundStatus === rs ? 'selected' : '' %>><%= rs %></option>
-                                    <% }) %>
-                                </select>
-                                <button type="submit" class="btn btn-sm btn-dark" style="font-size: 11px;">Save</button>
-                            </form>
-                        </div>-->
+
+                        </div>
                     </div>
 
                 </td>

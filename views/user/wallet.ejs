@@ -85,19 +85,25 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
             <!-- HEADER -->
             <div class="wallet-table-head">
-
-                <div>Description</div>
                 <div>Date</div>
+                <div>Description</div>
                 <div>Amount</div>
                 <div>Status</div>
 
             </div>
 
             <!-- ROWS -->
-            <% wallet.transactions.forEach(transaction => { %>
+            <% transactions.forEach(transaction => { %>
 
             <div class="wallet-table-row">
 
+                <!-- DATE -->
+                <div class="wallet-date">
+
+                    <%=new Date(transaction.createdAt)
+                    .toLocaleDateString('en-IN')  %>
+
+                </div>
                 <!-- DESCRIPTION -->
                 <div class="wallet-transaction-info">
 
@@ -118,7 +124,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     <div>
 
                         <h6 class="mb-1">
-                            <%= transaction.title %>
+                            <%= transaction.transactionType
+                            .replaceAll('_',' ')
+                            .toUpperCase() %>
                         </h6>
 
                         <small class="text-muted">
@@ -128,13 +136,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         </small>
 
                     </div>
-
-                </div>
-
-                <!-- DATE -->
-                <div class="wallet-date">
-
-                    <%= transaction.date %>
 
                 </div>
 
@@ -150,7 +151,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                     ? '+'
                     : '-' %>
 
-                    ₹<%= transaction.amount %>
+                    ₹<%= transaction.amount.toFixed(2) %>
 
                 </div>
 
