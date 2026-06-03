@@ -2881,12 +2881,12 @@ img {
 ========================================= */
 
 .user-coupon-header {
-  text-align: center;
-  margin-bottom: 50px;
+  text-align: start;
+  margin-bottom: 20px;
 }
 
 .user-coupon-title {
-  font-size: 52px;
+  font-size: 35px;
   font-weight: 700;
   color: #111827;
   margin-bottom: 10px;
@@ -2895,7 +2895,7 @@ img {
 .user-coupon-subtitle {
   color: #6b7280;
   max-width: 620px;
-  margin: auto;
+  /*margin: auto;*/
   line-height: 1.8;
 }
 
@@ -2914,7 +2914,7 @@ img {
 }
 
 .user-coupon-top {
-  height: 130px;
+  height: 110px;
   background: #ece6d8;
   display: flex;
   align-items: center;
