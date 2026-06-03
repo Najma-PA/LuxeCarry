@@ -2786,7 +2786,7 @@ img {
 .wallet-table-head,
 .wallet-table-row {
   display: grid;
-  grid-template-columns: 3fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 3fr 1fr 1fr;
   align-items: center;
 }
 
@@ -2873,5 +2873,124 @@ img {
 
   .wallet-section-title {
     font-size: 24px;
+  }
+}
+
+/* =========================================
+   USER COUPON PAGE
+========================================= */
+
+.user-coupon-header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.user-coupon-title {
+  font-size: 52px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.user-coupon-subtitle {
+  color: #6b7280;
+  max-width: 620px;
+  margin: auto;
+  line-height: 1.8;
+}
+
+.user-coupon-card {
+  background: #fff;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid #ececec;
+  transition: 0.3s ease;
+  height: 100%;
+}
+
+.user-coupon-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+}
+
+.user-coupon-top {
+  height: 130px;
+  background: #ece6d8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-coupon-top i {
+  font-size: 42px;
+  color: #c27a16;
+}
+
+.user-coupon-body {
+  padding: 24px;
+}
+
+.user-coupon-code {
+  font-size: 28px;
+  font-weight: 700;
+  color: #c27a16;
+  margin-bottom: 12px;
+}
+
+.user-coupon-offer {
+  font-size: 20px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 20px;
+}
+
+.user-coupon-meta p {
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 10px;
+}
+
+.user-coupon-copy-btn,
+.user-coupon-apply-btn {
+  width: 100%;
+  border-radius: 12px;
+  padding: 12px;
+  border: none;
+  font-weight: 600;
+  transition: 0.3s ease;
+}
+
+.user-coupon-copy-btn {
+  background: #fff;
+  border: 1px solid #d6d3d1;
+  color: #c27a16;
+  margin-bottom: 12px;
+}
+
+.user-coupon-copy-btn:hover {
+  background: #faf7f2;
+}
+
+.user-coupon-apply-btn {
+  background: #c27a16;
+  color: white;
+}
+
+.user-coupon-apply-btn:hover {
+  background: #a96510;
+}
+
+.coupon-disabled {
+  opacity: 0.5;
+}
+
+.coupon-disabled .user-coupon-apply-btn {
+  background: #d1d5db;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .user-coupon-title {
+    font-size: 36px;
   }
 }
