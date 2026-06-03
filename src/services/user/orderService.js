@@ -278,7 +278,7 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
   const order = await Order.findOne({
     _id: orderId,
     userId,
-  });
+  }).populate('item.product');
 
   if (!order) {
     return {
@@ -323,9 +323,9 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
 
   // REFUND
   if (order.paymentStatus === 'Paid') {
-    item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
+    item.refundAmount = item.finalPayable || item.totalPrice;
 
-    item.refundStatus = 'Pending';
+   // item.refundStatus = 'Pending';
   }
 
   // CHECK IF ALL ITEMS CANCELLED
@@ -339,6 +339,8 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
 
   return {
     success: true,
+    order,
+    item,
   };
 };
 

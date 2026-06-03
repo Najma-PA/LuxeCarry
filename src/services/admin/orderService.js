@@ -150,7 +150,7 @@ exports.updateItemRefund = async (orderId, itemId, refundAmount, refundStatus) =
 };
 
 exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
-  const order = await Order.findById(orderId);
+  const order = await Order.findById(orderId).populate('items.product');
 
   if (!order) {
     return {
@@ -192,13 +192,6 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
     if (!isDamaged) {
       await restoreStock(item);
     }
-
-    // REFUND
-    if (order.paymentStatus === 'Paid') {
-      item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
-
-      item.refundStatus = 'Pending';
-    }
   } else {
     return {
       success: false,
@@ -220,6 +213,8 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
 
   return {
     success: true,
+    order,
+    item,
     message: 'Request approved successfully',
   };
 };

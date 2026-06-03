@@ -1,5 +1,5 @@
 const cartService = require('./cartService');
-
+const couponService = require('./couponService');
 const Address = require('../../models/addressModel');
 const Order = require('../../models/orderModel');
 const Product = require('../../models/productModel');
@@ -31,18 +31,26 @@ exports.getCheckoutData = async (userId) => {
     isDefault: -1,
     createdAt: -1,
   });
-
-  const finalTotal = cart.total;
+  const coupons = await couponService.getEligibleCoupons(cart.total);
+  //const finalTotal = cart.total;
 
   return {
     success: true,
     cart,
     addresses,
-    finalTotal,
+    coupons,
+    finalTotal: cart.total,
   };
 };
+exports.applyCoupon = async (userId, couponCode) => {
+  const cart = await cartService.getCart(userId);
+  if (!cart || cart.items.length === 0) {
+    return { success: false, message: 'Cart is empty' };
+  }
+  return await couponService.validateCoupon(couponCode, cart.total);
+};
 
-exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
+exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) => {
   // Validate address
   const address = await Address.findById(addressId);
 
@@ -78,16 +86,32 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
 
   // Pricing
 
-  const finalTotal = cart.total;
+  const subtotal = cart.total;
+  let coupon = null;
+  let couponDiscount = 0;
+  if (couponCode) {
+    const couponResult = await couponService.validateCoupon(couponCode, subtotal);
+    if (!couponResult.success) {
+      return {
+        success: false,
 
+        message: couponResult.message,
+      };
+    }
+
+    coupon = couponResult.coupon;
+    couponDiscount = couponResult.discount;
+  }
+  const finalTotal = Number(subtotal - couponDiscount).toFixed(2);
+  const distributedItems = couponService.distributeDiscount(cart.items, subtotal, couponDiscount);
   // Build order items
   const orderItems = [];
 
-  for (const item of cart.items) {
+  for (const item of distributedItems) {
     const originalPrice = item.product.price;
     const finalPrice = item.finalPrice;
     const productDiscount = originalPrice - finalPrice;
-    const totalPrice = finalPrice * item.quantity;
+    // const totalPrice = finalPrice * item.quantity;
 
     const variantDetail = item.variantDetail;
     const productImage = item.product.thumbnail?.url || item.product.displayImage || '';
@@ -102,7 +126,9 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
       originalPrice,
       productDiscount,
       finalPrice,
-      totalPrice,
+      totalPrice: item.totalPrice,
+      couponDiscount: item.couponDiscount,
+      finalPayable: item.finalPayable,
       status: 'Pending',
     });
 
@@ -153,10 +179,15 @@ exports.createOrder = async ({ userId, addressId, paymentMethod }) => {
     paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Paid',
 
     orderStatus: 'Pending',
-
+    subtotal,
+    couponCode: coupon?.code || '',
+    couponDiscount,
+    finalAmount: finalTotal,
     totalAmount: finalTotal,
   });
-
+  if (coupon) {
+    await couponService.incrementUsage(coupon._id);
+  }
   // Clear cart
   await Cart.deleteOne({ user: userId });
 

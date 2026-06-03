@@ -8,6 +8,7 @@ const cartController = require('../controllers/user/cartController');
 const checkoutController = require('../controllers/user/checkoutController');
 const orderController = require('../controllers/user/orderController');
 const wishlistController = require('../controllers/user/wishlistController');
+const walletController = require('../controllers/user/walletController');
 const { upload, handleMulterError } = require('../middleware/multer');
 const { isUserAuth, redirectIfUserLoggedIn } = require('../middleware/userAuth');
 
@@ -84,6 +85,8 @@ router.get('/cart/items-status', isUserAuth, cartController.getCartItemsStatus);
 router.get('/checkout', isUserAuth, checkoutController.getCheckoutPage);
 router.post('/order-place', isUserAuth, checkoutController.placeOrder);
 
+router.get('/coupons', isUserAuth, checkoutController.getCouponsPage);
+
 //orders
 router.get('/order-success/:orderId', isUserAuth, orderController.getOrderSuccessPage);
 router.get('/orders/filter', isUserAuth, orderController.filterOrders);
@@ -102,7 +105,8 @@ router.patch('/cart/update/:id', isUserAuth, cartController.updateQuantity);
 
 // Remove item
 router.delete('/cart/item/:id', isUserAuth, cartController.removeItem);
-
+//wallet
+router.get('/wallet', isUserAuth, walletController.getWalletPage);
 // OTP
 router.get('/verifyOtp', noCache, userController.showVerifyOTP);
 router.post('/verifyOtp', noCache, userController.verifyOTP);

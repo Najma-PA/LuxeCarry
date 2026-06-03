@@ -68,7 +68,8 @@ const orderSchema = new mongoose.Schema(
         totalPrice: {
           type: Number,
         },
-
+        couponDiscount: { type: Number, default: 0 },
+        finalPayable: { type: Number },
         // Item Status
         status: {
           type: String,
@@ -134,11 +135,15 @@ const orderSchema = new mongoose.Schema(
         refundStatus: {
           type: String,
 
-          enum: ['Not Requested', 'Pending', 'Processed', 'Completed'],
+          enum: ['Not Requested', 'Pending', 'Processed'],
 
           default: 'Not Requested',
         },
-
+        refundProcessed: { type: Boolean, default: false },
+        walletTransactionId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'WalletTransaction',
+        },
         // Delivery
         deliveredAt: {
           type: Date,
@@ -182,7 +187,7 @@ const orderSchema = new mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      enum: ['Pending', 'Paid', 'Failed', 'Refunded'],
+      enum: ['Pending', 'Paid', 'Failed'],
       default: 'Pending',
     },
     orderStatus: {

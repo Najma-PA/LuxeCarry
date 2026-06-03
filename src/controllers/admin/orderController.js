@@ -1,5 +1,5 @@
 const orderService = require('../../services/admin/orderService');
-
+const walletController = require('../user/walletController');
 const mongoose = require('mongoose');
 
 exports.getOrders = async (req, res, next) => {
@@ -139,9 +139,24 @@ exports.approveOrderRequest = async (req, res, next) => {
     }
 
     const result = await orderService.approveOrderRequest(orderId, itemId, adminResponse);
+
     if (!result.success) {
       req.flash('error', result.message);
       return res.redirect(`/admin/orders/${orderId}`);
+    }
+    const { order, item } = result;
+    if (item.requestType === 'Return' && !item.refundProcessed) {
+      const walletTransaction = await walletController.creditWallet({
+        userId: order.userId,
+        amount: item.finalPayable || item.totalPrice,
+        transactionType: 'RETURN_REFUND',
+        description: `Refund for returned ${item.product?.name || 'product'}`,
+        orderId: order._id,
+      });
+      item.refundProcessed = true;
+      item.refundStatus = 'Processed';
+      item.walletTransactionId = walletTransaction.transaction._id;
+      await order.save();
     }
     req.flash('success', result.message);
     return res.redirect(`/admin/orders/${orderId}`);
@@ -163,11 +178,6 @@ exports.rejectOrderRequest = async (req, res, next) => {
       req.flash('error', 'Rejection reason required');
       return res.redirect(`/admin/orders/${orderId}`);
     }
-    /*
-    if (!adminResponse?.trim()) {
-      req.json({ success: false, message: 'Rejection reason required' });
-      return res.redirect(`/admin/orders/${orderId}`);
-    }*/
 
     const result = await orderService.rejectOrderRequest(orderId, itemId, adminResponse.trim());
 

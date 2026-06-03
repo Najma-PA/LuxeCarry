@@ -1,4 +1,7 @@
 const checkoutService = require('../../services/user/checkoutService');
+
+const couponService = require('../../services/user/couponService');
+
 const mongoose = require('mongoose');
 
 exports.getCheckoutPage = async (req, res, next) => {
@@ -71,6 +74,50 @@ exports.placeOrder = async (req, res, next) => {
         orderId: result.order._id,
         redirect: `/user/order-success/${result.order._id}`,
       },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* =========================================
+   GET USER COUPON PAGE
+========================================= */
+
+exports.getCouponsPage = async (req, res, next) => {
+  try {
+    const userId = req.user ? req.user._id : req.session.user ? req.session.user.id : null;
+
+    /*
+    =========================================
+    AUTH CHECK
+    =========================================
+    */
+
+    if (!userId) {
+      return res.redirect('/user/login');
+    }
+
+    /*
+    =========================================
+    GET ALL ACTIVE COUPONS
+    =========================================
+    */
+
+    const coupons = await couponService.getAllCoupons();
+
+    /*
+    =========================================
+    RENDER PAGE
+    =========================================
+    */
+
+    res.render('user/coupons', {
+      user: req.session.user,
+
+      coupons,
+
+      activePage: 'coupons',
     });
   } catch (error) {
     next(error);

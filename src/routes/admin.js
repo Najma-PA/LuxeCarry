@@ -6,6 +6,7 @@ const controller = require('../controllers/admin/categoryController');
 const productController = require('../controllers/admin/productController');
 const bannerController = require('../controllers/admin/bannerController');
 const orderController = require('../controllers/admin/orderController');
+const couponController = require('../controllers/admin/couponController');
 const { upload, handleMulterError } = require('../middleware/multer');
 
 const { isAdminAuth, redirectIfAdminLoggedIn } = require('../middleware/adminAuth');
@@ -128,4 +129,19 @@ router.post(
   isAdminAuth,
   orderController.rejectOrderRequest
 );
+
+/* COUPON MANAGEMENT */
+
+router.get('/coupons', noCache, isAdminAuth, couponController.getCouponsPage);
+
+router.post('/coupons', noCache, isAdminAuth, couponController.createCoupon);
+
+router.patch('/coupons/toggle/:id', noCache, isAdminAuth, couponController.toggleCoupon);
+
+router.delete('/coupons/:id', noCache, isAdminAuth, couponController.deleteCoupon);
+
+//router.get('/coupons/edit/:id', noCache, isAdminAuth, couponController.loadEditCouponPage);
+
+//router.post('/coupons/edit/:id', noCache, isAdminAuth, couponController.updateCoupon);
+
 module.exports = router;

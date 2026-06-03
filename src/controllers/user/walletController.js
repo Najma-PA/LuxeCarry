@@ -1,13 +1,14 @@
-const { Error } = require('mongoose');
+//const { Error } = require('mongoose');
 const walletService = require('../../services/user/walletService');
+//const walletTransaction = require('../../models/walletTransactionModel');
 exports.getWalletPage = async (req, res) => {
   try {
     const userId = req.user._id;
     let wallet = await walletService.findWalletByUserId(userId);
-    if (!waller) {
+    if (!wallet) {
       wallet = await walletService.createWallet(userId);
     }
-    const transactions = await walletService.getWalletTransactions(userID);
+    const transactions = await walletService.getWalletTransactions(userId);
     res.render('user/wallet', {
       user: req.user,
       wallet,
@@ -26,7 +27,7 @@ exports.creditWallet = async ({ userId, amount, transactionType, description, or
       wallet = await walletService.createWallet(userId);
     }
     wallet = await walletService.updateWalletBalance(wallet._id, amount);
-    await walletService.createWalletTransaction({
+    const transaction = await walletService.createWalletTransaction({
       walletId: wallet._id,
       userId,
       type: 'credit',
@@ -36,7 +37,7 @@ exports.creditWallet = async ({ userId, amount, transactionType, description, or
       orderId,
       status: 'COMPLETED',
     });
-    return wallet;
+    return { wallet, transaction };
   } catch (error) {
     console.error('Credit wallet error', error);
     throw error;
@@ -52,7 +53,7 @@ exports.debitWallet = async ({ userId, amount, transactionType, description, ord
       throw new Error('Insufficient wallet balance');
     }
     wallet = await walletService.updateWalletBalance(wallet._id, -amount);
-    await walletService.createWalletTransaction({
+    const transaction = await walletService.createWalletTransaction({
       walletId: wallet._id,
       userId,
       type: 'debit',
@@ -62,7 +63,7 @@ exports.debitWallet = async ({ userId, amount, transactionType, description, ord
       orderId,
       status: 'COMPLETED',
     });
-    return wallet;
+    return { wallet, transaction };
   } catch (error) {
     console.error('debit wallet error', error);
     throw error;

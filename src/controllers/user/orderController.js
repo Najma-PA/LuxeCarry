@@ -1,5 +1,6 @@
 const orderService = require('../../services/user/orderService');
 const invoiceService = require('../../services/user/invoiceService');
+const walletController = require('./walletController');
 const Order = require('../../models/orderModel');
 const mongoose = require('mongoose');
 
@@ -105,7 +106,20 @@ exports.cancelOrder = async (req, res, next) => {
         message: result.message,
       });
     }
-
+    const { order, item } = result;
+    if (!item.refundProcessed) {
+      const walletTransaction = await walletController.creditWallet({
+        userId: order.userId,
+        amount: item.totalPrice,
+        transactionType: 'ORDER_REFUND',
+        description: `Refund for cancelled ${item.product?.name || 'product'}`,
+        orderId: order._id,
+      });
+      item.refundProcessed = true;
+      item.refundStatus = 'Processed';
+      item.walletTransactionId = walletTransaction.transaction._id;
+      await order.save();
+    }
     return res.status(200).json({
       success: true,
       message: 'Item cancelled successfully',
