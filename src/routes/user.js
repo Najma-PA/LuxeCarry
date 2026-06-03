@@ -87,6 +87,10 @@ router.post('/order-place', isUserAuth, checkoutController.placeOrder);
 
 router.get('/coupons', isUserAuth, checkoutController.getCouponsPage);
 
+router.post('/apply-coupon', isUserAuth, checkoutController.applyCoupon);
+
+router.post('/remove-coupon', isUserAuth, checkoutController.removeCoupon);
+
 //orders
 router.get('/order-success/:orderId', isUserAuth, orderController.getOrderSuccessPage);
 router.get('/orders/filter', isUserAuth, orderController.filterOrders);

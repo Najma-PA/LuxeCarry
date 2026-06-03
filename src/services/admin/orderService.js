@@ -114,12 +114,19 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
     item.cancelledAt = new Date();
 
     item.cancelReason = 'Cancelled by Administrator';
+    await restoreStock(item);
   } else if (status === 'Returned') {
     item.returnedAt = new Date();
 
     item.returnReason = 'Returned by Administrator';
+    await restoreStock(item);
   } else if (status === 'Delivered') {
     item.deliveredAt = new Date();
+  }
+
+  if ((status === 'Cancelled' || status === 'Returned') && order.paymentStatus === 'Paid') {
+    item.refundAmount = item.finalPayable || item.totalPrice || item.finalPrice * item.quantity;
+    item.refundStatus = 'Pending';
   }
 
   await order.save();
@@ -191,6 +198,11 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
 
     if (!isDamaged) {
       await restoreStock(item);
+    }
+
+    if (order.paymentStatus === 'Paid') {
+      item.refundAmount = item.finalPayable || item.totalPrice || item.finalPrice * item.quantity;
+      item.refundStatus = 'Pending';
     }
   } else {
     return {

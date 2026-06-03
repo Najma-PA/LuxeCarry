@@ -22,6 +22,7 @@ exports.getCheckoutPage = async (req, res, next) => {
     res.render('user/checkout', {
       cart: result.cart,
       addresses: result.addresses,
+      coupons: result.coupons,
       finalTotal: result.finalTotal,
       user: req.session.user,
     });
@@ -42,7 +43,7 @@ exports.placeOrder = async (req, res, next) => {
       });
     }
 
-    const { addressId, paymentMethod } = req.body;
+    const { addressId, paymentMethod, couponCode } = req.body;
 
     if (!addressId) {
       return res.status(400).json({ success: false, message: 'Please select a shipping address' });
@@ -56,6 +57,7 @@ exports.placeOrder = async (req, res, next) => {
       userId,
       addressId,
       paymentMethod,
+      couponCode,
     });
 
     if (!result.success) {
@@ -118,6 +120,56 @@ exports.getCouponsPage = async (req, res, next) => {
       coupons,
 
       activePage: 'coupons',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* =========================================
+   APPLY COUPON
+========================================= */
+
+exports.applyCoupon = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const { couponCode } = req.body;
+
+    /*
+    =========================================
+    VALIDATE
+    =========================================
+    */
+
+    if (!couponCode) {
+      return res.json({
+        success: false,
+
+        message: 'Coupon code required',
+      });
+    }
+
+    /*
+    =========================================
+    APPLY
+    =========================================
+    */
+
+    const result = await checkoutService.applyCoupon(userId, couponCode);
+
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.removeCoupon = async (req, res, next) => {
+  try {
+    return res.json({
+      success: true,
+
+      message: 'Coupon removed successfully',
     });
   } catch (error) {
     next(error);

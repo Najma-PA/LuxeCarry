@@ -123,13 +123,14 @@ exports.distributeDiscount = (items, subtotal, couponDiscount) => {
     const finalPayable = Number((totalPrice - itemCouponDiscount).toFixed(2));
 
     return {
-      ...item,
-
+      product: item.product,
+      finalPrice: item.finalPrice,
+      variantDetail: item.variantDetail,
+      variant: item.variant,
+      quantity: item.quantity,
       totalPrice,
-
       couponDiscount: itemCouponDiscount,
-
-      finalPayable,
+      finalPayable
     };
   });
 };

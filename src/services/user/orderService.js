@@ -118,7 +118,7 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
 
   // Refund fields
   if (order.paymentStatus === 'Paid') {
-    item.refundAmount = item.totalPrice || item.finalPrice * item.quantity;
+    item.refundAmount = item.finalPayable || item.totalPrice || item.finalPrice * item.quantity;
     item.refundStatus = 'Pending';
   }
 
@@ -278,7 +278,7 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
   const order = await Order.findOne({
     _id: orderId,
     userId,
-  }).populate('item.product');
+  }).populate('items.product');
 
   if (!order) {
     return {
