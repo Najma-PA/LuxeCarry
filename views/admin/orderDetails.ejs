@@ -354,6 +354,10 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             
 
                           <% } %>
+                          <%if(
+                            item.status ==='Cancelled'||
+                            item.status ==='Returned'
+                          ){%>
                         <div class="bg-light p-2 rounded mt-1 border">
 
                             <div class="d-flex justify-content-between align-items-center mb-1">
@@ -391,6 +395,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             </div>
 
                         </div>
+                        <%}%>
                     </div>
 
                 </td>

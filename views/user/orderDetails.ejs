@@ -362,9 +362,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         const pDisc = item.productDiscount || 0;
                         const fPrice = item.finalPrice || item.price || 0;
                         const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
+                        const cDisc = item.couponDiscount || 0;
+                        const fPayable = item.finalPayable || (tPrice - cDisc);
                     %>
 
-                    <div class="payment-summary-item">
+                   <!-- <div class="payment-summary-item">
                         <span>Original Price</span>
                         <strong>₹<%= oPrice.toLocaleString() %></strong>
                     </div>
@@ -375,15 +377,27 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         <strong>- ₹<%= pDisc.toLocaleString() %></strong>
                     </div>
                     <% } %>
-
+                -->
                     <div class="payment-summary-item">
-                        <span>Final Price (per unit)</span>
+                        <span>Price (per unit)</span>
                         <strong>₹<%= fPrice.toLocaleString() %></strong>
                     </div>
 
-                    <div class="payment-summary-item grand-total">
-                        <span>Total Payable</span>
+                    <div class="payment-summary-item">
+                        <span>Total Price</span>
                         <strong>₹<%= tPrice.toLocaleString() %></strong>
+                    </div>
+
+                    <% if(cDisc > 0){ %>
+                    <div class="payment-summary-item text-success">
+                        <span>Coupon Discount</span>
+                        <strong>- ₹<%= cDisc.toLocaleString() %></strong>
+                    </div>
+                    <% } %>
+
+                    <div class="payment-summary-item grand-total">
+                        <span>Final Payable Amount</span>
+                        <strong>₹<%= fPayable.toLocaleString() %></strong>
                     </div>
                 </div>
 

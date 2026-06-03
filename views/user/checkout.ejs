@@ -151,8 +151,150 @@
                             </div>
                         <% }) %>
                     </div>
+                    <!-- coupon  -->
 
-                   <div class="coupon-section">
+
+                    <div class="coupon-section">
+
+                        <div class="
+                            d-flex
+                            justify-content-between
+                            align-items-center
+                            mb-3
+                        ">
+
+                            <div class="form-label mb-0">
+
+                                Available Coupons
+
+                            </div>
+
+                            <a
+                                href="/user/coupons"
+                                class="text-decoration-none fw-bold small">
+
+                                View All
+
+                            </a>
+
+                        </div>
+
+                        <!-- COUPON SELECT -->
+
+                        <div class="coupon-input-group">
+
+                            <select
+                                id="couponSelect"
+                                class="form-select">
+
+                                <option value="">
+
+                                    Select Coupon
+
+                                </option>
+
+                                <% if (coupons && coupons.length > 0) { %>
+
+                                    <% coupons.forEach(coupon => { %>
+
+                                        <option
+                                            value="<%= coupon.code %>">
+
+                                            <%= coupon.code %>
+
+                                            -
+
+                                            <% if (
+                                                coupon.discountType ===
+                                                'PERCENTAGE'
+                                            ) { %>
+
+                                                <%= coupon.discountValue %>% OFF
+
+                                            <% } else { %>
+
+                                                ₹<%= coupon.discountValue %> OFF
+
+                                            <% } %>
+
+                                        </option>
+
+                                    <% }) %>
+
+                                <% } %>
+
+                            </select>
+
+                            <!-- APPLY -->
+
+                            <button
+                                type="button"
+                                id="applyCouponBtn"
+                                class="btn-apply-coupon">
+
+                                Apply
+
+                            </button>
+
+                        </div>
+
+                        <!-- APPLIED COUPON -->
+
+                        <div
+                            id="appliedCouponBox"
+                            class="coupon-message d-none mt-3">
+
+                            <div class="
+                                d-flex
+                                justify-content-between
+                                align-items-center
+                            ">
+
+                                <div>
+
+                                    <i class="
+                                        fa-solid
+                                        fa-circle-check
+                                        text-success
+                                    "></i>
+
+                                    <span
+                                        id="appliedCouponCode">
+
+                                    </span>
+
+                                    applied successfully
+
+                                </div>
+
+                                <button
+                                    type="button"
+                                    id="removeCouponBtn"
+                                    class="
+                                        btn
+                                        btn-sm
+                                        btn-outline-danger
+                                    ">
+
+                                    Remove
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        <!-- HIDDEN INPUT -->
+
+                        <input
+                            type="hidden"
+                            id="couponCodeInput"
+                            name="couponCode">
+
+                    </div>
+
+
+                   <!--<div class="coupon-section">
                         <div class="form-label">Have a coupon code?</div>
                         <div class="coupon-input-group">
                             <input type="text" id="couponCode" class="form-control" placeholder="WELCOME10">
@@ -161,7 +303,7 @@
                         <div class="coupon-message" id="couponMsg">
                             <i class="fa-solid fa-circle-check"></i> Coupon WELCOME10 applied successfully!
                         </div>
-                    </div>
+                    </div>-->
                 
                     <div class="summary-totals">
                         <div class="total-row">
@@ -169,8 +311,12 @@
                             <span>₹<%= cart.subtotal.toLocaleString() %>.00</span>
                         </div>
                         <div class="total-row discount">
-                            <span>Discount </span>
+                            <span>Product Discount </span>
                             <span>-₹<%= cart.totalDiscount.toLocaleString() %>.00</span>
+                        </div>
+                        <div class="total-row discount"> 
+                            <span> Coupon Discount </span> 
+                            <span id="couponDiscountText"> ₹0.00 </span> 
                         </div>
                         <div class="total-row">
                             <span>Shipping</span>
@@ -179,7 +325,7 @@
 
                         <div class="total-row grand-total">
                             <span>Total</span>
-                            <span>₹<%= finalTotal.toLocaleString() %></span>
+                            <span id="finalTotalText">₹<%= finalTotal.toLocaleString() %></span>
                         </div>
                     </div>
 
@@ -338,6 +484,251 @@ function showStockErrors(errors) {
         }
         
     });
+
+
+/* =========================================
+   COUPON LOGIC
+========================================= */
+
+let appliedCoupon = null;
+
+const subtotal = <%= finalTotal %>;
+
+const couponSelect =
+  document.getElementById(
+    'couponSelect'
+  );
+
+const applyCouponBtn =
+  document.getElementById(
+    'applyCouponBtn'
+  );
+
+const removeCouponBtn =
+  document.getElementById(
+    'removeCouponBtn'
+  );
+
+const appliedCouponBox =
+  document.getElementById(
+    'appliedCouponBox'
+  );
+
+const appliedCouponCode =
+  document.getElementById(
+    'appliedCouponCode'
+  );
+
+const couponDiscountText =
+  document.getElementById(
+    'couponDiscountText'
+  );
+
+const finalTotalText =
+  document.getElementById(
+    'finalTotalText'
+  );
+
+const couponCodeInput =
+  document.getElementById(
+    'couponCodeInput'
+  );
+
+/* =========================================
+   APPLY COUPON
+========================================= */
+
+applyCouponBtn?.addEventListener(
+  'click',
+  async () => {
+
+    /*
+    PREVENT MULTIPLE
+    */
+
+    if (appliedCoupon) {
+
+      Swal.fire({
+
+        icon: 'warning',
+
+        title:
+          'Coupon Already Applied',
+
+        text:
+          'Remove existing coupon first',
+
+        confirmButtonColor:
+          '#b78846',
+
+      });
+
+      return;
+
+    }
+
+    const couponCode =
+      couponSelect.value;
+
+    if (!couponCode) {
+
+      Swal.fire({
+
+        icon: 'warning',
+
+        title:
+          'Select Coupon',
+
+        text:
+          'Please select a coupon',
+
+        confirmButtonColor:
+          '#b78846',
+
+      });
+
+      return;
+
+    }
+
+    try {
+
+      const response =
+        await fetch(
+          '/user/apply-coupon',
+          {
+
+            method: 'POST',
+
+            headers: {
+
+              'Content-Type':
+                'application/json',
+
+            },
+
+            body: JSON.stringify({
+
+              couponCode,
+
+            }),
+
+          }
+        );
+
+      const data =
+        await response.json();
+
+      /*
+      SUCCESS
+      */
+
+      if (data.success) {
+
+        appliedCoupon =
+          couponCode;
+
+        couponCodeInput.value =
+          couponCode;
+
+        appliedCouponBox
+          .classList
+          .remove('d-none');
+
+        appliedCouponCode.innerText =
+          couponCode;
+
+        couponDiscountText.innerText =
+          `- ₹${data.discount.toFixed(2)}`;
+
+        finalTotalText.innerText =
+          `₹${data.finalTotal.toFixed(2)}`;
+
+        Swal.fire({
+
+          icon: 'success',
+
+          title:
+            'Coupon Applied',
+
+          text:
+            `${couponCode} applied successfully`,
+
+          timer: 1500,
+
+          showConfirmButton: false,
+
+        });
+
+      } else {
+
+        Swal.fire({
+
+          icon: 'error',
+
+          title:
+            'Coupon Failed',
+
+          text:
+            data.message,
+
+          confirmButtonColor:
+            '#b78846',
+
+        });
+
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+    }
+
+  }
+);
+
+/* =========================================
+   REMOVE COUPON
+========================================= */
+
+removeCouponBtn?.addEventListener(
+  'click',
+  () => {
+
+    appliedCoupon = null;
+
+    couponCodeInput.value = '';
+
+    appliedCouponBox
+      .classList
+      .add('d-none');
+
+    couponDiscountText.innerText =
+      '₹0.00';
+
+    finalTotalText.innerText =
+      `₹${subtotal.toFixed(2)}`;
+
+    couponSelect.value = '';
+
+    Swal.fire({
+
+      icon: 'success',
+
+      title:
+        'Coupon Removed',
+
+      timer: 1200,
+
+      showConfirmButton: false,
+
+    });
+
+  }
+);
+
+
 </script>
 <%- include('../partials/flashAndToast') %>
 </body>
