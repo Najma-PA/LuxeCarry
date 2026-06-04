@@ -136,12 +136,10 @@ router.get('/coupons', noCache, isAdminAuth, couponController.getCouponsPage);
 
 router.post('/coupons', noCache, isAdminAuth, couponController.createCoupon);
 
-router.patch('/coupons/toggle/:id', noCache, isAdminAuth, couponController.toggleCoupon);
+router.put('/coupons/:id', noCache, isAdminAuth, couponController.editCoupon);
+
+router.patch('/coupons/:id/toggle', noCache, isAdminAuth, couponController.toggleCoupon);
 
 router.delete('/coupons/:id', noCache, isAdminAuth, couponController.deleteCoupon);
-
-//router.get('/coupons/edit/:id', noCache, isAdminAuth, couponController.loadEditCouponPage);
-
-//router.post('/coupons/edit/:id', noCache, isAdminAuth, couponController.updateCoupon);
 
 module.exports = router;

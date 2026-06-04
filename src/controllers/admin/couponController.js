@@ -1,15 +1,11 @@
 const couponService = require('../../services/admin/couponService');
 
-/* =========================================
-   GET COUPON PAGE
-========================================= */
-
 exports.getCouponsPage = async (req, res, next) => {
   try {
     const {
       search = '',
 
-      status = 'active',
+      status = '',
 
       page = 1,
     } = req.query;
@@ -22,10 +18,7 @@ exports.getCouponsPage = async (req, res, next) => {
       page,
     });
 
-    /*
-      AJAX
-      */
-
+    //ajax
     if (req.headers.accept?.includes('application/json')) {
       return res.json({
         success: true,
@@ -48,10 +41,6 @@ exports.getCouponsPage = async (req, res, next) => {
   }
 };
 
-/* =========================================
-   CREATE COUPON
-========================================= */
-
 exports.createCoupon = async (req, res, next) => {
   try {
     const result = await couponService.createCoupon(req.body);
@@ -61,10 +50,6 @@ exports.createCoupon = async (req, res, next) => {
     next(error);
   }
 };
-
-/* =========================================
-   TOGGLE COUPON
-========================================= */
 
 exports.toggleCoupon = async (req, res, next) => {
   try {
@@ -76,14 +61,18 @@ exports.toggleCoupon = async (req, res, next) => {
   }
 };
 
-/* =========================================
-   DELETE COUPON
-========================================= */
-
 exports.deleteCoupon = async (req, res, next) => {
   try {
     const result = await couponService.deleteCoupon(req.params.id);
 
+    return res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+exports.editCoupon = async (req, res, next) => {
+  try {
+    const result = await couponService.updateCoupon(req.params.id, req.body);
     return res.json(result);
   } catch (error) {
     next(error);

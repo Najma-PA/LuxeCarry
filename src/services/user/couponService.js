@@ -34,10 +34,6 @@ exports.calculateDiscount = (coupon, subtotal) => {
   if (coupon.discountType === 'PERCENTAGE') {
     discount = (subtotal * coupon.discountValue) / 100;
 
-    /*
-      MAXIMUM CAP
-      */
-
     if (coupon.maximumDiscount > 0) {
       discount = Math.min(discount, coupon.maximumDiscount);
     }
@@ -54,10 +50,6 @@ exports.validateCoupon = async (couponCode, subtotal) => {
 
     isActive: true,
   });
-
-  /*
-    INVALID
-    */
 
   if (!coupon) {
     return {
@@ -82,10 +74,6 @@ exports.validateCoupon = async (couponCode, subtotal) => {
       message: `Minimum order amount is ₹${coupon.minimumOrderAmount}`,
     };
   }
-
-  /*
-    USAGE LIMIT
-    */
 
   if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) {
     return {
@@ -130,7 +118,7 @@ exports.distributeDiscount = (items, subtotal, couponDiscount) => {
       quantity: item.quantity,
       totalPrice,
       couponDiscount: itemCouponDiscount,
-      finalPayable
+      finalPayable,
     };
   });
 };

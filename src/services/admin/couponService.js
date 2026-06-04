@@ -1,9 +1,5 @@
 const Coupon = require('../../models/couponModel');
 
-/* =========================================
-   GET COUPONS
-========================================= */
-
 exports.getCoupons = async ({
   search,
 
@@ -17,10 +13,6 @@ exports.getCoupons = async ({
 
   const query = {};
 
-  /*
-    SEARCH
-    */
-
   if (search) {
     query.code = {
       $regex: search,
@@ -28,10 +20,6 @@ exports.getCoupons = async ({
       $options: 'i',
     };
   }
-
-  /*
-    STATUS
-    */
 
   if (status === 'active') {
     query.isActive = true;
@@ -59,10 +47,6 @@ exports.getCoupons = async ({
     totalPages: Math.ceil(totalCoupons / limit),
   };
 };
-
-/* =========================================
-   CREATE COUPON
-========================================= */
 
 exports.createCoupon = async (data) => {
   const existingCoupon = await Coupon.findOne({
@@ -98,10 +82,6 @@ exports.createCoupon = async (data) => {
   };
 };
 
-/* =========================================
-   TOGGLE COUPON
-========================================= */
-
 exports.toggleCoupon = async (id) => {
   const coupon = await Coupon.findById(id);
 
@@ -120,4 +100,26 @@ exports.deleteCoupon = async (id) => {
   return {
     success: true,
   };
+};
+exports.updateCoupon = async (id, data) => {
+  const coupon = await Coupon.findById(id);
+  if (!coupon) {
+    return { success: false, message: 'Coupon not found' };
+  }
+  const mongoose = require('mongoose');
+  const existingCoupon = await Coupon.findOne({
+    code: data.code.toUpperCase(),
+    _id: { $ne: new mongoose.Types.ObjectId(id) },
+  });
+  if (existingCoupon) {
+    return { success: false, message: 'Coupon code already exist' };
+  }
+  coupon.code = data.code.toUpperCase();
+  coupon.discountType = data.discountType;
+  coupon.discountValue = data.discountValue;
+  coupon.minimumOrderAmount = data.minimumOrderAmount;
+  coupon.expiryDate = data.expiryDate;
+  coupon.maximumDiscount = data.maximumDiscount || 0;
+  await coupon.save();
+  return { success: true, coupon };
 };

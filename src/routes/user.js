@@ -83,6 +83,7 @@ router.get('/cart/items-status', isUserAuth, cartController.getCartItemsStatus);
 
 // Checkout
 router.get('/checkout', isUserAuth, checkoutController.getCheckoutPage);
+router.post('/verify-payment', isUserAuth, checkoutController.verifyPayment);
 router.post('/order-place', isUserAuth, checkoutController.placeOrder);
 
 router.get('/coupons', isUserAuth, checkoutController.getCouponsPage);

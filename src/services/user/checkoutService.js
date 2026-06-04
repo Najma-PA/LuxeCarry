@@ -1,10 +1,11 @@
 const cartService = require('./cartService');
 const couponService = require('./couponService');
+
 const Address = require('../../models/addressModel');
 const Order = require('../../models/orderModel');
 const Product = require('../../models/productModel');
 const Cart = require('../../models/cartModel');
-
+const walletController = require('../../controllers/user/walletController');
 exports.getCheckoutData = async (userId) => {
   const cart = await cartService.getCart(userId);
 
@@ -16,7 +17,6 @@ exports.getCheckoutData = async (userId) => {
     };
   }
 
-  // Validate stock
   const validation = await cartService.validateCart(userId);
 
   if (!validation.success) {
@@ -31,8 +31,8 @@ exports.getCheckoutData = async (userId) => {
     isDefault: -1,
     createdAt: -1,
   });
+
   const coupons = await couponService.getEligibleCoupons(cart.total);
-  //const finalTotal = cart.total;
 
   return {
     success: true,
@@ -42,16 +42,21 @@ exports.getCheckoutData = async (userId) => {
     finalTotal: cart.total,
   };
 };
+
 exports.applyCoupon = async (userId, couponCode) => {
   const cart = await cartService.getCart(userId);
+
   if (!cart || cart.items.length === 0) {
-    return { success: false, message: 'Cart is empty' };
+    return {
+      success: false,
+      message: 'Cart is empty',
+    };
   }
+
   return await couponService.validateCoupon(couponCode, cart.total);
 };
 
 exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) => {
-  // Validate address
   const address = await Address.findById(addressId);
 
   if (!address) {
@@ -62,7 +67,6 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
     };
   }
 
-  // Get cart
   const cart = await cartService.getCart(userId);
 
   if (!cart || cart.items.length === 0) {
@@ -73,7 +77,6 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
     };
   }
 
-  // Validate stock
   const validation = await cartService.validateCart(userId);
 
   if (!validation.success) {
@@ -84,71 +87,102 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
     };
   }
 
-  // Pricing
-
   const subtotal = cart.total;
+
   let coupon = null;
   let couponDiscount = 0;
+
   if (couponCode) {
     const couponResult = await couponService.validateCoupon(couponCode, subtotal);
-    if (!couponResult.success) {
+
+    if (couponResult.success) {
+      coupon = couponResult.coupon;
+
+      couponDiscount = couponResult.discount;
+    }
+  }
+
+  const finalTotal = subtotal - couponDiscount;
+  if (paymentMethod === 'WALLET') {
+    try {
+      await walletController.debitWallet({
+        userId,
+
+        amount: finalTotal,
+
+        transactionType: 'ORDER_PAYMENT',
+
+        description: 'Payment for order',
+      });
+    } catch (error) {
       return {
         success: false,
-
-        message: couponResult.message,
+        message: error.message,
       };
     }
-
-    coupon = couponResult.coupon;
-    couponDiscount = couponResult.discount;
   }
-  const finalTotal = Number(subtotal - couponDiscount).toFixed(2);
   const distributedItems = couponService.distributeDiscount(cart.items, subtotal, couponDiscount);
-  // Build order items
+
   const orderItems = [];
 
   for (const item of distributedItems) {
     const originalPrice = item.product.price;
+
     const finalPrice = item.finalPrice;
+
     const productDiscount = originalPrice - finalPrice;
-    // const totalPrice = finalPrice * item.quantity;
 
     const variantDetail = item.variantDetail;
+
     const productImage = item.product.thumbnail?.url || item.product.displayImage || '';
 
     orderItems.push({
       product: item.product._id,
+
       productName: item.product.name,
+
       productImage,
+
       variant: item.variant || null,
+
       variantValue: variantDetail ? variantDetail.value : null,
+
       quantity: item.quantity,
+
       originalPrice,
+
       productDiscount,
+
       finalPrice,
+
       totalPrice: item.totalPrice,
+
       couponDiscount: item.couponDiscount,
+
       finalPayable: item.finalPayable,
+
       status: 'Pending',
     });
 
-    // Deduct stock
     if (item.variant) {
       await Product.updateOne(
         {
-          _id: item.product,
+          _id: item.product._id,
           'variants._id': item.variant,
         },
         {
           $inc: {
             stock: -item.quantity,
+
             'variants.$.stock': -item.quantity,
           },
         }
       );
     } else {
       await Product.updateOne(
-        { _id: item.product._id },
+        {
+          _id: item.product._id,
+        },
         {
           $inc: {
             stock: -item.quantity,
@@ -158,7 +192,6 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
     }
   }
 
-  // Create order
   const order = await Order.create({
     userId,
 
@@ -176,20 +209,28 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
 
     paymentMethod,
 
-    paymentStatus: paymentMethod === 'COD' ? 'Pending' : 'Paid',
+    paymentStatus: paymentMethod === 'RAZORPAY' ? 'Paid' : 'Pending',
 
     orderStatus: 'Pending',
+
     subtotal,
+
     couponCode: coupon?.code || '',
+
     couponDiscount,
+
     finalAmount: finalTotal,
+
     totalAmount: finalTotal,
   });
+
   if (coupon) {
     await couponService.incrementUsage(coupon._id);
   }
-  // Clear cart
-  await Cart.deleteOne({ user: userId });
+
+  await Cart.deleteOne({
+    user: userId,
+  });
 
   return {
     success: true,

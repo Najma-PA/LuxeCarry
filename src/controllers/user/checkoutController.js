@@ -1,7 +1,9 @@
 const checkoutService = require('../../services/user/checkoutService');
 
 const couponService = require('../../services/user/couponService');
-
+const razorpayService = require('../../services/payment/razorpayService');
+const walletService = require('../../services/user/walletService');
+const crypto = require('crypto');
 const mongoose = require('mongoose');
 
 exports.getCheckoutPage = async (req, res, next) => {
@@ -18,12 +20,17 @@ exports.getCheckoutPage = async (req, res, next) => {
       if (result.message) req.flash('error', result.message);
       return res.redirect(result.redirect || '/user/cart');
     }
+    let wallet = await walletService.findWalletByUserId(userId);
 
+    if (!wallet) {
+      wallet = await walletService.createWallet(userId);
+    }
     res.render('user/checkout', {
       cart: result.cart,
       addresses: result.addresses,
       coupons: result.coupons,
       finalTotal: result.finalTotal,
+      wallet,
       user: req.session.user,
     });
   } catch (error) {
@@ -52,7 +59,66 @@ exports.placeOrder = async (req, res, next) => {
     if (!mongoose.Types.ObjectId.isValid(addressId)) {
       return res.status(400).json({ success: false, message: 'Invalid shipping address' });
     }
+    if (paymentMethod === 'RAZORPAY') {
+      const checkoutData = await checkoutService.getCheckoutData(userId);
+      if (!checkoutData.success) {
+        return res.status(400).json({
+          success: false,
+          message: checkoutData.message,
+        });
+      }
+      let finalAmount = checkoutData.finalTotal;
 
+      if (couponCode) {
+        const couponResult = await checkoutService.applyCoupon(userId, couponCode);
+
+        if (couponResult.success) {
+          finalAmount = couponResult.finalTotal;
+        }
+      }
+
+      const razorpayOrder = await razorpayService.createOrder(finalAmount);
+
+      return res.json({
+        success: true,
+
+        razorpay: true,
+
+        key: process.env.RAZORPAY_KEY_ID,
+
+        amount: razorpayOrder.amount,
+
+        currency: razorpayOrder.currency,
+
+        razorpayOrderId: razorpayOrder.id,
+      });
+    }
+    if (paymentMethod === 'WALLET') {
+      let wallet = await walletService.findWalletByUserId(userId);
+
+      if (!wallet) {
+        wallet = await walletService.createWallet(userId);
+      }
+
+      const checkoutData = await checkoutService.getCheckoutData(userId);
+
+      let finalAmount = checkoutData.finalTotal;
+
+      if (couponCode) {
+        const couponResult = await checkoutService.applyCoupon(userId, couponCode);
+
+        if (couponResult.success) {
+          finalAmount = couponResult.finalTotal;
+        }
+      }
+
+      if (wallet.balance < finalAmount) {
+        return res.status(400).json({
+          success: false,
+          message: 'Insufficient wallet balance',
+        });
+      }
+    }
     const result = await checkoutService.createOrder({
       userId,
       addressId,
@@ -82,37 +148,15 @@ exports.placeOrder = async (req, res, next) => {
   }
 };
 
-/* =========================================
-   GET USER COUPON PAGE
-========================================= */
-
 exports.getCouponsPage = async (req, res, next) => {
   try {
     const userId = req.user ? req.user._id : req.session.user ? req.session.user.id : null;
-
-    /*
-    =========================================
-    AUTH CHECK
-    =========================================
-    */
 
     if (!userId) {
       return res.redirect('/user/login');
     }
 
-    /*
-    =========================================
-    GET ALL ACTIVE COUPONS
-    =========================================
-    */
-
     const coupons = await couponService.getAllCoupons();
-
-    /*
-    =========================================
-    RENDER PAGE
-    =========================================
-    */
 
     res.render('user/coupons', {
       user: req.session.user,
@@ -126,21 +170,11 @@ exports.getCouponsPage = async (req, res, next) => {
   }
 };
 
-/* =========================================
-   APPLY COUPON
-========================================= */
-
 exports.applyCoupon = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
     const { couponCode } = req.body;
-
-    /*
-    =========================================
-    VALIDATE
-    =========================================
-    */
 
     if (!couponCode) {
       return res.json({
@@ -149,12 +183,6 @@ exports.applyCoupon = async (req, res, next) => {
         message: 'Coupon code required',
       });
     }
-
-    /*
-    =========================================
-    APPLY
-    =========================================
-    */
 
     const result = await checkoutService.applyCoupon(userId, couponCode);
 
@@ -170,6 +198,50 @@ exports.removeCoupon = async (req, res, next) => {
       success: true,
 
       message: 'Coupon removed successfully',
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+exports.verifyPayment = async (req, res, next) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+
+      addressId,
+      paymentMethod,
+      couponCode,
+    } = req.body;
+
+    const generatedSignature = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(razorpay_order_id + '|' + razorpay_payment_id)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.json({
+        success: false,
+
+        message: 'Payment verification failed',
+      });
+    }
+
+    const result = await checkoutService.createOrder({
+      userId: req.user._id,
+
+      addressId,
+
+      paymentMethod,
+
+      couponCode,
+    });
+
+    return res.json({
+      success: true,
+
+      orderId: result.order._id,
     });
   } catch (error) {
     next(error);
