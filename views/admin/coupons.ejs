@@ -61,7 +61,6 @@
 
             </div>
 
-            <!-- ADD BUTTON -->
 
             <button
                 class="btn-gold"
@@ -78,11 +77,7 @@
 
         </div>
 
-        <!-- COUPON CARD -->
-
         <div class="card-shadow p-4">
-
-            <!-- SEARCH + FILTER -->
 
             <div class="row g-3 mb-4">
 
@@ -127,9 +122,7 @@
 
                         <div class="col-lg-4 col-md-6">
 
-                            <div class="admin-coupon-card">
-
-                                <!-- LEFT -->
+                            <div class="admin-coupon-card <%= !coupon.isActive ? 'coupon-disabled' : '' %>">
 
                                 <div class="admin-coupon-left">
 
@@ -159,20 +152,12 @@
 
                                 </div>
 
-                                <!-- RIGHT -->
-
                                 <div class="admin-coupon-right">
-
-                                    <!-- CODE -->
-
                                     <div class="admin-coupon-code">
 
                                         <%= coupon.code %>
 
                                     </div>
-
-                                    <!-- EXPIRY -->
-
                                     <div class="admin-coupon-expiry">
 
                                         <i class="fa-regular fa-calendar"></i>
@@ -182,10 +167,7 @@
                                         <%= new Date(coupon.expiryDate).toLocaleDateString('en-IN') %>
 
                                     </div>
-
-                                    <!-- STATUS -->
-
-                                    <div class="mb-3">
+                                    <div class="mb-2">
 
                                         <% if (coupon.isActive) { %>
 
@@ -200,46 +182,57 @@
                                             </span>
 
                                         <% } %>
-
                                     </div>
+                                            <div class="admin-coupon-actions">
 
-                                    <!-- ACTIONS -->
+                                                <button
+                                                    onclick='openEditCouponModal(
+                                                        "<%= coupon._id %>",
+                                                        "<%= coupon.code %>",
+                                                        "<%= coupon.discountType %>",
+                                                        "<%= coupon.discountValue %>",
+                                                        "<%= coupon.minimumOrderAmount %>",
+                                                        "<%= coupon.maximumDiscount %>",
+                                                        "<%= new Date(coupon.expiryDate)
+                                                            .toISOString()
+                                                            .split("T")[0] %>"
+                                                    )'
+                                                    class="btn btn-sm btn-outline-primary">
 
-                                    <div class="admin-coupon-actions">
+                                                    Edit
 
-                                        <!-- TOGGLE -->
+                                                </button>
 
-                                        <button
-                                            class="
-                                                btn
-                                                btn-sm
-                                                <%= coupon.isActive
-                                                    ? 'btn-outline-warning'
-                                                    : 'btn-outline-success'
-                                                %>
-                                            ">
+                                                <button
+                                                    onclick="toggleCoupon('<%= coupon._id %>')"
+                                                    class="
+                                                        btn
+                                                        btn-sm
+                                                        <%= coupon.isActive
+                                                            ? 'btn-outline-warning'
+                                                            : 'btn-outline-success'
+                                                        %>">
 
-                                            <%= coupon.isActive
-                                                ? 'Disable'
-                                                : 'Enable'
-                                            %>
+                                                    <%= coupon.isActive
+                                                        ? 'Disable'
+                                                        : 'Enable'
+                                                    %>
 
-                                        </button>
+                                                </button>
 
-                                        <!-- DELETE -->
+                                                <button
+                                                    onclick="deleteCoupon('<%= coupon._id %>')"
+                                                    class="
+                                                        btn
+                                                        btn-sm
+                                                        btn-outline-danger
+                                                    ">
 
-                                        <button
-                                            class="
-                                                btn
-                                                btn-sm
-                                                btn-outline-danger
-                                            ">
+                                                    Delete
 
-                                            Delete
+                                                </button>
 
-                                        </button>
-
-                                    </div>
+                                            </div>
 
                                 </div>
 
@@ -250,9 +243,6 @@
                     <% }) %>
 
                 <% } else { %>
-
-                    <!-- EMPTY -->
-
                     <div class="col-12">
 
                         <div class="text-center py-5">
@@ -290,11 +280,6 @@
     </div>
 
 </div>
-
-<!-- =========================================
-     ADD COUPON MODAL
-========================================= -->
-
 <div
     class="modal fade"
     id="addCouponModal"
@@ -305,9 +290,6 @@
         <div class="modal-content">
 
             <div class="modal-body p-4">
-
-                <!-- HEADER -->
-
                 <div class="
                     d-flex
                     justify-content-between
@@ -329,14 +311,8 @@
 
                 </div>
 
-                <!-- FORM -->
-
                 <form
-                    action="/admin/coupons"
-                    method="POST">
-
-                    <!-- CODE -->
-
+                    action="/admin/coupons" method="POST">
                     <div class="mb-3">
 
                         <label class="form-label">
@@ -357,13 +333,7 @@
                             required>
 
                     </div>
-
-                    <!-- TYPE + VALUE -->
-
                     <div class="row">
-
-                        <!-- TYPE -->
-
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">
@@ -394,9 +364,6 @@
                             </select>
 
                         </div>
-
-                        <!-- VALUE -->
-
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">
@@ -417,13 +384,7 @@
                         </div>
 
                     </div>
-
-                    <!-- MIN + MAX -->
-
                     <div class="row">
-
-                        <!-- MIN ORDER -->
-
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">
@@ -442,9 +403,6 @@
                                 required>
 
                         </div>
-
-                        <!-- MAX DISCOUNT -->
-
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">
@@ -465,9 +423,6 @@
                         </div>
 
                     </div>
-
-                    <!-- EXPIRY -->
-
                     <div class="mb-4">
 
                         <label class="form-label">
@@ -486,9 +441,6 @@
                             required>
 
                     </div>
-
-                    <!-- SUBMIT -->
-
                     <button
                         type="submit"
                         class="btn-gold w-100">
@@ -507,10 +459,382 @@
 
 </div>
 
-<!-- BOOTSTRAP -->
+
+<div
+    class="modal fade"
+    id="editCouponModal"
+    tabindex="-1">
+
+    <div class="modal-dialog modal-dialog-centered">
+
+        <div class="modal-content">
+
+            <div class="modal-body p-4">
+                <div class="
+                    d-flex
+                    justify-content-between
+                    align-items-center
+                    mb-4
+                ">
+
+                    <h4 class="fw-bold mb-0">
+
+                        Edit Coupon
+
+                    </h4>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal">
+                    </button>
+
+                </div>
+                <form id="editCouponForm">
+
+                    <input
+                        type="hidden"
+                        id="editCouponId">
+                    <div class="mb-3">
+
+                        <label class="form-label">
+
+                            Coupon Code
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="editCode"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+
+                                Coupon Type
+
+                            </label>
+
+                            <select
+                                id="editDiscountType"
+                                class="form-select">
+
+                                <option value="FIXED">
+
+                                    Fixed Amount
+
+                                </option>
+
+                                <option value="PERCENTAGE">
+
+                                    Percentage
+
+                                </option>
+
+                            </select>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+
+                                Discount Value
+
+                            </label>
+
+                            <input
+                                type="number"
+                                id="editDiscountValue"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+
+                                Minimum Order Amount
+
+                            </label>
+
+                            <input
+                                type="number"
+                                id="editMinimumAmount"
+                                class="form-control"
+                                required>
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+
+                            <label class="form-label">
+
+                                Maximum Discount
+
+                            </label>
+
+                            <input
+                                type="number"
+                                id="editMaximumDiscount"
+                                class="form-control">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="mb-4">
+
+                        <label class="form-label">
+
+                            Expiry Date
+
+                        </label>
+
+                        <input
+                            type="date"
+                            id="editExpiryDate"
+                            class="form-control"
+                            required>
+
+                    </div>
+
+                    <button
+                        type="submit"
+                        class="btn-gold w-100">
+
+                        Update Coupon
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<script>
+
+
+
+function openEditCouponModal(
+    id,
+    code,
+    type,
+    discountValue,
+    minimumOrderAmount,
+    maximumDiscount,
+    expiryDate
+) {
+
+    document.getElementById(
+        'editCouponId'
+    ).value = id;
+
+    document.getElementById(
+        'editCode'
+    ).value = code;
+
+    document.getElementById(
+        'editDiscountType'
+    ).value = type;
+
+    document.getElementById(
+        'editDiscountValue'
+    ).value = discountValue;
+
+    document.getElementById(
+        'editMinimumAmount'
+    ).value = minimumOrderAmount;
+
+    document.getElementById(
+        'editMaximumDiscount'
+    ).value = maximumDiscount;
+
+    document.getElementById(
+        'editExpiryDate'
+    ).value = expiryDate;
+
+    new bootstrap.Modal(
+        document.getElementById(
+            'editCouponModal'
+        )
+    ).show();
+
+}
+
+
+document
+.getElementById(
+    'editCouponForm'
+)
+.addEventListener(
+    'submit',
+
+    async function (e) {
+
+        e.preventDefault();
+
+        const id =
+            document.getElementById(
+                'editCouponId'
+            ).value;
+
+        const response =
+            await fetch(
+
+                `/admin/coupons/${id}`,
+
+                {
+
+                    method: 'PUT',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json',
+
+                    },
+
+                    body: JSON.stringify({
+
+                        code:
+                            document.getElementById(
+                                'editCode'
+                            ).value,
+
+                        discountType:
+                            document.getElementById(
+                                'editDiscountType'
+                            ).value,
+
+                        discountValue:
+                            document.getElementById(
+                                'editDiscountValue'
+                            ).value,
+
+                        minimumOrderAmount:
+                            document.getElementById(
+                                'editMinimumAmount'
+                            ).value,
+
+                        maximumDiscount:
+                            document.getElementById(
+                                'editMaximumDiscount'
+                            ).value,
+
+                        expiryDate:
+                            document.getElementById(
+                                'editExpiryDate'
+                            ).value,
+
+                    }),
+
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (data.success) {
+
+            location.reload();
+
+        } else {
+
+            alert(data.message);
+
+        }
+
+    }
+);
+
+
+
+async function deleteCoupon(id) {
+    const result = await Swal.fire({
+        title: 'Delete this coupon?',
+        text: 'This action cannot be undone.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#c26a00',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Yes, delete it!'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            const response = await fetch(`/admin/coupons/${id}`, {
+                method: 'DELETE',
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Deleted!',
+                    text: 'Coupon has been deleted.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire('Error', data.message || 'Failed to delete coupon', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'An unexpected error occurred', 'error');
+        }
+    }
+}
+
+
+async function toggleCoupon(id) {
+
+    const response =
+        await fetch(
+
+            `/admin/coupons/${id}/toggle`,
+
+            {
+                method: 'PATCH',
+            }
+        );
+
+    const data =
+        await response.json();
+
+    if (data.success) {
+
+        location.reload();
+
+    }
+
+}
+
+</script>
 </body>
 </html>
 
