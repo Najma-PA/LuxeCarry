@@ -110,7 +110,7 @@ exports.cancelOrder = async (req, res, next) => {
     if (!item.refundProcessed) {
       const walletTransaction = await walletController.creditWallet({
         userId: order.userId,
-        amount: item.totalPrice,
+        amount: item.finalPayable,
         transactionType: 'ORDER_REFUND',
         description: `Refund for cancelled ${item.product?.name || 'product'}`,
         orderId: order._id,
