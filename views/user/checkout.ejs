@@ -636,9 +636,6 @@ if (result.success) {
     });
 
 
-/* =========================================
-   COUPON LOGIC
-========================================= */
 
 let appliedCoupon = null;
 
@@ -684,18 +681,13 @@ const couponCodeInput =
     'couponCodeInput'
   );
 
-/* =========================================
-   APPLY COUPON
-========================================= */
+
 
 applyCouponBtn?.addEventListener(
   'click',
   async () => {
 
-    /*
-    PREVENT MULTIPLE
-    */
-
+  
     if (appliedCoupon) {
 
       Swal.fire({
@@ -794,7 +786,7 @@ applyCouponBtn?.addEventListener(
         finalTotalText.innerText =
           `₹${data.finalTotal.toFixed(2)}`;
 
-        Swal.fire({
+       /* Swal.fire({
 
           icon: 'success',
 
@@ -809,7 +801,7 @@ applyCouponBtn?.addEventListener(
           showConfirmButton: false,
 
         });
-
+*/
       } else {
 
         Swal.fire({
@@ -838,9 +830,7 @@ applyCouponBtn?.addEventListener(
   }
 );
 
-/* =========================================
-   REMOVE COUPON
-========================================= */
+
 
 removeCouponBtn?.addEventListener(
   'click',
