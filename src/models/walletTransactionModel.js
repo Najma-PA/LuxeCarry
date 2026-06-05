@@ -25,6 +25,7 @@ const walletTransactionSchema = new mongoose.Schema(
 
       enum: [
         'REFERRAL',
+        'ORDER_PAYMENT',
         'ORDER_REFUND',
         'RETURN_REFUND',
         'TOPUP',

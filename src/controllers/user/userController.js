@@ -10,6 +10,7 @@ const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
 const Wishlist = require('../../models/wishlistModel');
 const Banner = require('../../models/bannerModel');
+const User = require('../../models/userModel');
 // OTP generator
 function generateOtp() {
   const digits = '1234567890';
@@ -241,11 +242,15 @@ exports.resetPassword = async (req, res) => {
 
 /*REGISTER */
 exports.showRegister = (req, res) => {
-  res.render('user/signup', { error: null, errors: {}, formData: {} });
+  res.render('user/signup', {
+    error: null,
+    errors: {},
+    formData: { referralCode: req.query.ref || '' },
+  });
 };
 
 exports.registerUser = async (req, res) => {
-  let { name, email, password, confirmPassword } = req.body;
+  let { name, email, password, confirmPassword, referralCode } = req.body;
 
   name = name?.trim();
   email = email?.trim();
@@ -256,7 +261,16 @@ exports.registerUser = async (req, res) => {
   const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{6,}$/;
 
   let errors = {};
-
+  //referalCode
+  let referredBy = null;
+  if (referralCode) {
+    const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+    if (!referrer) {
+      errors.referralCode = 'Invalid referal code';
+    } else {
+      referredBy = referrer._id;
+    }
+  }
   //Name validation
   if (!name) {
     errors.name = 'Name is required';
@@ -300,7 +314,7 @@ exports.registerUser = async (req, res) => {
 
   const otp = generateOtp();
 
-  req.session.signupData = { name, email, password };
+  req.session.signupData = { name, email, password, referredBy };
   req.session.signupOTP = otp;
   req.session.otpExpire = Date.now() + 5 * 60 * 1000;
 
@@ -660,7 +674,19 @@ exports.deleteAddress = async (req, res) => {
     });
   }
 };
-
+//referralPage
+exports.getReferralPage = async (req, res, next) => {
+  try {
+    const user = await userService.findUserById(req.session.user.id);
+    res.render('user/referral', {
+      user,
+      activePage: 'referral',
+      req
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 //LOGOUT
 exports.userLogout = (req, res) => {
   req.logout((err) => {

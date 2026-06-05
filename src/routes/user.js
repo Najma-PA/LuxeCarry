@@ -112,6 +112,9 @@ router.patch('/cart/update/:id', isUserAuth, cartController.updateQuantity);
 router.delete('/cart/item/:id', isUserAuth, cartController.removeItem);
 //wallet
 router.get('/wallet', isUserAuth, walletController.getWalletPage);
+//referal page
+router.get('/referral', isUserAuth, userController.getReferralPage);
+
 // OTP
 router.get('/verifyOtp', noCache, userController.showVerifyOTP);
 router.post('/verifyOtp', noCache, userController.verifyOTP);

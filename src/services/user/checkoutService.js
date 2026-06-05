@@ -5,7 +5,10 @@ const Address = require('../../models/addressModel');
 const Order = require('../../models/orderModel');
 const Product = require('../../models/productModel');
 const Cart = require('../../models/cartModel');
+const User = require('../../models/userModel');
+
 const walletController = require('../../controllers/user/walletController');
+
 exports.getCheckoutData = async (userId) => {
   const cart = await cartService.getCart(userId);
 
@@ -209,7 +212,7 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
 
     paymentMethod,
 
-    paymentStatus: paymentMethod === 'RAZORPAY' ? 'Paid' : 'Pending',
+    paymentStatus: ['RAZORPAY', 'WALLET'].includes(paymentMethod) ? 'Paid' : 'Pending',
 
     orderStatus: 'Pending',
 
@@ -224,6 +227,28 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
     totalAmount: finalTotal,
   });
 
+  const user = await User.findById(userId);
+  if (user.referredBy && !user.referralRewardClaimed) {
+    const rewardAmount = 50;
+    //reward to new user
+    await walletController.creditWallet({
+      userId: user._id,
+      amount: rewardAmount,
+      transactionType: 'REFERRAL',
+      description: 'Referral reward',
+      orderId: order._id,
+    });
+    await walletController.creditWallet({
+      userId: user.referredBy,
+      amount: 100,
+      transactionType: 'REFERRAL',
+      description: 'Referral earnings',
+      orderId: order._id,
+    });
+    user.referralRewardClaimed = true;
+
+    await user.save();
+  }
   if (coupon) {
     await couponService.incrementUsage(coupon._id);
   }
