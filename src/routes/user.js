@@ -93,6 +93,7 @@ router.post('/apply-coupon', isUserAuth, checkoutController.applyCoupon);
 router.post('/remove-coupon', isUserAuth, checkoutController.removeCoupon);
 
 //orders
+router.get('/payment-failure', isUserAuth, checkoutController.getPaymentFailurePage);
 router.get('/order-success/:orderId', isUserAuth, orderController.getOrderSuccessPage);
 router.get('/orders/filter', isUserAuth, orderController.filterOrders);
 router.get('/orders', isUserAuth, orderController.getUserOrders);

@@ -147,7 +147,11 @@ exports.placeOrder = async (req, res, next) => {
     next(error);
   }
 };
-
+exports.getPaymentFailurePage = (req, res) => {
+  res.render('user/payment-failure', {
+    user: req.user,
+  });
+};
 exports.getCouponsPage = async (req, res, next) => {
   try {
     const userId = req.user ? req.user._id : req.session.user ? req.session.user.id : null;
