@@ -321,6 +321,7 @@
                             <span> Coupon Discount </span> 
                             <span id="couponDiscountText"> ₹0.00 </span> 
                         </div>
+                        
                         <div class="total-row">
                             <span>Shipping</span>
                             <span class="text-success fw-bold">Free</span>
@@ -328,7 +329,9 @@
 
                         <div class="total-row grand-total">
                             <span>Total</span>
-                            <span id="finalTotalText">₹<%= finalTotal.toLocaleString() %></span>
+                            <span id="finalTotalText">₹<%= finalTotal
+                                -(user.referredBy && !user.referralOfferUsed ? cart.total *0.10:0)
+                                .toFixed(2) %></span>
                         </div>
                     </div>
 
@@ -593,23 +596,10 @@ if (result.success) {
 
                     showStockErrors(result.errors);
 
-                   /* Swal.fire({
-                        icon: 'warning',
-                        title: 'Some items need attention',
-                        text: 'Please review the highlighted products.',
-                        confirmButtonColor: '#b78846'
-                    });*/
-
                     return;
                 }
-/*
+
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Checkout Failed',
-                    text: result.message || 'There was an issue processing your order.',
-                    confirmButtonColor: '#b78846'
-                });*/
-                /*Swal.fire({
                     icon: 'error',
                     title: 'Checkout Failed',
                     text: result.message || 'There was an issue processing your order.',
@@ -618,7 +608,7 @@ if (result.success) {
                     if (result.redirect) {
                         window.location.href = result.redirect;
                     }
-                });*/
+                });
             }
         } catch (error) {
             console.error(error);
