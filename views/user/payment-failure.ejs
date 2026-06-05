@@ -1,48 +1,71 @@
-<div class="container py-5 text-center">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
 
-  <div class="mb-4">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <i
-      class="
-        fa-solid
-        fa-circle-xmark
-        text-danger
-      "
-      style="font-size: 90px;">
-    </i>
+    <title>Payment Failed | LuxeCarry</title>
 
-  </div>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
-  <h1 class="fw-bold mb-3">
-    Payment Failed
-  </h1>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
-  <p class="text-muted mb-4">
-    Your payment could not be completed.
-  </p>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
-  <div class="
-      d-flex
-      justify-content-center
-      gap-3
-  ">
+    <link rel="stylesheet" href="/css/style.css" />
+  </head>
 
-    <a
-      href="/user/checkout"
-      class="btn btn-dark">
+  <body>
+    <%- include('../partials/user/navbar') %>
 
-      Retry Payment
+    <div class="order-success-wrapper">
+      <div class="success-card payment-failed-card">
+        <!-- Failed Icon -->
+        <div class="payment-failed-icon">
+          <i class="fa-solid fa-xmark"></i>
+        </div>
 
-    </a>
+        <!-- Heading -->
+        <h1 class="success-title">Payment Failed</h1>
 
-    <a
-      href="/shop"
-      class="btn btn-outline-dark">
+        <p class="success-subtitle">
+          Your payment could not be completed. Please retry the payment or continue later.
+        </p>
 
-      Continue Shopping
+        <!-- Summary -->
+        <div class="order-summary-box">
+          <div class="summary-row">
+            <span class="summary-label"> Payment Method </span>
 
-    </a>
+            <span class="summary-value"> Razorpay </span>
+          </div>
 
-  </div>
+          <div class="summary-row">
+            <span class="summary-label"> Status </span>
 
-</div>
+            <span class="summary-value text-danger"> Failed </span>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="success-actions">
+          <a href="/user/checkout" class="btn-order-primary"> Retry Payment </a>
+
+          <a href="/user/cart" class="btn-order-outline"> Cancel </a>
+        </div>
+      </div>
+    </div>
+
+    <%- include('../partials/user/footer-short') %>
+  </body>
+</html>
