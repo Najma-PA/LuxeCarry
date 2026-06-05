@@ -513,7 +513,7 @@ function showStockErrors(errors) {
                            `/user/order-success/${verifyData.orderId}`;
 
                     });
-
+               
                 } else {
 
                     Swal.fire({
@@ -541,19 +541,22 @@ function showStockErrors(errors) {
         theme: {
             color: '#b78846',
         },
+      
 
     };
 
     const rzp = new Razorpay(options);
      rzp.on('payment.failed',function(){
-        Swal.fire({
+        /*Swal.fire({
             icon:'error',
             title:'Payment failed',
             text:'Your payment could not be completed'
         }).then(()=>{
+        */    
             window.location.href='/user/payment-failure';
-        });
+       // });
      });
+
 
     rzp.open();
 

@@ -123,6 +123,7 @@ exports.cancelOrder = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: 'Item cancelled successfully',
+      refundAmount: item.finalPayable,
     });
   } catch (error) {
     next(error);
