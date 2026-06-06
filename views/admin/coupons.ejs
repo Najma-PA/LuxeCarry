@@ -312,6 +312,7 @@
                 </div>
 
                 <form
+                    id="addCouponForm"
                     action="/admin/coupons" method="POST">
                     <div class="mb-3">
 
@@ -325,12 +326,11 @@
                             type="text"
 
                             name="code"
-
+                            id="couponCode"
                             class="form-control"
 
-                            placeholder="WELCOME500"
-
-                            required>
+                            placeholder="WELCOME500">
+                        <small id="codeError" class="text-danger"></small>
 
                     </div>
                     <div class="row">
@@ -344,24 +344,16 @@
 
                             <select
                                 name="discountType"
-
-                                class="form-select"
-
-                                required>
-
+                                id="discountType"
+                                class="form-select">
                                 <option value="FIXED">
-
                                     Fixed Amount
-
                                 </option>
-
                                 <option value="PERCENTAGE">
-
                                     Percentage
-
                                 </option>
-
                             </select>
+                            <small id="discountTypeError" class="text-danger"></small>
 
                         </div>
                         <div class="col-md-6 mb-3">
@@ -374,12 +366,10 @@
 
                             <input
                                 type="number"
-
                                 name="discountValue"
-
-                                class="form-control"
-
-                                required>
+                                id="discountValue"
+                                class="form-control">
+                            <small id="discountValueError" class="text-danger"></small>
 
                         </div>
 
@@ -397,13 +387,13 @@
                                 type="number"
 
                                 name="minimumOrderAmount"
-
-                                class="form-control"
-
-                                required>
-
+                                id="minimumOrderAmount"
+                                class="form-control">
+                            <small id="minimumOrderError" class="text-danger"></small>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-6 mb-3"
+                        id="maximumDiscountWrapper"
+                        style="display: none;">
 
                             <label class="form-label">
 
@@ -415,11 +405,10 @@
                                 type="number"
 
                                 name="maximumDiscount"
-
+                                id="maximumDiscount"
                                 class="form-control"
-
                                 placeholder="Optional">
-
+                            <small id="maximumDiscountError" class="text-danger"></small>
                         </div>
 
                     </div>
@@ -435,10 +424,9 @@
                             type="date"
 
                             name="expiryDate"
-
-                            class="form-control"
-
-                            required>
+                            id="expiryDate"
+                            class="form-control">
+                        <small id="expiryDateError" class="text-danger"></small>    
 
                     </div>
                     <button
@@ -834,6 +822,222 @@ async function toggleCoupon(id) {
 
 }
 
+const addCouponForm =
+    document.getElementById(
+        'addCouponForm'
+    );
+
+const discountType =
+    document.getElementById(
+        'discountType'
+    );
+
+const maximumDiscountWrapper =
+    document.getElementById(
+        'maximumDiscountWrapper'
+    );
+
+
+// SHOW/HIDE MAX DISCOUNT
+
+function toggleMaximumDiscount() {
+
+    if (discountType.value === 'PERCENTAGE') {
+
+        maximumDiscountWrapper.style.display =
+            'block';
+
+    } else {
+
+        maximumDiscountWrapper.style.display =
+            'none';
+
+        document.getElementById(
+            'maximumDiscount'
+        ).value = '';
+
+    }
+}
+
+toggleMaximumDiscount();
+
+discountType.addEventListener(
+    'change',
+    toggleMaximumDiscount
+);
+
+
+// FORM VALIDATION
+
+addCouponForm.addEventListener(
+    'submit',
+    function (e) {
+
+        let isValid = true;
+
+        // clear old errors
+
+        document.querySelectorAll(
+            '.text-danger'
+        ).forEach(el => {
+            el.innerText = '';
+        });
+
+
+        const code =
+            document.getElementById(
+                'couponCode'
+            ).value.trim();
+
+        const discountValue =
+            Number(
+                document.getElementById(
+                    'discountValue'
+                ).value
+            );
+
+        const minimumOrderAmount =
+            Number(
+                document.getElementById(
+                    'minimumOrderAmount'
+                ).value
+            );
+
+        const maximumDiscount =
+            Number(
+                document.getElementById(
+                    'maximumDiscount'
+                ).value
+            );
+
+        const expiryDate =
+            document.getElementById(
+                'expiryDate'
+            ).value;
+
+
+        // COUPON CODE
+
+        if (!code) {
+
+            document.getElementById(
+                'codeError'
+            ).innerText =
+                'Coupon code is required';
+
+            isValid = false;
+        }
+
+
+        // DISCOUNT VALUE
+
+        if (
+            !discountValue ||
+            discountValue <= 0
+        ) {
+
+            document.getElementById(
+                'discountValueError'
+            ).innerText =
+                'Enter valid discount value';
+
+            isValid = false;
+        }
+
+
+        // FIXED VALIDATION
+
+        if (
+            discountType.value === 'FIXED' &&
+            minimumOrderAmount <= discountValue
+        ) {
+
+            document.getElementById(
+                'minimumOrderError'
+            ).innerText =
+                'Minimum purchase must be greater than discount amount';
+
+            isValid = false;
+        }
+
+
+        // PERCENTAGE VALIDATION
+
+        if (
+            discountType.value === 'PERCENTAGE'
+        ) {
+
+            if (discountValue > 100) {
+
+                document.getElementById(
+                    'discountValueError'
+                ).innerText =
+                    'Percentage cannot exceed 100';
+
+                isValid = false;
+            }
+
+            if (
+                !maximumDiscount ||
+                maximumDiscount <= 0
+            ) {
+
+                document.getElementById(
+                    'maximumDiscountError'
+                ).innerText =
+                    'Maximum discount required';
+
+                isValid = false;
+            }
+
+        }
+
+
+        // MIN ORDER
+
+        if (
+            !minimumOrderAmount ||
+            minimumOrderAmount <= 0
+        ) {
+
+            document.getElementById(
+                'minimumOrderError'
+            ).innerText =
+                'Enter valid minimum order amount';
+
+            isValid = false;
+        }
+
+
+        // EXPIRY DATE
+
+        const today =
+            new Date()
+                .toISOString()
+                .split('T')[0];
+
+        if (
+            !expiryDate ||
+            expiryDate < today
+        ) {
+
+            document.getElementById(
+                'expiryDateError'
+            ).innerText =
+                'Select future date';
+
+            isValid = false;
+        }
+
+
+        if (!isValid) {
+
+            e.preventDefault();
+
+        }
+
+    }
+);
 </script>
 </body>
 </html>
