@@ -60,6 +60,21 @@ exports.createCoupon = async (data) => {
       message: 'Coupon already exists',
     };
   }
+  if (
+    data.discountType === 'FIXED' &&
+    Number(data.minimumOrderAmount) <= Number(data.discountValue)
+  ) {
+    return {
+      success: false,
+      message: 'Minimum purchase should be greater than discount amount',
+    };
+  }
+  if (data.discountType === 'PERCENTAGE' && Number(data.discountValue) > 100) {
+    return {
+      success: false,
+      message: 'Percentage discount cannot exceed 100',
+    };
+  }
 
   const coupon = await Coupon.create({
     code: data.code.toUpperCase(),

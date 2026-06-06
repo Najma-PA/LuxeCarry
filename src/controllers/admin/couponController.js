@@ -43,9 +43,9 @@ exports.getCouponsPage = async (req, res, next) => {
 
 exports.createCoupon = async (req, res, next) => {
   try {
-    const result = await couponService.createCoupon(req.body);
+    await couponService.createCoupon(req.body);
 
-    return res.json(result);
+    return res.redirect('/admin/coupons');
   } catch (error) {
     next(error);
   }
