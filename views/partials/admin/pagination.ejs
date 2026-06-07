@@ -1,11 +1,24 @@
-        <% if(currentPage > 1) { %>
-          <a href="?page=<%= currentPage - 1 %>&status=<%= status %>&search=<%= search %>" class="page-btn pagination-link" data-page="<%= currentPage - 1 %>"><i class="fa-solid fa-chevron-left"></i></a>
-        <% } %>
+<%
+  let queryString = '';
+  if (typeof req !== 'undefined' && req.query) {
+    const q = new URLSearchParams(req.query);
+    q.delete('page');
+    const str = q.toString();
+    queryString = str ? '&' + str : '';
+  } else {
+    const safeStatus = typeof status !== 'undefined' ? status : '';
+    const safeSearch = typeof search !== 'undefined' ? search : '';
+    queryString = `&status=${safeStatus}&search=${safeSearch}`;
+  }
+%>
+<% if(currentPage > 1) { %>
+  <a href="?page=<%= currentPage - 1 %><%= queryString %>" class="page-btn pagination-link" data-page="<%= currentPage - 1 %>"><i class="fa-solid fa-chevron-left"></i></a>
+<% } %>
         
-        <% for(let i=1; i<=totalPages; i++){ %>
-          <a href="?page=<%= i %>&status=<%= status %>&search=<%= search %>" class="page-btn pagination-link <%= currentPage===i?'active':'' %>" data-page="<%= i %>"><%= i %></a>
-        <% } %>
+<% for(let i=1; i<=totalPages; i++){ %>
+  <a href="?page=<%= i %><%= queryString %>" class="page-btn pagination-link <%= currentPage===i?'active':'' %>" data-page="<%= i %>"><%= i %></a>
+<% } %>
 
-        <% if(currentPage < totalPages) { %>
-          <a href="?page=<%= currentPage + 1 %>&status=<%= status %>&search=<%= search %>" class="page-btn pagination-link" data-page="<%= currentPage + 1 %>"><i class="fa-solid fa-chevron-right"></i></a>
-        <% } %>
+<% if(currentPage < totalPages) { %>
+  <a href="?page=<%= currentPage + 1 %><%= queryString %>" class="page-btn pagination-link" data-page="<%= currentPage + 1 %>"><i class="fa-solid fa-chevron-right"></i></a>
+<% } %>

@@ -206,22 +206,6 @@
               Revenue Overview
             </h5>
 
-            <select class="dashboard-filter-small">
-
-              <option>
-                Monthly
-              </option>
-
-              <option>
-                Weekly
-              </option>
-
-              <option>
-                Yearly
-              </option>
-
-            </select>
-
           </div>
 
           <canvas id="salesChart"></canvas>
@@ -249,9 +233,20 @@
 
     <!-- LOWER SECTION -->
     <div class="row g-3 mt-2">
+          <!-- TOP CATEGORIES CHART SECTION -->
+      <div class="col-lg-4">
+        <div class="dashboard-card p-4 h-100">
+          <h5 class="dashboard-card-title mb-3">
+            Top Categories (Units Sold)
+          </h5>
+          <div style="height: 300px; position: relative;">
+            <canvas id="topCategoriesChart"></canvas>
+          </div>
+        </div>
+      </div>
 
       <!-- TOP PRODUCTS -->
-      <div class="col-lg-7">
+      <div class="col-lg-8">
 
         <div class="dashboard-card p-4">
 
@@ -317,17 +312,7 @@
 
       </div>
 
-      <!-- TOP CATEGORIES CHART SECTION -->
-      <div class="col-lg-5">
-        <div class="dashboard-card p-4 h-100">
-          <h5 class="dashboard-card-title mb-3">
-            Top Categories (Units Sold)
-          </h5>
-          <div style="height: 300px; position: relative;">
-            <canvas id="topCategoriesChart"></canvas>
-          </div>
-        </div>
-      </div>
+  
 
     </div>
 
