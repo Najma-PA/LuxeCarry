@@ -41,57 +41,13 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(globalLocals);
-/*const cartService = require('./src/services/user/cartService');
-const userService = require('./src/services/user/userService');
 
-/* GLOBAL LOCALS 
-app.use(async (req, res, next) => {
-  try {
-    const sessionUser = req.user || req.session?.user || null;
-    let user = null;
-
-    if (sessionUser) {
-      const userId = sessionUser._id || sessionUser.id;
-      user = await userService.findUserById(userId);
-
-      // If user was blocked or deleted in the admin dashboard:
-      if (!user || user.isBlocked) {
-        req.session.user = null;
-        if (req.logout) {
-          req.logout(() => {});
-        }
-        user = null;
-      }
-    }
-
-    res.locals.user = user;
-    res.locals.admin = req.session?.admin || null;
-
-    // Support both Passport (_id) and Custom Session (id)
-    const userId = user ? user._id || user.id : null;
-    res.locals.cartCount = userId ? await cartService.getCartCount(userId) : 0;
-  } catch (err) {
-    console.error('Error in global locals middleware:', err);
-    res.locals.user = null;
-    res.locals.cartCount = 0;
-  }
-  
-  res.locals.success_msg = req.flash('success');
-  res.locals.error_msg = req.flash('error');
-  
-  next();
-});
-*/
 app.use('/admin', adminRoutes);
 app.use('/user', noCache, userRoutes);
 
 /* ROOT */
 const { redirectIfUserLoggedIn } = require('./src/middleware/userAuth');
-/*app.get('/', redirectIfUserLoggedIn, (req, res) => {
-  res.render('user/home', {
-    user: req.user || null
-  });
-  */
+
 app.get('/', redirectIfUserLoggedIn, (req, res) => {
   res.redirect('/user/home');
 });
