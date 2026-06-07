@@ -1,14 +1,106 @@
 const User = require('../../models/userModel');
 
-exports.buildOrderQuery = async ({ search = '', status = '', dateRange = '' }) => {
+exports.buildOrderQuery = async ({
+  search = '',
+  status = '',
+  dateRange = '',
+  customStartDate = '',
+  customEndDate = '',
+}) => {
   const query = {};
 
   // STATUS FILTER
   if (status && status !== 'All') {
     query['items.status'] = status;
   }
-
   // DATE FILTER
+
+  if (dateRange && dateRange !== 'All') {
+    const now = new Date();
+
+    let startDate;
+    let endDate;
+
+    switch (dateRange) {
+      case 'Today':
+        startDate = new Date();
+
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date();
+
+        endDate.setHours(23, 59, 59, 999);
+
+        break;
+
+      case 'Yesterday':
+        startDate = new Date();
+
+        startDate.setDate(now.getDate() - 1);
+
+        startDate.setHours(0, 0, 0, 0);
+
+        endDate = new Date();
+
+        endDate.setDate(now.getDate() - 1);
+
+        endDate.setHours(23, 59, 59, 999);
+
+        break;
+
+      case 'Last 7 Days':
+        startDate = new Date();
+
+        startDate.setDate(now.getDate() - 7);
+
+        endDate = new Date();
+
+        break;
+
+      case 'Last 30 Days':
+        startDate = new Date();
+
+        startDate.setDate(now.getDate() - 30);
+
+        endDate = new Date();
+
+        break;
+
+      case 'This Month':
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        endDate = new Date();
+
+        break;
+
+      case 'This Year':
+        startDate = new Date(now.getFullYear(), 0, 1);
+
+        endDate = new Date();
+
+        break;
+
+      case 'Custom':
+        if (customStartDate && customEndDate) {
+          startDate = new Date(customStartDate);
+
+          endDate = new Date(customEndDate);
+
+          endDate.setHours(23, 59, 59, 999);
+        }
+
+        break;
+    }
+
+    if (startDate && endDate) {
+      query.createdAt = {
+        $gte: startDate,
+
+        $lte: endDate,
+      };
+    }
+  }
+  /* // DATE FILTER
   if (dateRange && dateRange !== 'All') {
     const now = new Date();
 
@@ -51,7 +143,7 @@ exports.buildOrderQuery = async ({ search = '', status = '', dateRange = '' }) =
       };
     }
   }
-
+*/
   // SEARCH FILTER
   if (search) {
     let trimmedSearch = search.trim();

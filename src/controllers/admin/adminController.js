@@ -1,5 +1,6 @@
 const adminService = require('../../services/admin/adminService');
 const dashboardService = require('../../services/admin/dashboardService');
+const reportService = require('../../services/admin/reportService');
 const bcrypt = require('bcryptjs');
 
 /*AUTH */
@@ -152,5 +153,38 @@ exports.toggleUser = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false });
+  }
+};
+
+// SALES REPORT PAGE
+
+exports.getSalesReportPage = async (req, res) => {
+  try {
+    const reportData = await reportService.getSalesReport(req.query);
+
+    res.render('admin/salesReport', {
+      title: 'Sales Report',
+      active: 'salesreport',
+      req: req,
+      orders: reportData.orders,
+
+      summary: reportData.summary,
+
+      search: req.query.search || '',
+
+      reportFilter: req.query.reportFilter || '',
+
+      customStartDate: req.query.customStartDate || '',
+
+      customEndDate: req.query.customEndDate || '',
+
+      currentPage: reportData.currentPage,
+      
+      totalPages: reportData.totalPages,
+    });
+  } catch (error) {
+    console.log(error);
+
+    res.status(500).send('Server Error');
   }
 };

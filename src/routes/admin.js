@@ -7,6 +7,8 @@ const productController = require('../controllers/admin/productController');
 const bannerController = require('../controllers/admin/bannerController');
 const orderController = require('../controllers/admin/orderController');
 const couponController = require('../controllers/admin/couponController');
+const pdfController = require('../controllers/admin/pdfController');
+const excelController = require('../controllers/admin/excelController');
 const { upload, handleMulterError } = require('../middleware/multer');
 
 const { isAdminAuth, redirectIfAdminLoggedIn } = require('../middleware/adminAuth');
@@ -141,5 +143,13 @@ router.put('/coupons/:id', noCache, isAdminAuth, couponController.editCoupon);
 router.patch('/coupons/:id/toggle', noCache, isAdminAuth, couponController.toggleCoupon);
 
 router.delete('/coupons/:id', noCache, isAdminAuth, couponController.deleteCoupon);
+
+// SALES REPORT
+
+router.get('/reports', adminController.getSalesReportPage);
+
+router.get('/reports/export/pdf', pdfController.exportSalesPDF);
+
+router.get('/reports/export/excel', excelController.exportSalesExcel);
 
 module.exports = router;
