@@ -1,4 +1,5 @@
 const adminService = require('../../services/admin/adminService');
+const dashboardService = require('../../services/admin/dashboardService');
 const bcrypt = require('bcryptjs');
 
 /*AUTH */
@@ -67,15 +68,22 @@ exports.adminLogout = (req, res) => {
 
 /*DASHBOARD*/
 
-exports.adminDashboard = async (req, res) => {
+exports.adminDashboard = async (req, res, next) => {
   try {
+    const data = await dashboardService.getdashboardData();
+
     res.render('admin/dashboard', {
       title: 'Admin Dashboard',
       admin: req.session.admin,
+      stats: data.stats,
+      topProducts: data.topProducts,
+      topCategories: data.topCategories,
+      orderStatusData: data.orderStatusData,
+      monthlyRevenue: data.monthlyRevenue,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).send('Server Error');
+    next(err);
   }
 };
 

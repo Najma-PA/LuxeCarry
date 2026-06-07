@@ -39,6 +39,19 @@ exports.getCoupons = async ({
 
     .limit(limit);
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  for (let coupon of coupons) {
+    if (coupon.isActive) {
+      const expiry = new Date(coupon.expiryDate);
+      if (expiry.setHours(0, 0, 0, 0) < today.getTime()) {
+        coupon.isActive = false;
+        await coupon.save();
+      }
+    }
+  }
+
   const totalCoupons = await Coupon.countDocuments(query);
 
   return {
@@ -73,6 +86,16 @@ exports.createCoupon = async (data) => {
     return {
       success: false,
       message: 'Percentage discount cannot exceed 100',
+    };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(data.expiryDate);
+  if (expiry.setHours(0, 0, 0, 0) < today.getTime()) {
+    return {
+      success: false,
+      message: 'Expiry date cannot be in the past',
     };
   }
 
@@ -128,6 +151,16 @@ exports.updateCoupon = async (id, data) => {
   });
   if (existingCoupon) {
     return { success: false, message: 'Coupon code already exist' };
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(data.expiryDate);
+  if (expiry.setHours(0, 0, 0, 0) < today.getTime()) {
+    return {
+      success: false,
+      message: 'Expiry date cannot be in the past',
+    };
   }
   coupon.code = data.code.toUpperCase();
   coupon.discountType = data.discountType;

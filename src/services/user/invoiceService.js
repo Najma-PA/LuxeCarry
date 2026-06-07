@@ -248,7 +248,15 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     0
   );
 
-  const invoiceTotal = invoiceItems.reduce((sum, item) => sum + (item.totalPrice || 0), 0);
+  const totalCouponDiscount = invoiceItems.reduce(
+    (sum, item) => sum + (item.couponDiscount || 0),
+    0
+  );
+
+  const finalPayable = invoiceItems.reduce(
+    (sum, item) => sum + (item.finalPayable || item.totalPrice || 0),
+    0
+  );
 
   // SUBTOTAL
 
@@ -263,14 +271,29 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   // DISCOUNT
 
-  doc.text('Discount', 330, position);
+  doc.text('Product Discount', 330, position);
 
   doc.text(`- Rs. ${totalDiscount.toLocaleString()}`, 430, position, {
     width: 110,
     align: 'right',
   });
 
-  position += 35;
+  position += 22;
+
+  // COUPON DISCOUNT
+  if (totalCouponDiscount > 0) {
+    doc.text('Coupon Discount', 330, position);
+
+    doc.text(`- Rs. ${totalCouponDiscount.toLocaleString()}`, 430, position, {
+      width: 110,
+      align: 'right',
+    });
+
+    position += 22;
+  }
+
+  // Add padding before grand total
+  position += 13;
 
   // GRAND TOTAL BOX
 
@@ -280,7 +303,7 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   doc.text('Grand Total', 315, position + 5);
 
-  doc.text(`Rs. ${invoiceTotal.toLocaleString()}`, 415, position + 5, {
+  doc.text(`Rs. ${finalPayable.toLocaleString()}`, 415, position + 5, {
     width: 115,
     align: 'right',
   });

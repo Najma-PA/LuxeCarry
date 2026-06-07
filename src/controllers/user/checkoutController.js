@@ -65,6 +65,8 @@ exports.placeOrder = async (req, res, next) => {
         return res.status(400).json({
           success: false,
           message: checkoutData.message,
+          errors: checkoutData.errors || [],
+          redirect: checkoutData.redirect,
         });
       }
       let finalAmount = checkoutData.finalTotal;
@@ -101,6 +103,15 @@ exports.placeOrder = async (req, res, next) => {
       }
 
       const checkoutData = await checkoutService.getCheckoutData(userId);
+
+      if (!checkoutData.success) {
+        return res.status(400).json({
+          success: false,
+          message: checkoutData.message,
+          errors: checkoutData.errors || [],
+          redirect: checkoutData.redirect,
+        });
+      }
 
       let finalAmount = checkoutData.finalTotal;
 

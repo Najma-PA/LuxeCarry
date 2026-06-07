@@ -14,9 +14,17 @@ exports.getCategories = async (req, res) => {
         });
       });
 
+      const paginationHtml = await new Promise((resolve, reject) => {
+        res.render('partials/admin/pagination', { ...data, status, search: req.query.search || '', currentStatus: status }, (err, html) => {
+          if (err) reject(err);
+          else resolve(html);
+        });
+      });
+
       return res.json({
         success: true,
         tableHtml,
+        paginationHtml,
         currentPage: data.currentPage,
         totalPages: data.totalPages,
       });

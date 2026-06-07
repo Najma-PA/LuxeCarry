@@ -27,6 +27,7 @@ exports.getCheckoutData = async (userId) => {
       success: false,
       redirect: '/user/cart',
       message: validation.message,
+      errors: validation.errors || [],
     };
   }
 
@@ -228,23 +229,27 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
   });
 
   const user = await User.findById(userId);
+  const orderCount = await Order.countDocuments({ userId });
+
   if (user.referredBy && !user.referralRewardClaimed) {
-    const rewardAmount = 50;
-    //reward to new user
-    await walletController.creditWallet({
-      userId: user._id,
-      amount: rewardAmount,
-      transactionType: 'REFERRAL',
-      description: 'Referral reward',
-      orderId: order._id,
-    });
-    await walletController.creditWallet({
-      userId: user.referredBy,
-      amount: 100,
-      transactionType: 'REFERRAL',
-      description: 'Referral earnings',
-      orderId: order._id,
-    });
+    if (orderCount === 1) {
+      const rewardAmount = 50;
+      //reward to new user
+      await walletController.creditWallet({
+        userId: user._id,
+        amount: rewardAmount,
+        transactionType: 'REFERRAL',
+        description: 'Referral reward',
+        orderId: order._id,
+      });
+      await walletController.creditWallet({
+        userId: user.referredBy,
+        amount: 100,
+        transactionType: 'REFERRAL',
+        description: 'Referral earnings',
+        orderId: order._id,
+      });
+    }
     user.referralRewardClaimed = true;
 
     await user.save();
