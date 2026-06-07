@@ -74,8 +74,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                     <th style="width: 35%;">PRODUCT</th>
                     <th style="width: 8%;">QTY</th>
-                    <th style="width: 22%;">PRICE </th>
-                    <th style="width: 35%;">STATUS & ACTIONS</th>
+                    <th style="width: 18%;">PRICE </th>
+                    <th style="width: 12%;">COUPON</th>
+                    <th style="width: 30%;">STATUS & ACTIONS</th>
 
                 </tr>
 
@@ -128,15 +129,43 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                 <td>
 
                     <% 
-                        const oPrice = item.originalPrice || item.price || 0;
-                        const pDisc = item.productDiscount || 0;
-                        const fPrice = item.finalPrice || item.price || 0;
-                        const tPrice = item.totalPrice || (item.price * item.quantity) || 0;
+                        let oPrice = item.originalPrice || item.price || 0;
+                        let pDisc = item.productDiscount || 0;
+                        let fPrice = item.finalPrice || item.price || 0;
+                        let tPrice = item.totalPrice ||(item.price * item.quantity) ||0;
+
+                        let cDisc =item.couponDiscount || 0;
+
+                        let fPayable =item.finalPayable ||(tPrice - cDisc);
+                        
                     %>
                     <div class="small">
                         <div class="fw-bold d-flex justify-content-between text-dark"><span>₹<%= fPrice.toLocaleString() %></span></div>
                     </div>
                    
+
+                </td>
+                <td>
+
+                    
+
+                    <% if(cDisc > 0){ %>
+
+                        <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-2">
+
+                            - ₹<%= cDisc.toFixed(2) %>
+
+                        </span>
+
+                    <% } else { %>
+
+                        <span class="text-muted small">
+
+                            No Coupon
+
+                        </span>
+
+                    <% } %>
 
                 </td>
                 
@@ -494,10 +523,20 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                         <div>
 
                             Grand Total :
-
+                            <%
+                            const activeTotal=order.items.reduce((total,item)=>{
+                                if(
+                                    item.status !=='Cancelled' && item.status !=='Returned'
+                                ){
+                                    return total+(item.finalPayable|| 0)
+                                }
+                                return total;
+                            },0)
+                            %>
+                        
                             <span class="ms-1 text-dark">
 
-                                ₹<%= order.totalAmount.toLocaleString() %>
+                                ₹<%= activeTotal.toFixed(2) %>
 
                             </span>
 

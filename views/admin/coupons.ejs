@@ -120,119 +120,88 @@
 
                     <% coupons.forEach(coupon => { %>
 
-                        <div class="col-lg-4 col-md-6">
+                        <div class="col-lg-3 col-md-6">
 
                             <div class="admin-coupon-card <%= !coupon.isActive ? 'coupon-disabled' : '' %>">
 
-                                <div class="admin-coupon-left">
+                                <div class="admin-coupon-top">
 
-                                    <% if (coupon.discountType === 'PERCENTAGE') { %>
-
-                                        <div class="admin-coupon-discount">
-
-                                            <%= coupon.discountValue %>% OFF
-
-                                        </div>
-
-                                    <% } else { %>
-
-                                        <div class="admin-coupon-discount">
-
-                                            ₹<%= coupon.discountValue %> OFF
-
-                                        </div>
-
-                                    <% } %>
-
-                                    <div class="admin-coupon-min">
-
-                                        Min Purchase ₹<%= coupon.minimumOrderAmount %>
-
-                                    </div>
+                                    <i class="
+                                        fa-solid
+                                        <%= coupon.discountType === 'PERCENTAGE'
+                                            ? 'fa-gift'
+                                            : 'fa-gem' %>
+                                    "></i>
 
                                 </div>
 
-                                <div class="admin-coupon-right">
-                                    <div class="admin-coupon-code">
+                                <div class="admin-coupon-body">
 
+                                    <h3 class="admin-coupon-code">
                                         <%= coupon.code %>
+                                    </h3>
 
-                                    </div>
-                                    <div class="admin-coupon-expiry">
+                                    <div class="admin-coupon-offer">
 
-                                        <i class="fa-regular fa-calendar"></i>
-
-                                        Expires on
-
-                                        <%= new Date(coupon.expiryDate).toLocaleDateString('en-IN') %>
-
-                                    </div>
-                                    <div class="mb-2">
-
-                                        <% if (coupon.isActive) { %>
-
-                                            <span class="badge bg-success">
-                                                Active
-                                            </span>
-
+                                        <% if (coupon.discountType === 'PERCENTAGE') { %>
+                                            <%= coupon.discountValue %>% OFF
                                         <% } else { %>
-
-                                            <span class="badge bg-danger">
-                                                Inactive
-                                            </span>
-
+                                            ₹<%= coupon.discountValue %> OFF
                                         <% } %>
+
                                     </div>
-                                            <div class="admin-coupon-actions">
 
-                                                <button
-                                                    onclick='openEditCouponModal(
-                                                        "<%= coupon._id %>",
-                                                        "<%= coupon.code %>",
-                                                        "<%= coupon.discountType %>",
-                                                        "<%= coupon.discountValue %>",
-                                                        "<%= coupon.minimumOrderAmount %>",
-                                                        "<%= coupon.maximumDiscount %>",
-                                                        "<%= new Date(coupon.expiryDate)
-                                                            .toISOString()
-                                                            .split("T")[0] %>"
-                                                    )'
-                                                    class="btn btn-sm btn-outline-primary">
+                                    <div class="admin-coupon-meta">
 
-                                                    Edit
+                                        <p>
+                                            <i class="fa-solid fa-cart-shopping"></i>
+                                            Min order ₹<%= coupon.minimumOrderAmount %>
+                                        </p>
 
-                                                </button>
+                                        <p>
+                                            <i class="fa-regular fa-calendar"></i>
+                                            Expires on <%= new Date(coupon.expiryDate).toLocaleDateString('en-IN') %>
+                                        </p>
 
-                                                <button
-                                                    onclick="toggleCoupon('<%= coupon._id %>')"
-                                                    class="
-                                                        btn
-                                                        btn-sm
-                                                        <%= coupon.isActive
-                                                            ? 'btn-outline-warning'
-                                                            : 'btn-outline-success'
-                                                        %>">
+                                        <p>
+                                            <% if (coupon.isActive) { %>
+                                                <span class="badge bg-success">Active</span>
+                                            <% } else { %>
+                                                <span class="badge bg-danger">Inactive</span>
+                                            <% } %>
+                                        </p>
 
-                                                    <%= coupon.isActive
-                                                        ? 'Disable'
-                                                        : 'Enable'
-                                                    %>
+                                    </div>
 
-                                                </button>
+                                    <div class="admin-coupon-actions">
 
-                                                <button
-                                                    onclick="deleteCoupon('<%= coupon._id %>')"
-                                                    class="
-                                                        btn
-                                                        btn-sm
-                                                        btn-outline-danger
-                                                    ">
+                                        <button
+                                            onclick='openEditCouponModal(
+                                                "<%= coupon._id %>",
+                                                "<%= coupon.code %>",
+                                                "<%= coupon.discountType %>",
+                                                "<%= coupon.discountValue %>",
+                                                "<%= coupon.minimumOrderAmount %>",
+                                                "<%= coupon.maximumDiscount %>",
+                                                "<%= new Date(coupon.expiryDate).toISOString().split("T")[0] %>"
+                                            )'
+                                            class="btn btn-outline-primary">
+                                            Edit
+                                        </button>
 
-                                                    Delete
+                                        <button
+                                            onclick="toggleCoupon('<%= coupon._id %>')"
+                                            class="btn <%= coupon.isActive ? 'btn-outline-warning' : 'btn-outline-success' %>">
+                                            <%= coupon.isActive ? 'Disable' : 'Enable' %>
+                                        </button>
 
-                                                </button>
-
-                                            </div>
+                                      <!--  <button
+                                            onclick="deleteCoupon('<%= coupon._id %>')"
+                                            class="btn btn-outline-danger">
+                                            Delete
+                                        </button>
+                                    -->
+                                    </div>
 
                                 </div>
 
@@ -406,8 +375,7 @@
 
                                 name="maximumDiscount"
                                 id="maximumDiscount"
-                                class="form-control"
-                                placeholder="Optional">
+                                class="form-control">
                             <small id="maximumDiscountError" class="text-danger"></small>
                         </div>
 
@@ -422,10 +390,10 @@
 
                         <input
                             type="date"
-
                             name="expiryDate"
                             id="expiryDate"
-                            class="form-control">
+                            class="form-control"
+                            min="<%= new Date().toISOString().split('T')[0] %>">
                         <small id="expiryDateError" class="text-danger"></small>    
 
                     </div>
@@ -597,6 +565,7 @@
                             type="date"
                             id="editExpiryDate"
                             class="form-control"
+                            min="<%= new Date().toISOString().split('T')[0] %>"
                             required>
 
                     </div>

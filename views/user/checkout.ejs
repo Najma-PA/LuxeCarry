@@ -68,6 +68,7 @@
                                 </div>
                             <% }) %>
                         </div>
+                        <div id="address-error" class="text-danger fw-bold mt-3 mb-1 text-center" style="font-size: 13px;"></div>
                         <div class="mt-4 pt-2 border-top d-flex justify-content-between align-items-center flex-wrap gap-2">
                             <a href="/user/addAddress?redirect=checkout" class="btn btn-theme-premium">
                                 <i class="fa fa-plus me-1"></i> Add New Address
@@ -84,6 +85,7 @@
                             </div>
                             <h5 class="fw-bold mb-2">No saved addresses found</h5>
                             <p class="text-muted small mb-4" style="max-width: 320px; margin: 0 auto;">Please add a shipping address to proceed with your premium order placement.</p>
+                            <div id="address-error-empty" class="text-danger fw-bold mb-3 text-center" style="font-size: 13px;"></div>
                             <a href="/user/addAddress?redirect=checkout" class="btn btn-theme-premium px-4">
                                 <i class="fa fa-plus me-1"></i> Add Address
                             </a>
@@ -123,6 +125,7 @@
                                  <small class="text-success d-block mt-1">
                                     Balance: ₹<%= wallet.balance.toFixed(2) %>
                                  </small>
+                                 <div id="wallet-error" class="text-danger fw-bold mt-1" style="font-size: 11px;"></div>
                             </label>
                         </div>
 
@@ -330,7 +333,6 @@
                         <div class="total-row grand-total">
                             <span>Total</span>
                             <span id="finalTotalText">₹<%= finalTotal
-                                -(user.referredBy && !user.referralOfferUsed ? cart.total *0.10:0)
                                 .toFixed(2) %></span>
                         </div>
                     </div>
@@ -370,6 +372,12 @@
     document.querySelectorAll('[id^="stock-error-"]').forEach(el => {
         el.innerHTML = '';
     });
+    const walletError = document.getElementById('wallet-error');
+    if (walletError) walletError.innerHTML = '';
+    const err1 = document.getElementById('address-error');
+    if (err1) err1.innerHTML = '';
+    const err2 = document.getElementById('address-error-empty');
+    if (err2) err2.innerHTML = '';
 
 }
 
@@ -405,14 +413,21 @@ function showStockErrors(errors) {
     document.getElementById('checkoutForm')?.addEventListener('submit', async function(e) {
         e.preventDefault();
         
+        clearStockErrors();
+
         const addressId = document.getElementById('selectedAddressId').value;
         if (!addressId) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Shipping Address Required',
-                text: 'Please add and select a shipping address before placing your order.',
-                confirmButtonColor: '#b78846'
-            });
+            const err1 = document.getElementById('address-error');
+            const err2 = document.getElementById('address-error-empty');
+            const msg = '<i class="fa-solid fa-circle-exclamation"></i> Please add and select a shipping address before placing your order.';
+            if (err1) err1.innerHTML = msg;
+            if (err2) err2.innerHTML = msg;
+            
+            if (err1 && err1.offsetParent !== null) {
+                err1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else if (err2 && err2.offsetParent !== null) {
+                err2.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
             return;
         }
 
@@ -595,10 +610,33 @@ if (result.success) {
            else {
                 clearStockErrors();
 
-                if (result.errors && Array.isArray(result.errors)) {
-
+                if (result.errors && Array.isArray(result.errors) && result.errors.length > 0) {
                     showStockErrors(result.errors);
+                    return;
+                }
 
+                if (result.message && result.message.toLowerCase().includes('insufficient wallet balance')) {
+                    const walletErrorBox = document.getElementById('wallet-error');
+                    if (walletErrorBox) {
+                        walletErrorBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${result.message}`;
+                        // Also automatically select the wallet radio button so the user sees the error
+                        document.getElementById('wallet').checked = true;
+                    }
+                    return;
+                }
+
+                if (result.message && (result.message.toLowerCase().includes('shipping address') || result.message.toLowerCase().includes('address not found'))) {
+                    const err1 = document.getElementById('address-error');
+                    const err2 = document.getElementById('address-error-empty');
+                    const msg = `<i class="fa-solid fa-circle-exclamation"></i> ${result.message}`;
+                    if (err1) err1.innerHTML = msg;
+                    if (err2) err2.innerHTML = msg;
+                    
+                    if (err1 && err1.offsetParent !== null) {
+                        err1.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    } else if (err2 && err2.offsetParent !== null) {
+                        err2.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                     return;
                 }
 
