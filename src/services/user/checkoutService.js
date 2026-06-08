@@ -233,7 +233,7 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
 
   if (user.referredBy && !user.referralRewardClaimed) {
     if (orderCount === 1) {
-      const rewardAmount = 50;
+      const rewardAmount = 500;
       //reward to new user
       await walletController.creditWallet({
         userId: user._id,
@@ -244,7 +244,7 @@ exports.createOrder = async ({ userId, addressId, paymentMethod, couponCode }) =
       });
       await walletController.creditWallet({
         userId: user.referredBy,
-        amount: 100,
+        amount: 1000,
         transactionType: 'REFERRAL',
         description: 'Referral earnings',
         orderId: order._id,

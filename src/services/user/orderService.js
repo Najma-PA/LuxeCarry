@@ -191,6 +191,8 @@ exports.returnOrder = async (orderId, itemId, userId, reason, customReason) => {
 
   item.status = 'Return Requested';
 
+  item.requestType = 'Return';
+
   item.returnReason = finalReason || '';
 
   item.returnedAt = new Date();

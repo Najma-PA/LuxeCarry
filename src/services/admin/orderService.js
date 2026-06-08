@@ -202,7 +202,7 @@ exports.approveOrderRequest = async (orderId, itemId, adminResponse = '') => {
 
     if (order.paymentStatus === 'Paid') {
       item.refundAmount = item.finalPayable || item.totalPrice || item.finalPrice * item.quantity;
-      item.refundStatus = 'Pending';
+      item.refundStatus = 'Processed';
     }
   } else {
     return {
@@ -264,7 +264,6 @@ exports.rejectOrderRequest = async (orderId, itemId, adminResponse = '') => {
     };
   }
 
-  // RESTORE PREVIOUS STATUS
   item.status = 'Delivered';
 
   item.requestStatus = 'Rejected';

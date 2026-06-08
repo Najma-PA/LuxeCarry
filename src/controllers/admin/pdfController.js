@@ -54,14 +54,14 @@ exports.exportSalesPDF = async (req, res) => {
 
     doc.fontSize(11).font('Helvetica');
     doc.text(`Total Orders: ${summary.totalOrders || 0}`, 40, 155);
-    doc.text(`Total Sales: INR ${(summary.totalSales || 0).toLocaleString('en-IN')}`, 40, 170);
+    doc.text(`Total Sales: Rs. ${(summary.totalSales || 0).toLocaleString('en-IN')}`, 40, 170);
     doc.text(
-      `Total Discounts: INR ${(summary.couponDiscount || 0).toLocaleString('en-IN')}`,
+      `Total Discounts: Rs. ${(summary.couponDiscount || 0).toLocaleString('en-IN')}`,
       40,
       185
     );
-    doc.text(`Total Refunds: INR ${(summary.totalRefunds || 0).toLocaleString('en-IN')}`, 40, 200);
-    doc.text(`Net Revenue: INR ${(summary.netRevenue || 0).toLocaleString('en-IN')}`, 40, 220);
+    doc.text(`Total Refunds: Rs. ${(summary.totalRefunds || 0).toLocaleString('en-IN')}`, 40, 200);
+    doc.text(`Net Revenue: Rs. ${(summary.netRevenue || 0).toLocaleString('en-IN')}`, 40, 220);
 
     let tableTop = 250;
 
