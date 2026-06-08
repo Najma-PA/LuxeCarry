@@ -66,35 +66,14 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
             </a>
 
-
-        <!-- <a href="/admin/reports/export/pdf" 
-           class="btn btn-danger report-btn">
-
-          <i class="fa fa-file-pdf me-2"></i>
-          Export PDF
-
-        </a>
-
-        <a href="/admin/reports/export/excel"
-           class="btn btn-success report-btn">
-
-          <i class="fa fa-file-excel me-2"></i>
-          Export Excel
-
-        </a>
--->
       </div>
 
     </div>
 
     <!-- FILTER -->
-    <form method="GET"
-          action="/admin/reports">
-
-      <div class="report-filter-card mb-4">
-
+    <form id="filter-form" >
+      <div class="report-filter-card mb-4 " style="border: 2 solid; border-color: rgb(158, 83, 2);">
         <div class="row g-3 align-items-end">
-
           <!-- SEARCH -->
           <div class="col-lg-4">
 
@@ -111,7 +90,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
           </div>
 
-          <!-- FILTER -->
+        
           <div class="col-lg-3">
 
             <label class="report-label">
@@ -120,8 +99,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
             <select
               name="reportFilter"
-              class="form-select report-input">
-                            
+              class="form-select report-input">                    
                 <option value="Today"
                 <%= reportFilter === 'Today' ? 'selected' : '' %>>
                 Today
@@ -131,287 +109,223 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                 <%= reportFilter === 'Last 7 Days' ? 'selected' : '' %>>
                 Last 7 Days
                 </option>
-
                 <option value="Last 30 Days"
                 <%= reportFilter === 'Last 30 Days' ? 'selected' : '' %>>
                 Last 30 Days
                 </option>
-
                 <option value="This Month"
                 <%= reportFilter === 'This Month' ? 'selected' : '' %>>
                 This Month
                 </option>
-
                 <option value="This Year"
                 <%= reportFilter === 'This Year' ? 'selected' : '' %>>
                 This Year
                 </option>
-
                 <option value="Custom"
                 <%= reportFilter === 'Custom' ? 'selected' : '' %>>
                 Custom Range
                 </option>
-
-
-
-             <!-- <option value="Today">
-                Today
-              </option>
-
-              <option value="Last 7 Days">
-                Last 7 Days
-              </option>
-
-              <option value="Last 30 Days">
-                Last 30 Days
-              </option>
-
-              <option value="This Month">
-                This Month
-              </option>
-
-              <option value="This Year">
-                This Year
-              </option>
-
-              <option value="Custom">
-                Custom Range
-              </option>-->
-
             </select>
-
           </div>
 
-          <!-- START DATE -->
           <div class="col-lg-2">
-
             <label class="report-label">
               From
             </label>
-
             <input
               type="date"
               name="customStartDate"
+              value="<%= customStartDate || '' %>"
               class="form-control report-input">
-
           </div>
 
-          <!-- END DATE -->
           <div class="col-lg-2">
-
             <label class="report-label">
               To
             </label>
-
             <input
               type="date"
               name="customEndDate"
+              value="<%= customEndDate || '' %>"
               class="form-control report-input">
-
           </div>
 
-          <!-- BUTTON -->
+          
           <div class="col-lg-1">
-
-            <button class="btn report-filter-btn w-100">
-
-              Apply
-
+            <button type="button" id="clear-btn" class="btn btn-secondary w-100" style="background-color: rgb(210, 159, 30);">
+              Clear
             </button>
-
           </div>
-
         </div>
-
       </div>
-
     </form>
 
-   
-
-    <!-- TABLE -->
     <div class="report-table-card">
 
-      <div class="table-responsive">
-
-        <table class="table align-middle mb-0">
-
-          <thead>
-
-            <tr>
-
-              <th>Order ID</th>
-
-              <th>Date</th>
-
-              <th>Customer</th>
-
-              <th>Products</th>
-
-              <th>Payment method</th>
-
-              <th>Total</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            <% if(orders.length > 0){ %>
-
-              <% orders.forEach(order=>{ %>
-
-                <tr>
-
-                  <td class="fw-semibold">
-
-                    #<%= order.orderId %>
-
-                  </td>
-
-                  <td>
-
-                    <%= new Date(order.createdAt)
-                    .toLocaleDateString('en-IN') %>
-
-                  </td>
-
-                  <td>
-
-                    <div class="fw-semibold">
-
-                      <%= order.userId?.name || 'User' %>
-
-                    </div>
-
-                    <small class="text-muted">
-
-                      <%= order.userId?.email || '' %>
-
-                    </small>
-
-                  </td>
-
-                  <td>
-                    <small class="text-muted">
-                      <% 
-                        let pNames = '';
-                        if (order.items && order.items.length > 0) {
-                          pNames = order.items.map(i => i.productName).join(', ');
-                          if (pNames.length > 40) {
-                            pNames = pNames.substring(0, 40) + '...';
-                          }
-                        }
-                      %>
-                      <%= pNames %>
-                    </small>
-                  </td>
-
-                  <td>
-                    <span class="payment-badge">
-
-                      <%= order.paymentMethod %>
-
-                    </span>
-
-                  </td>
-
-                  <td class="fw-semibold text-success">
-                    <% 
-                      let totalRefunds = 0;
-                      if (order.items && order.items.length > 0) {
-                        order.items.forEach(item => {
-                          totalRefunds += (item.refundAmount || 0);
-                        });
-                      }
-                      let netTotal = (order.finalAmount || order.totalAmount || 0) - totalRefunds;
-                      netTotal = Math.max(0, netTotal);
-                    %>
-                    ₹<%= Number(netTotal).toLocaleString() %>
-                  </td>
-
-                
-
-                </tr>
-
-              <% }) %>
-
-            <% } else { %>
-
-              <tr>
-
-                <td colspan="7"
-                    class="text-center py-5 text-muted">
-
-                  No sales reports found
-
-                </td>
-
-              </tr>
-
-            <% } %>
-
-          </tbody>
-
-        </table>
-
+      <div class="table-responsive" id="table-container">
+        <%- include('../partials/admin/sales-table') %>
       </div>
 
     </div>
      <div class="pagination-wrapper d-flex gap-1 align-items-center" id="pagination-container">
         <%- include('../partials/admin/pagination') %>
       </div>
-
-
     </div>
-
-  
   </div>
 
 </div>
 
 <script>
-
-  const filterSelect =
-    document.querySelector(
-      'select[name="reportFilter"]'
-    );
-
-  const startDateWrapper =
-    document.querySelector(
-      'input[name="customStartDate"]'
-    ).closest('.col-lg-2');
-
-  const endDateWrapper =
-    document.querySelector(
-      'input[name="customEndDate"]'
-    ).closest('.col-lg-2');
+  const filterSelect = document.querySelector('select[name="reportFilter"]');
+  const startDateInput = document.querySelector('input[name="customStartDate"]');
+  const endDateInput = document.querySelector('input[name="customEndDate"]');
+  const startDateWrapper = startDateInput.closest('.col-lg-2');
+  const endDateWrapper = endDateInput.closest('.col-lg-2');
+  const filterForm = document.getElementById('filter-form');
+  const searchInput = document.querySelector('input[name="search"]');
 
   function toggleCustomDates() {
-
-    const isCustom =
-      filterSelect.value === 'Custom';
-
-    startDateWrapper.style.display =
-      isCustom ? 'block' : 'none';
-
-    endDateWrapper.style.display =
-      isCustom ? 'block' : 'none';
-
+    const isCustom = filterSelect.value === 'Custom';
+    startDateWrapper.style.display = isCustom ? 'block' : 'none';
+    endDateWrapper.style.display = isCustom ? 'block' : 'none';
+    
+    // Clear inputs if switching away from Custom
+    if (!isCustom) {
+      startDateInput.value = '';
+      endDateInput.value = '';
+    }
   }
 
   // INITIAL LOAD
-
   toggleCustomDates();
 
   // ON CHANGE
+  filterSelect.addEventListener('change', () => {
+    toggleCustomDates();
+    if (filterSelect.value !== 'Custom') {
+      fetchSalesData(1);
+    }
+  });
 
-  filterSelect.addEventListener(
-    'change',
-    toggleCustomDates
-  );
+  // Handle form submission
+  filterForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+  });
 
+  // Handle custom date changes
+  startDateInput.addEventListener('change', () => fetchSalesData(1));
+  endDateInput.addEventListener('change', () => fetchSalesData(1));
+
+  // Handle Clear Button
+  const clearBtn = document.getElementById('clear-btn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      filterSelect.value = 'Today';
+      startDateInput.value = '';
+      endDateInput.value = '';
+      toggleCustomDates();
+      fetchSalesData(1);
+    });
+  }
+  
+  // Search timeout
+  let searchTimeout;
+  searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      fetchSalesData(1);
+    }, 500);
+  });
+
+  // Pagination handler
+  document.addEventListener('click', function(e) {
+    const paginationLink = e.target.closest('.pagination-link');
+    if (paginationLink) {
+      e.preventDefault();
+      const href = paginationLink.getAttribute('href');
+      if (href) {
+        const urlParams = new URLSearchParams(href.split('?')[1]);
+        const page = urlParams.get('page') || 1;
+        fetchSalesData(page);
+      }
+    }
+  });
+
+  async function fetchSalesData(page = 1) {
+    const formData = new FormData(filterForm);
+    const searchParams = new URLSearchParams();
+    
+    // Build query params from form
+    for (const [key, value] of formData.entries()) {
+      if (value) {
+        searchParams.append(key, value);
+      }
+    }
+    searchParams.append('page', page);
+    
+    const queryString = searchParams.toString();
+    const url = `/admin/reports?${queryString}`;
+    
+    // Update export buttons dynamically
+    document.querySelector('.btn-danger.report-btn').href = `/admin/reports/export/pdf?${queryString}`;
+    document.querySelector('.btn-success.report-btn').href = `/admin/reports/export/excel?${queryString}`;
+    
+    
+    window.history.pushState({}, '', url);
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json'
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        // Update table
+        document.getElementById('table-container').innerHTML = data.tableHtml;
+        
+        // Ensure pagination logic uses the returned current page and total pages
+        updatePagination(data.currentPage, data.totalPages);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
+  function updatePagination(currentPage, totalPages) {
+    const paginationContainer = document.getElementById('pagination-container');
+    if (!paginationContainer) return;
+    
+    if (totalPages <= 1) {
+      paginationContainer.innerHTML = '';
+      return;
+    }
+    
+    let html = '';
+    
+    // Prev button
+    if (currentPage > 1) {
+      html += `<a href="?page=${currentPage - 1}" class="page-btn pagination-link" data-page="${currentPage - 1}">
+        <i class="fa-solid fa-chevron-left"></i></a>`;
+    }
+    
+    // Pages
+    for (let i = 1; i <= totalPages; i++) {
+      html += `<a href="?page=${i}" class="page-btn pagination-link ${i === currentPage ? 'active' : ''}" data-page="${i}">${i}</a>`;
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+      html += `<a href="?page=${currentPage + 1}" class="page-btn pagination-link" data-page="${currentPage + 1}">
+        <i class="fa-solid fa-chevron-right"></i></a>`;
+    }
+    
+    paginationContainer.innerHTML = html;
+  }
 </script>
 
 

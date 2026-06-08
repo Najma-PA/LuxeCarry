@@ -1,0 +1,84 @@
+<table class="table align-middle mb-0">
+
+  <thead>
+
+    <tr>
+
+      <th>Order ID</th>
+      <th>Date</th>
+      <th>Customer</th>
+      <th>Products</th>
+      <th>Payment method</th>
+      <th>Total</th>
+
+    </tr>
+
+  </thead>
+
+  <tbody>
+
+    <% if(orders.length > 0){ %>
+      <% orders.forEach(order=>{ %>
+        <tr>
+          <td class="fw-semibold">
+            #<%= order.orderId %>
+          </td>
+          <td>
+            <%= new Date(order.createdAt)
+            .toLocaleDateString('en-IN') %>
+          </td>
+          <td>
+            <div class="fw-semibold">
+             <%= order.userId?.name || 'User' %>
+            </div>
+            <small class="text-muted">
+              <%= order.userId?.email || '' %>
+            </small>
+          </td>
+          <td>
+            <small class="text-muted">
+              <% 
+                let pNames = '';
+                if (order.items && order.items.length > 0) {
+                  pNames = order.items.map(i => i.productName).join(', ');
+                  if (pNames.length > 40) {
+                    pNames = pNames.substring(0, 40) + '...';
+                  }
+                }
+              %>
+              <%= pNames %>
+            </small>
+          </td>
+          <td>
+            <span class="payment-badge">
+              <%= order.paymentMethod %>
+            </span>
+          </td>
+          <td class="fw-semibold text-success">
+            <% 
+              let totalRefunds = 0;
+              if (order.items && order.items.length > 0) {
+                order.items.forEach(item => {
+                  totalRefunds += (item.refundAmount || 0);
+                });
+              }
+              let netTotal = (order.finalAmount || order.totalAmount || 0) - totalRefunds;
+              netTotal = Math.max(0, netTotal);
+            %>
+            ₹<%= Number(netTotal).toLocaleString() %>
+          </td> 
+
+        </tr>
+
+      <% }) %>
+    <% } else { %>
+      <tr>
+        <td colspan="6"
+            class="text-center py-5 text-muted">
+          No sales reports found
+        </td>
+      </tr>
+    <% } %>
+  </tbody>
+
+</table>

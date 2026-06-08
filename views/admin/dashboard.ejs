@@ -51,20 +51,11 @@
       <!-- FILTER -->
       <div>
 
-        <select class="dashboard-filter">
-
-          <option value="yearly">
-            This Year
-          </option>
-
-          <option value="monthly">
-            This Month
-          </option>
-
-          <option value="weekly">
-            This Week
-          </option>
-
+        <select class="dashboard-filter" onchange="window.location.href='/admin/dashboard?filter=' + encodeURIComponent(this.value)">
+          <option value="All" <%= typeof filter !== 'undefined' && filter === 'All' ? 'selected' : '' %>>All Time</option>
+          <option value="This Year" <%= typeof filter === 'undefined' || filter === 'This Year' ? 'selected' : '' %>>This Year</option>
+          <option value="This Month" <%= typeof filter !== 'undefined' && filter === 'This Month' ? 'selected' : '' %>>This Month</option>
+          <option value="Last 7 Days" <%= typeof filter !== 'undefined' && filter === 'Last 7 Days' ? 'selected' : '' %>>This Week</option>
         </select>
 
       </div>
@@ -400,7 +391,7 @@
       // Generate an array of colors based on the number of labels
       backgroundColor: orderStatusLabels.map((_, i) => {
         const colors = [
-          '#c59d5f', '#dbc29a', '#f0e6d7', '#4CAF50', '#2196F3', 
+          '#c59d5f', '#6b7280', '#f0e6d7', '#4CAF50', '#2196F3', 
           '#FFC107', '#F44336', '#9C27B0', '#00BCD4', '#FF9800', 
           '#795548', '#607D8B', '#E91E63', '#3F51B5', '#8BC34A'
         ];
@@ -438,7 +429,7 @@
         return '#c39d5f';
       }
       if(index===1){
-        return '#d5b98a';
+        return '#6b7280';
       }
       return '#eadbc2';
     })
