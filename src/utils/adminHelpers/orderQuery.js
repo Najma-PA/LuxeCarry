@@ -9,12 +9,10 @@ exports.buildOrderQuery = async ({
 }) => {
   const query = {};
 
-  // STATUS FILTER
   if (status && status !== 'All') {
     query['items.status'] = status;
   }
-  // DATE FILTER
-
+  //datefilter
   if (dateRange && dateRange !== 'All') {
     const now = new Date();
 
@@ -83,9 +81,9 @@ exports.buildOrderQuery = async ({
       case 'Custom':
         if (customStartDate && customEndDate) {
           startDate = new Date(customStartDate);
+          startDate.setHours(0, 0, 0, 0);
 
           endDate = new Date(customEndDate);
-
           endDate.setHours(23, 59, 59, 999);
         }
 
@@ -100,50 +98,7 @@ exports.buildOrderQuery = async ({
       };
     }
   }
-  /* // DATE FILTER
-  if (dateRange && dateRange !== 'All') {
-    const now = new Date();
 
-    let startDate = new Date();
-
-    if (dateRange === 'Today') {
-      startDate.setHours(0, 0, 0, 0);
-
-      query.createdAt = {
-        $gte: startDate,
-      };
-    } else if (dateRange === 'Yesterday') {
-      const yesterdayStart = new Date();
-
-      yesterdayStart.setDate(now.getDate() - 1);
-
-      yesterdayStart.setHours(0, 0, 0, 0);
-
-      const yesterdayEnd = new Date();
-
-      yesterdayEnd.setDate(now.getDate() - 1);
-
-      yesterdayEnd.setHours(23, 59, 59, 999);
-
-      query.createdAt = {
-        $gte: yesterdayStart,
-        $lte: yesterdayEnd,
-      };
-    } else if (dateRange === 'Last 7 Days') {
-      startDate.setDate(now.getDate() - 7);
-
-      query.createdAt = {
-        $gte: startDate,
-      };
-    } else if (dateRange === 'Last 30 Days') {
-      startDate.setDate(now.getDate() - 30);
-
-      query.createdAt = {
-        $gte: startDate,
-      };
-    }
-  }
-*/
   // SEARCH FILTER
   if (search) {
     let trimmedSearch = search.trim();

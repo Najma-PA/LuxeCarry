@@ -71,7 +71,8 @@ exports.adminLogout = (req, res) => {
 
 exports.adminDashboard = async (req, res, next) => {
   try {
-    const data = await dashboardService.getdashboardData();
+    const filter = req.query.filter || 'This Year';
+    const data = await dashboardService.getdashboardData(filter);
 
     res.render('admin/dashboard', {
       title: 'Admin Dashboard',
@@ -81,6 +82,7 @@ exports.adminDashboard = async (req, res, next) => {
       topCategories: data.topCategories,
       orderStatusData: data.orderStatusData,
       monthlyRevenue: data.monthlyRevenue,
+      filter: filter,
     });
   } catch (err) {
     console.error(err);
@@ -161,6 +163,23 @@ exports.toggleUser = async (req, res) => {
 exports.getSalesReportPage = async (req, res) => {
   try {
     const reportData = await reportService.getSalesReport(req.query);
+
+    // AJAX Hook
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+      const tableHtml = await new Promise((resolve, reject) => {
+        res.render('partials/admin/sales-table', { orders: reportData.orders }, (err, html) => {
+          if (err) reject(err);
+          else resolve(html);
+        });
+      });
+
+      return res.json({
+        success: true,
+        tableHtml,
+        currentPage: reportData.currentPage,
+        totalPages: reportData.totalPages,
+      });
+    }
 
     res.render('admin/salesReport', {
       title: 'Sales Report',

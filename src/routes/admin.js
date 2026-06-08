@@ -146,7 +146,7 @@ router.delete('/coupons/:id', noCache, isAdminAuth, couponController.deleteCoupo
 
 // SALES REPORT
 
-router.get('/reports', adminController.getSalesReportPage);
+router.get('/reports', noCache, isAdminAuth, adminController.getSalesReportPage);
 
 router.get('/reports/export/pdf', pdfController.exportSalesPDF);
 
