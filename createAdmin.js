@@ -11,7 +11,7 @@ async function createAdmin() {
     console.log(' DB Connected');
 
     const existingAdmin = await Admin.findOne({
-      email: 'najmaPA.najma@outlook.com',
+      email: 'admin@gmail.com',
     });
 
     if (existingAdmin) {
@@ -22,7 +22,7 @@ async function createAdmin() {
     const hashedPassword = await bcrypt.hash('Admin123*', 10);
 
     const admin = new Admin({
-      email: 'najmaPA.najma@outlook.com',
+      email: 'admin@gmail.com',
       password: hashedPassword,
       role: 'admin',
     });
