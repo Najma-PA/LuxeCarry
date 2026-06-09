@@ -160,7 +160,112 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
         </div>
       </div>
     </form>
+<div class="row g-3 mb-4">
 
+ 
+  <div class="col-xl-3 col-md-6">
+    <div class="dashboard-stat-card">
+
+      <div>
+        <p class="dashboard-stat-label">
+          Total Orders
+        </p>
+
+        <h3 id="total-orders" class="dashboard-stat-value">
+          <%= summary.totalOrders || 0 %>
+        </h3>
+      </div>
+
+      <div class="dashboard-stat-icon orders">
+        <i class="fa-solid fa-box"></i>
+      </div>
+
+    </div>
+  </div>
+
+ 
+   <div class="col-xl-3 col-md-6">
+    <div class="dashboard-stat-card">
+
+      <div>
+        <p class="dashboard-stat-label">
+          Total Sales
+        </p>
+
+        <h3 id="total-sales" class="dashboard-stat-value">
+          ₹<%= Number(summary.totalSales || 0).toLocaleString() %>
+        </h3>
+      </div>
+
+      <div class="dashboard-stat-icon revenue">
+        <i class="fa-solid fa-wallet"></i>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- COUPON DISCOUNT 
+  <div class="col-xl-3 col-md-6">
+    <div class="dashboard-stat-card">
+
+      <div>
+        <p class="dashboard-stat-label">
+          Coupon Discounts
+        </p>
+
+        <h3 class="dashboard-stat-value">
+          ₹<%= Number(summary.couponDiscount || 0).toLocaleString() %>
+        </h3>
+      </div>
+
+      <div class="dashboard-stat-icon users">
+        <i class="fa-solid fa-tags"></i>
+      </div>
+
+    </div>
+  </div>-->
+ 
+  <div class="col-xl-3 col-md-6">
+    <div class="dashboard-stat-card">
+
+      <div>
+        <p class="dashboard-stat-label">
+          Total Refunds
+        </p>
+
+        <h3 id="total-refunds" class="dashboard-stat-value text-danger">
+          ₹<%= Number(summary.totalRefunds || 0).toLocaleString() %>
+        </h3>
+      </div>
+
+      <div class="dashboard-stat-icon orders">
+        <i class="fa-solid fa-rotate-left"></i>
+      </div>
+
+    </div>
+  </div>
+  
+  <div class="col-xl-3 col-md-6">
+    <div class="dashboard-stat-card">
+
+      <div>
+        <p class="dashboard-stat-label">
+          Net Revenue
+        </p>
+
+        <h3 id="net-revenue" class="dashboard-stat-value text-success">
+          ₹<%= Number(summary.netRevenue || 0).toLocaleString() %>
+        </h3>
+      </div>
+
+      <div class="dashboard-stat-icon products">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+
+    </div>
+  </div>
+
+</div>
     <div class="report-table-card">
 
       <div class="table-responsive" id="table-container">
@@ -288,7 +393,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
       if (data.success) {
         // Update table
         document.getElementById('table-container').innerHTML = data.tableHtml;
-        
+        updateSummaryCards(data.summary);
         // Ensure pagination logic uses the returned current page and total pages
         updatePagination(data.currentPage, data.totalPages);
       }
@@ -327,6 +432,20 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
     
     paginationContainer.innerHTML = html;
   }
+ function updateSummaryCards(summary) {
+
+  document.getElementById('total-orders').innerText =
+    summary.totalOrders || 0;
+
+  document.getElementById('total-sales').innerText =
+    `₹${Number(summary.totalSales || 0).toLocaleString()}`;
+
+  document.getElementById('total-refunds').innerText =
+    `₹${Number(summary.totalRefunds || 0).toLocaleString()}`;
+
+  document.getElementById('net-revenue').innerText =
+    `₹${Number(summary.netRevenue || 0).toLocaleString()}`;
+}
 </script>
 
 

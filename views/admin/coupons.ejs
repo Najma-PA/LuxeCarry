@@ -112,7 +112,7 @@
 
             </div>
 
-            <!-- COUPON GRID -->
+            
 
             <div class="row g-4">
 
@@ -188,19 +188,40 @@
                                             class="btn btn-outline-primary">
                                             Edit
                                         </button>
-
+                                        <!--
                                         <button
                                             onclick="toggleCoupon('<%= coupon._id %>')"
                                             class="btn <%= coupon.isActive ? 'btn-outline-warning' : 'btn-outline-success' %>">
                                             <%= coupon.isActive ? 'Disable' : 'Enable' %>
-                                        </button>
+                                        </button>-->
 
-                                      <!--  <button
-                                            onclick="deleteCoupon('<%= coupon._id %>')"
-                                            class="btn btn-outline-danger">
-                                            Delete
-                                        </button>
-                                    -->
+                                        <%
+                                        const today = new Date();
+                                        today.setHours(0,0,0,0);
+
+                                        const expiryDate = new Date(coupon.expiryDate);
+                                        expiryDate.setHours(0,0,0,0);
+
+                                        const isExpired = expiryDate < today;
+                                        %>
+
+                                        <% if (isExpired) { %>
+
+                                           <span class="badge rounded-pill text-bg-dark px-3 py-2">
+                                            Expired
+                                           </span>
+
+                                        <% } else { %>
+
+                                            <button
+                                                onclick="toggleCoupon('<%= coupon._id %>')"
+                                                class="btn <%= coupon.isActive ? 'btn-outline-warning' : 'btn-outline-success' %>">
+
+                                                <%= coupon.isActive ? 'Disable' : 'Enable' %>
+
+                                            </button>
+
+                                        <% } %>
                                     </div>
 
                                 </div>
@@ -462,8 +483,8 @@
                         <input
                             type="text"
                             id="editCode"
-                            class="form-control"
-                            required>
+                            class="form-control">
+                        <small id="editCodeError" class="text-danger"></small>
 
                     </div>
 
@@ -510,7 +531,8 @@
                                 type="number"
                                 id="editDiscountValue"
                                 class="form-control"
-                                required>
+                                >
+                            <small id="editDiscountValueError" class="text-danger"></small>
 
                         </div>
 
@@ -530,9 +552,8 @@
                             <input
                                 type="number"
                                 id="editMinimumAmount"
-                                class="form-control"
-                                required>
-
+                                class="form-control">
+                            <small id="editMinimumOrderError" class="text-danger"></small>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -547,7 +568,7 @@
                                 type="number"
                                 id="editMaximumDiscount"
                                 class="form-control">
-
+                            <small id="editMaximumDiscountError" class="text-danger"></small>
                         </div>
 
                     </div>
@@ -566,7 +587,8 @@
                             id="editExpiryDate"
                             class="form-control"
                             min="<%= new Date().toISOString().split('T')[0] %>"
-                            required>
+                            >
+                        <small id="editExpiryDateError" class="text-danger"></small>    
 
                     </div>
 
@@ -638,11 +660,271 @@ function openEditCouponModal(
             'editCouponModal'
         )
     ).show();
+    toggleEditMaximumDiscount();
 
 }
 
+function toggleEditMaximumDiscount() {
+
+    const discountType =
+        document.getElementById(
+            'editDiscountType'
+        ).value;
+
+    const maxDiscountWrapper =
+        document.getElementById(
+            'editMaximumDiscount'
+        ).closest('.col-md-6');
+
+    if (discountType === 'PERCENTAGE') {
+
+        maxDiscountWrapper.style.display =
+            'block';
+
+    } else {
+
+        maxDiscountWrapper.style.display =
+            'none';
+
+        document.getElementById(
+            'editMaximumDiscount'
+        ).value = '';
+    }
+}
 
 document
+.getElementById('editDiscountType')
+.addEventListener(
+    'change',
+    toggleEditMaximumDiscount
+);
+document
+.getElementById(
+    'editCouponForm'
+)
+.addEventListener(
+    'submit',
+
+    async function (e) {
+
+        e.preventDefault();
+
+        let isValid = true;
+
+        // CLEAR ERRORS
+
+        document.querySelectorAll(
+            '#editCouponModal .text-danger'
+        ).forEach(el => {
+            el.innerText = '';
+        });
+
+        const id =
+            document.getElementById(
+                'editCouponId'
+            ).value;
+
+        const code =
+            document.getElementById(
+                'editCode'
+            ).value.trim();
+
+        const discountType =
+            document.getElementById(
+                'editDiscountType'
+            ).value;
+
+        const discountValue =
+            Number(
+                document.getElementById(
+                    'editDiscountValue'
+                ).value
+            );
+
+        const minimumOrderAmount =
+            Number(
+                document.getElementById(
+                    'editMinimumAmount'
+                ).value
+            );
+
+        const maximumDiscount =
+            Number(
+                document.getElementById(
+                    'editMaximumDiscount'
+                ).value
+            );
+
+        const expiryDate =
+            document.getElementById(
+                'editExpiryDate'
+            ).value;
+
+        // CODE
+
+        if (!code) {
+
+            document.getElementById(
+                'editCodeError'
+            ).innerText =
+                'Coupon code is required';
+
+            isValid = false;
+        }
+
+        // DISCOUNT VALUE
+
+        if (
+            !discountValue ||
+            discountValue <= 0
+        ) {
+
+            document.getElementById(
+                'editDiscountValueError'
+            ).innerText =
+                'Enter valid discount value';
+
+            isValid = false;
+        }
+
+        // MINIMUM ORDER
+
+        if (
+            !minimumOrderAmount ||
+            minimumOrderAmount <= 0
+        ) {
+
+            document.getElementById(
+                'editMinimumOrderError'
+            ).innerText =
+                'Enter valid minimum order amount';
+
+            isValid = false;
+        }
+
+        // FIXED VALIDATION
+
+        if (
+            discountType === 'FIXED' &&
+            minimumOrderAmount <= discountValue
+        ) {
+
+            document.getElementById(
+                'editMinimumOrderError'
+            ).innerText =
+                'Minimum purchase must be greater than discount amount';
+
+            isValid = false;
+        }
+
+        // PERCENTAGE VALIDATION
+
+        if (
+            discountType === 'PERCENTAGE'
+        ) {
+
+            if (discountValue > 100) {
+
+                document.getElementById(
+                    'editDiscountValueError'
+                ).innerText =
+                    'Percentage cannot exceed 100';
+
+                isValid = false;
+            }
+
+            if (
+                !maximumDiscount ||
+                maximumDiscount <= 0
+            ) {
+
+                document.getElementById(
+                    'editMaximumDiscountError'
+                ).innerText =
+                    'Maximum discount required';
+
+                isValid = false;
+            }
+        }
+
+        // EXPIRY DATE
+
+        const today =
+            new Date()
+                .toISOString()
+                .split('T')[0];
+
+        if (
+            !expiryDate ||
+            expiryDate < today
+        ) {
+
+            document.getElementById(
+                'editExpiryDateError'
+            ).innerText =
+                'Select future date';
+
+            isValid = false;
+        }
+
+        if (!isValid) {
+            return;
+        }
+
+        const response =
+            await fetch(
+
+                `/admin/coupons/${id}`,
+
+                {
+
+                    method: 'PUT',
+
+                    headers: {
+
+                        'Content-Type':
+                            'application/json',
+
+                    },
+
+                    body: JSON.stringify({
+
+                        code,
+
+                        discountType,
+
+                        discountValue,
+
+                        minimumOrderAmount,
+
+                        maximumDiscount,
+
+                        expiryDate,
+
+                    }),
+
+                }
+            );
+
+        const data =
+            await response.json();
+
+        if (data.success) {
+
+            location.reload();
+
+        } else {
+
+            Swal.fire(
+                'Error',
+                data.message,
+                'error'
+            );
+        }
+    }
+);
+
+/*document
 .getElementById(
     'editCouponForm'
 )
@@ -727,7 +1009,7 @@ document
     }
 );
 
-
+*/
 
 async function deleteCoupon(id) {
     const result = await Swal.fire({

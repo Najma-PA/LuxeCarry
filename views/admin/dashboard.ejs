@@ -320,53 +320,67 @@
 
   const salesCtx =
     document.getElementById('salesChart');
+    const revenueLabels =
+  <%- JSON.stringify(revenueLabels || []) %>;
 
-  const monthlyRevData = <%- JSON.stringify(monthlyRevenue || []) %>;
+const revenueValues =
+  <%- JSON.stringify(revenueValues || []) %>;
 
-  new Chart(salesCtx, {
+new Chart(salesCtx, {
 
-    type: 'line',
+  type: 'line',
 
-    data: {
+  data: {
 
-      labels: [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-      ],
+    labels: revenueLabels,
 
-      datasets: [{
+    datasets: [{
 
-        label: 'Revenue',
+      label: 'Revenue',
 
-        data: monthlyRevData,
+      data: revenueValues,
 
-        borderColor: '#c59d5f',
+      borderColor: '#c59d5f',
 
-        backgroundColor: 'rgba(197,157,95,0.1)',
+      backgroundColor: 'rgba(197,157,95,0.1)',
 
-        fill: true,
+      fill: true,
 
-        tension: 0.4
+      tension: 0.4,
 
-      }]
+      pointRadius: 4,
+
+      pointHoverRadius: 6
+
+    }]
+
+  },
+
+  options: {
+
+    responsive: true,
+
+    plugins: {
+
+      legend: {
+        display: false
+      }
 
     },
 
-    options: {
+    scales: {
 
-      responsive: true,
+      y: {
 
-      plugins: {
-
-        legend: {
-          display: false
-        }
+        beginAtZero: true
 
       }
 
     }
 
-  });
+  }
+
+});
 
   // ORDER STATUS CHART
 
