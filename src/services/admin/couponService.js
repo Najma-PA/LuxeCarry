@@ -122,7 +122,19 @@ exports.createCoupon = async (data) => {
 
 exports.toggleCoupon = async (id) => {
   const coupon = await Coupon.findById(id);
-
+  if (!coupon) {
+    return { success: false, message: 'Coupon not found' };
+  }
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const expiry = new Date(coupon.expiryDate);
+  expiry.setHours(0, 0, 0, 0);
+  if (!coupon.isActive && expiry < today) {
+    return {
+      success: false,
+      message: 'Expired coupon cannot be enabled. Update expiry date first',
+    };
+  }
   coupon.isActive = !coupon.isActive;
 
   await coupon.save();
@@ -151,6 +163,23 @@ exports.updateCoupon = async (id, data) => {
   });
   if (existingCoupon) {
     return { success: false, message: 'Coupon code already exist' };
+  }
+
+  if (
+    data.discountType === 'FIXED' &&
+    Number(data.minimumOrderAmount) <= Number(data.discountValue)
+  ) {
+    return {
+      success: false,
+      message: 'Minimum purchase should be greater than discount amount',
+    };
+  }
+
+  if (data.discountType === 'PERCENTAGE' && Number(data.discountValue) > 100) {
+    return {
+      success: false,
+      message: 'Percentage discount cannot exceed 100',
+    };
   }
 
   const today = new Date();

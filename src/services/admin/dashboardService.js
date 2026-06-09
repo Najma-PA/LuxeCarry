@@ -142,18 +142,37 @@ exports.getdashboardData = async (filter = 'This Year') => {
     { $sort: { _id: 1 } },
   ]);
 */
+  let groupId = {};
+  let labels = [];
 
-  const revenueByMonth = await Order.aggregate([
-    {
-      $match: {
-        ...query,
-
-        createdAt: {
-          $gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
-
-          $lte: new Date(`${currentYear}-12-31T23:59:59.999Z`),
+  if (filter === 'Today') {
+    groupId = {
+      hour: { $hour: '$createdAt' },
+    };
+  } else if (filter === 'Last 7 Days' || filter === 'This Month') {
+    groupId = {
+      day: {
+        $dateToString: {
+          format: '%Y-%m-%d',
+          date: '$createdAt',
         },
       },
+    };
+  } else {
+    // This Year / All Time
+    groupId = {
+      day: {
+        $dateToString: {
+          format: '%Y-%m-%d',
+          date: '$createdAt',
+        },
+      },
+    };
+  }
+
+  const revenueChartData = await Order.aggregate([
+    {
+      $match: query,
     },
 
     {
@@ -170,9 +189,7 @@ exports.getdashboardData = async (filter = 'This Year') => {
 
     {
       $group: {
-        _id: {
-          $month: '$createdAt',
-        },
+        _id: groupId,
 
         revenue: {
           $sum: {
@@ -184,15 +201,42 @@ exports.getdashboardData = async (filter = 'This Year') => {
 
     {
       $sort: {
-        _id: 1,
+        '_id.day': 1,
+        '_id.hour': 1,
+        '_id.month': 1,
       },
     },
   ]);
 
-  const monthlyRevenue = new Array(12).fill(0);
-  revenueByMonth.forEach((item) => {
-    monthlyRevenue[item._id - 1] = item.revenue;
-  });
+  let revenueLabels = [];
+  let revenueValues = [];
+
+  if (filter === 'Today') {
+    revenueLabels = revenueChartData.map((item) => `${item._id.hour}:00`);
+  } else if (filter === 'Last 7 Days' || filter === 'This Month') {
+    revenueLabels = revenueChartData.map((item) => item._id.day);
+  } else {
+  revenueLabels = revenueChartData.map(
+    (item) => item._id.day
+  );
+}/*const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    revenueLabels = revenueChartData.map((item) => months[item._id.month - 1]);
+*/
+  revenueValues = revenueChartData.map((item) => item.revenue);
 
   return {
     stats: {
@@ -201,9 +245,12 @@ exports.getdashboardData = async (filter = 'This Year') => {
       totalUsers,
       totalProducts,
     },
+
     topProducts,
     topCategories,
     orderStatusData,
-    monthlyRevenue,
+
+    revenueLabels,
+    revenueValues,
   };
 };

@@ -124,8 +124,6 @@ exports.getSalesReport = async (queryParams) => {
     limit = 10,
   } = queryParams;
 
-  // DATE + SEARCH QUERY
-
   const baseQuery = await buildOrderQuery({
     search,
 
@@ -136,19 +134,13 @@ exports.getSalesReport = async (queryParams) => {
     customEndDate,
   });
 
-  // REVENUE FILTER QUERY
-
   const revenueQuery = buildRevenueQuery();
-
-  // FINAL QUERY
 
   const query = {
     ...baseQuery,
 
     ...revenueQuery,
   };
-
-  // PAGINATION
 
   const pageNum = parseInt(page) || 1;
 
@@ -157,8 +149,6 @@ exports.getSalesReport = async (queryParams) => {
   const limitNum = isAll ? 0 : parseInt(limit) || 10;
 
   const skip = isAll ? 0 : (pageNum - 1) * limitNum;
-
-  // SUMMARY
 
   const summaryData = await Order.aggregate([
     {
@@ -201,8 +191,6 @@ exports.getSalesReport = async (queryParams) => {
       },
     },
   ]);
-
-  // FALLBACK SUMMARY
 
   const summary = summaryData[0] || {
     totalSales: 0,

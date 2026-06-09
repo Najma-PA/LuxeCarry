@@ -81,7 +81,10 @@ exports.adminDashboard = async (req, res, next) => {
       topProducts: data.topProducts,
       topCategories: data.topCategories,
       orderStatusData: data.orderStatusData,
-      monthlyRevenue: data.monthlyRevenue,
+
+      revenueLabels: data.revenueLabels,
+      revenueValues: data.revenueValues,
+      // monthlyRevenue: data.monthlyRevenue,
       filter: filter,
     });
   } catch (err) {
@@ -158,8 +161,6 @@ exports.toggleUser = async (req, res) => {
   }
 };
 
-// SALES REPORT PAGE
-
 exports.getSalesReportPage = async (req, res) => {
   try {
     const reportData = await reportService.getSalesReport(req.query);
@@ -176,6 +177,7 @@ exports.getSalesReportPage = async (req, res) => {
       return res.json({
         success: true,
         tableHtml,
+        summary: reportData.summary,
         currentPage: reportData.currentPage,
         totalPages: reportData.totalPages,
       });
@@ -198,7 +200,7 @@ exports.getSalesReportPage = async (req, res) => {
       customEndDate: req.query.customEndDate || '',
 
       currentPage: reportData.currentPage,
-      
+
       totalPages: reportData.totalPages,
     });
   } catch (error) {
