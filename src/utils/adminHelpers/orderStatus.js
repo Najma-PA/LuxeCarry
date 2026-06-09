@@ -11,10 +11,6 @@ exports.calculateOrderStatus = (items) => {
     return 'Returned';
   }
 
-  if (statuses.every((s) => s === 'Cancelled' || s === 'Returned')) {
-    return 'Closed';
-  }
-
   if (activeStatuses.length === 0) {
     return 'Closed';
   }
@@ -54,6 +50,8 @@ exports.calculateOrderStatus = (items) => {
   if (activeStatuses.includes('Confirmed')) {
     return 'Partially Confirmed';
   }
-
+  if (activeStatuses.incluldes('Pending')) {
+    return 'Partially Pending';
+  }
   return 'Pending';
 };

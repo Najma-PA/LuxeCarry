@@ -207,6 +207,7 @@ const orderSchema = new mongoose.Schema(
         'Cancelled',
         'Partially Returned',
         'Returned',
+        'Closed',
       ],
       default: 'Pending',
     },
