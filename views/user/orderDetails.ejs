@@ -685,14 +685,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok && data.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'Refund Credited',
-                        html: `${data.message || 'Item cancelled successfully'}
-                                <br><br>
-                                <strong>₹${data.refundAmount || 0}
-                                </strong>
-                                credited to wallet.`,
+                        title: 'Success',
+                        text: data.message || 'Item cancelled successfully',
+                                
                         showConfirmButton: false,
-                        timer: 2500
+                        timer: 1500
                     }).then(() => {
                         window.location.reload();
                     });
