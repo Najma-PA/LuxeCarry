@@ -532,15 +532,11 @@ function showStockErrors(errors) {
                 } else {
 
                     Swal.fire({
-
                         icon: 'error',
-
                         title:
                             'Verification Failed',
-
                         text:
                             verifyData.message,
-
                     });
 
                 }
@@ -792,9 +788,7 @@ applyCouponBtn?.addEventListener(
       const data =
         await response.json();
 
-      /*
-      SUCCESS
-      */
+      
 
       if (data.success) {
 
@@ -817,22 +811,7 @@ applyCouponBtn?.addEventListener(
         finalTotalText.innerText =
           `₹${data.finalTotal.toFixed(2)}`;
 
-       /* Swal.fire({
-
-          icon: 'success',
-
-          title:
-            'Coupon Applied',
-
-          text:
-            `${couponCode} applied successfully`,
-
-          timer: 1500,
-
-          showConfirmButton: false,
-
-        });
-*/
+  
       } else {
 
         Swal.fire({
@@ -898,7 +877,12 @@ removeCouponBtn?.addEventListener(
 
   }
 );
-
+const urlParams= new URLSearchParams(window.location.search);
+const couponFromUrl=urlParams.get('coupon');
+if(couponFromUrl){
+    couponSelect.value=couponFromUrl;
+    applyCouponBtn.click();
+}
 
 </script>
 <%- include('../partials/flashAndToast') %>

@@ -27,16 +27,16 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
 <div class="row">
 
-    <!-- SIDEBAR -->
+  
     <%- include("../partials/user/sidebar", {
         user,
         activePage: 'wallet'
     }) %>
 
-    <!-- MAIN CONTENT -->
+    
     <div class="col-lg-9 col-md-8">
 
-        <!-- PAGE HEADER -->
+       
         <div class="dashboard-page-header">
 
             <h1 class="dashboard-page-title">
@@ -49,7 +49,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
         </div>
 
-        <!-- BALANCE CARD -->
         <div class="wallet-balance-card">
 
             <div class="wallet-balance-label">
@@ -64,10 +63,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
         </div>
 
-        <!-- TRANSACTION HEADER -->
         <div class="wallet-transaction-header">
 
-            <h3 class="wallet-section-title">
+            <!--<h3 class="wallet-section-title">
                 Recent Transactions
             </h3>
 
@@ -76,14 +74,32 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 View All
 
+            </a>-->
+            <h3>
+                <%= isViewAll ? 'All Transactions' : 'Recent Transactions' %>
+            </h3>
+            
+            <% if (!isViewAll && totalTransactions > 5) { %>
+                <a
+                    href="/user/wallet?view=all"
+                    class="btn btn-sm btn-dark"
+                >
+                    View All
+                </a>
+                <% } %>
+                <% if (isViewAll) { %>
+            <a
+                href="/user/wallet"
+                class="btn btn-sm btn-outline-secondary"
+            >
+                Show Recent
             </a>
+            <% } %>
 
         </div>
 
-        <!-- TRANSACTION TABLE -->
         <div class="wallet-transaction-table">
 
-            <!-- HEADER -->
             <div class="wallet-table-head">
                 <div>Date</div>
                 <div>Description</div>
@@ -92,19 +108,17 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
             </div>
 
-            <!-- ROWS -->
             <% transactions.forEach(transaction => { %>
 
             <div class="wallet-table-row">
 
-                <!-- DATE -->
                 <div class="wallet-date">
 
                     <%=new Date(transaction.createdAt)
                     .toLocaleDateString('en-IN')  %>
 
                 </div>
-                <!-- DESCRIPTION -->
+              
                 <div class="wallet-transaction-info">
 
                     <div class="wallet-transaction-icon">
@@ -139,7 +153,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 </div>
 
-                <!-- AMOUNT -->
                 <div class="
                     wallet-amount
                     <%= transaction.type === 'credit'
@@ -155,7 +168,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                 </div>
 
-                <!-- STATUS -->
                 <div>
 
                     <span class="wallet-status-badge">

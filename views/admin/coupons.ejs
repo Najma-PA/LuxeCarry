@@ -81,34 +81,41 @@
 
             <div class="row g-3 mb-4">
 
-                <div class="col-md-8">
+                <div class="col-md-7">
 
                     <input
                         type="text"
+                        id="searchInput"
                         class="form-control"
-                        placeholder="Search coupons...">
+                        placeholder="Search coupons..."
+                        value="<%= search %>">
 
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
 
-                    <select class="form-select">
+                    <select class="form-select" id="statusFilter">
 
-                        <option value="">
+                        <option value="" <%= status === '' ? 'selected' : '' %>>
                             All Status
                         </option>
 
-                        <option value="active">
+                        <option value="active" <%= status === 'active' ? 'selected' : '' %>>
                             Active
                         </option>
 
-                        <option value="inactive">
+                        <option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>
                             Inactive
                         </option>
 
                     </select>
 
                 </div>
+                <div class="col-lg-1">
+            <button type="button" id="clear-btn" class="btn btn-secondary w-100" style="background-color: rgb(210, 159, 30);">
+              Clear
+            </button>
+          </div>
 
             </div>
 
@@ -711,7 +718,7 @@ document
 
         let isValid = true;
 
-        // CLEAR ERRORS
+        
 
         document.querySelectorAll(
             '#editCouponModal .text-danger'
@@ -760,7 +767,7 @@ document
                 'editExpiryDate'
             ).value;
 
-        // CODE
+        
 
         if (!code) {
 
@@ -772,7 +779,7 @@ document
             isValid = false;
         }
 
-        // DISCOUNT VALUE
+        
 
         if (
             !discountValue ||
@@ -787,7 +794,7 @@ document
             isValid = false;
         }
 
-        // MINIMUM ORDER
+        
 
         if (
             !minimumOrderAmount ||
@@ -802,7 +809,7 @@ document
             isValid = false;
         }
 
-        // FIXED VALIDATION
+        
 
         if (
             discountType === 'FIXED' &&
@@ -817,7 +824,7 @@ document
             isValid = false;
         }
 
-        // PERCENTAGE VALIDATION
+        
 
         if (
             discountType === 'PERCENTAGE'
@@ -847,7 +854,7 @@ document
             }
         }
 
-        // EXPIRY DATE
+        
 
         const today =
             new Date()
@@ -924,92 +931,7 @@ document
     }
 );
 
-/*document
-.getElementById(
-    'editCouponForm'
-)
-.addEventListener(
-    'submit',
 
-    async function (e) {
-
-        e.preventDefault();
-
-        const id =
-            document.getElementById(
-                'editCouponId'
-            ).value;
-
-        const response =
-            await fetch(
-
-                `/admin/coupons/${id}`,
-
-                {
-
-                    method: 'PUT',
-
-                    headers: {
-
-                        'Content-Type':
-                            'application/json',
-
-                    },
-
-                    body: JSON.stringify({
-
-                        code:
-                            document.getElementById(
-                                'editCode'
-                            ).value,
-
-                        discountType:
-                            document.getElementById(
-                                'editDiscountType'
-                            ).value,
-
-                        discountValue:
-                            document.getElementById(
-                                'editDiscountValue'
-                            ).value,
-
-                        minimumOrderAmount:
-                            document.getElementById(
-                                'editMinimumAmount'
-                            ).value,
-
-                        maximumDiscount:
-                            document.getElementById(
-                                'editMaximumDiscount'
-                            ).value,
-
-                        expiryDate:
-                            document.getElementById(
-                                'editExpiryDate'
-                            ).value,
-
-                    }),
-
-                }
-            );
-
-        const data =
-            await response.json();
-
-        if (data.success) {
-
-            location.reload();
-
-        } else {
-
-            alert(data.message);
-
-        }
-
-    }
-);
-
-*/
 
 async function deleteCoupon(id) {
     const result = await Swal.fire({
@@ -1089,7 +1011,7 @@ const maximumDiscountWrapper =
     );
 
 
-// SHOW/HIDE MAX DISCOUNT
+
 
 function toggleMaximumDiscount() {
 
@@ -1118,7 +1040,7 @@ discountType.addEventListener(
 );
 
 
-// FORM VALIDATION
+
 
 addCouponForm.addEventListener(
     'submit',
@@ -1289,6 +1211,43 @@ addCouponForm.addEventListener(
 
     }
 );
+
+// Search and Filter Logic
+let searchTimeout;
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+
+function updateCoupons() {
+    const search = searchInput.value.trim();
+    const status = statusFilter.value;
+    
+    let url = '/admin/coupons?';
+    if (search) url += `search=${encodeURIComponent(search)}&`;
+    if (status) url += `status=${encodeURIComponent(status)}&`;
+    
+    window.location.href = url;
+}
+
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            updateCoupons();
+        }, 500);
+    });
+}
+
+if (statusFilter) {
+    statusFilter.addEventListener('change', updateCoupons);
+}
+
+const clearBtn = document.getElementById('clear-btn');
+if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+        window.location.href = '/admin/coupons';
+    });
+}
+
 </script>
 </body>
 </html>
