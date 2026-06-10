@@ -122,6 +122,9 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
     await restoreStock(item);
   } else if (status === 'Delivered') {
     item.deliveredAt = new Date();
+    if (order.paymentMethod?.trim().toUpperCase() === 'COD') {
+      order.paymentStatus = 'Paid';
+    }
   }
 
   if ((status === 'Cancelled' || status === 'Returned') && order.paymentStatus === 'Paid') {

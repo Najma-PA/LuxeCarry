@@ -130,13 +130,12 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
   await restoreStock(item);
 
   // REFUND
-  if (order.paymentStatus === 'Paid') {
+  if (order.paymentStatus === 'Paid' && order.paymentMethod !== 'COD') {
     item.refundAmount = item.finalPayable || item.totalPrice;
 
     // item.refundStatus = 'Pending';
   }
 
-  // CHECK IF ALL ITEMS CANCELLED
   const allCancelled = order.items.every((i) => i.status === 'Cancelled');
 
   if (allCancelled) {

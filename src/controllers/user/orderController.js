@@ -107,7 +107,7 @@ exports.cancelOrder = async (req, res, next) => {
       });
     }
     const { order, item } = result;
-    if (!item.refundProcessed) {
+    if (order.paymentStatus === 'Paid' && order.paymentMethod !== 'COD' && !item.refundProcessed) {
       const walletTransaction = await walletController.creditWallet({
         userId: order.userId,
         amount: item.finalPayable,

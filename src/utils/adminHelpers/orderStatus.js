@@ -50,7 +50,7 @@ exports.calculateOrderStatus = (items) => {
   if (activeStatuses.includes('Confirmed')) {
     return 'Partially Confirmed';
   }
-  if (activeStatuses.incluldes('Pending')) {
+  if (activeStatuses.includes('Pending')) {
     return 'Partially Pending';
   }
   return 'Pending';
