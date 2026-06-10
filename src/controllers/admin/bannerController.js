@@ -2,8 +2,6 @@ const Banner = require('../../models/bannerModel');
 
 const { uploadStream, deleteImage } = require('../../utils/cloudinaryHelper');
 
-// LOAD BANNERS LIST
-
 exports.getBanners = async (req, res) => {
   try {
     const banners = await Banner.find().sort({ createdAt: -1 });
@@ -14,13 +12,9 @@ exports.getBanners = async (req, res) => {
   }
 };
 
-// LOAD ADD PAGE
-
 exports.loadAddPage = (req, res) => {
   res.render('admin/addBanner');
 };
-
-// ADD BANNER
 
 exports.addBanner = async (req, res) => {
   try {
@@ -31,8 +25,6 @@ exports.addBanner = async (req, res) => {
     if (!file) {
       return res.status(400).json({ success: false, message: 'Banner image is required' });
     }
-
-    // Upload to Cloudinary
 
     const result = await uploadStream(file.buffer, 'banners');
 
@@ -66,8 +58,6 @@ exports.addBanner = async (req, res) => {
   }
 };
 
-// TOGGLE STATUS
-
 exports.toggleStatus = async (req, res) => {
   try {
     const banner = await Banner.findById(req.params.id);
@@ -84,15 +74,11 @@ exports.toggleStatus = async (req, res) => {
   }
 };
 
-// DELETE BANNER
-
 exports.deleteBanner = async (req, res) => {
   try {
     const banner = await Banner.findById(req.params.id);
 
     if (!banner) throw new Error('Banner not found');
-
-    // Delete from Cloudinary
 
     await deleteImage(banner.image.public_id);
 
@@ -103,4 +89,3 @@ exports.deleteBanner = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
-

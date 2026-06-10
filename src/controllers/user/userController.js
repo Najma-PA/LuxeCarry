@@ -503,7 +503,7 @@ exports.removeProfilePic = async (req, res) => {
   }
 };
 
-/*CHANGE PASSWORD */
+//chang epassword
 exports.loadChangePassword = async (req, res) => {
   const user = await userService.findUserById(req.session.user.id);
   if (user.googleId) {
@@ -547,8 +547,7 @@ exports.changePassword = async (req, res) => {
     res.render('user/changePassword', { error: 'Something went wrong', formData: req.body, user });
   }
 };
-
-/*ADDRESS*/
+//address
 exports.loadAddresses = async (req, res) => {
   const addresses = await Address.find({ userId: req.session.user.id }).sort({
     isDefault: -1,
@@ -573,7 +572,6 @@ exports.addAddress = async (req, res) => {
     const user = req.session.user;
     const redirect = req.query.redirect || '';
 
-    // VALIDATION
     const errors = addressService.validateAddressData(req.body);
 
     if (Object.keys(errors).length > 0) {
@@ -681,13 +679,13 @@ exports.getReferralPage = async (req, res, next) => {
     res.render('user/referral', {
       user,
       activePage: 'referral',
-      req
+      req,
     });
   } catch (error) {
     next(error);
   }
 };
-//LOGOUT
+
 exports.userLogout = (req, res) => {
   req.logout((err) => {
     if (err) {

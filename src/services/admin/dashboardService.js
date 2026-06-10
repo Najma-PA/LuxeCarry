@@ -1,7 +1,7 @@
 const Order = require('../../models/orderModel');
 const Product = require('../../models/productModel');
 const User = require('../../models/userModel');
-//const Categories = require('../../models/categoryModel');
+
 const { buildOrderQuery } = require('../../utils/adminHelpers/orderQuery');
 
 const { buildRevenueQuery } = require('../../utils/adminHelpers/revenueQuery');
@@ -31,7 +31,7 @@ exports.getdashboardData = async (filter = 'This Year') => {
   const totalOrders = await Order.countDocuments(query);
   const totalUsers = await User.countDocuments({ role: 'user' });
   const totalProducts = await Product.countDocuments();
-  // const topcategories = await Categories.find().limit(5);
+
   const topProducts = await Order.aggregate([
     { $match: query },
     { $unwind: '$items' },
@@ -98,14 +98,12 @@ exports.getdashboardData = async (filter = 'This Year') => {
             ],
           },
         },
-
-        //    revenue: { $sum: '$items.finalPayable' },
       },
     },
     { $sort: { totalSold: -1 } },
     { $limit: 5 },
   ]);
-  // Order Status Distribution
+
   const orderStatusCounts = await Order.aggregate([
     { $match: dateQuery },
     {
@@ -121,27 +119,8 @@ exports.getdashboardData = async (filter = 'This Year') => {
     data: orderStatusCounts.map((item) => item.count),
   };
 
-  // Monthly Revenue for Current Year
   const currentYear = new Date().getFullYear();
-  /*const revenueByMonth = await Order.aggregate([
-    {
-      $match: {
-        paymentStatus: 'Paid',
-        createdAt: {
-          $gte: new Date(`${currentYear}-01-01T00:00:00.000Z`),
-          $lte: new Date(`${currentYear}-12-31T23:59:59.999Z`),
-        },
-      },
-    },
-    {
-      $group: {
-        _id: { $month: '$createdAt' },
-        totalRevenue: { $sum: '$totalAmount' },
-      },
-    },
-    { $sort: { _id: 1 } },
-  ]);
-*/
+
   let groupId = {};
   let labels = [];
 
@@ -216,26 +195,8 @@ exports.getdashboardData = async (filter = 'This Year') => {
   } else if (filter === 'Last 7 Days' || filter === 'This Month') {
     revenueLabels = revenueChartData.map((item) => item._id.day);
   } else {
-  revenueLabels = revenueChartData.map(
-    (item) => item._id.day
-  );
-}/*const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-
-    revenueLabels = revenueChartData.map((item) => months[item._id.month - 1]);
-*/
+    revenueLabels = revenueChartData.map((item) => item._id.day);
+  }
   revenueValues = revenueChartData.map((item) => item.revenue);
 
   return {

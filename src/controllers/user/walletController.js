@@ -8,11 +8,15 @@ exports.getWalletPage = async (req, res) => {
     if (!wallet) {
       wallet = await walletService.createWallet(userId);
     }
-    const transactions = await walletService.getWalletTransactions(userId);
+    const isViewAll = req.query.view === 'all';
+    const transactions = await walletService.getWalletTransactions(userId, isViewAll ? 0 : 5);
+    const totalTransactions = await walletService.getTransactionCount(userId);
     res.render('user/wallet', {
       user: req.user,
       wallet,
       transactions,
+      totalTransactions,
+      isViewAll,
       activePage: 'wallet',
     });
   } catch (error) {

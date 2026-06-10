@@ -13,6 +13,15 @@ exports.updateWalletBalance = async (walletId, amount) => {
 exports.createWalletTransaction = async (data) => {
   return await WalletTransaction.create(data);
 };
-exports.getWalletTransactions = async (userId) => {
-  return await WalletTransaction.find({ userId }).sort({ createdAt: -1 }).lean();
+exports.getWalletTransactions = async (userId, limit = 5) => {
+  let query = WalletTransaction.find({ userId }).sort({ createdAt: -1 });
+  if (limit > 0) {
+    query.limit(limit);
+  }
+  return await query.lean();
+};
+exports.getTransactionCount = async (userId) => {
+  return await WalletTransaction.countDocuments({
+    userId,
+  });
 };

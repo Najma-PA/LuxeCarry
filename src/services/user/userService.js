@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const User = require('../../models/userModel');
 const { uploadStream, deleteImage } = require('../../utils/cloudinaryHelper');
+const generateReferralCode = require('../../utils/userHelpers/generateReferralCode');
 
 exports.findUserByEmail = (email) => User.findOne({ email, role: 'user' });
 
@@ -10,13 +11,14 @@ exports.registerUser = async ({ name, email, password, referredBy }) => {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   // const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-  let referralCode;
+  /* let referralCode;
   let existReferral;
   do {
     referralCode = name.substring(0, 4).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
     existReferral = await User.findOne({ referralCode });
   } while (existReferral);
-
+*/
+  const referralCode = await generateReferralCode(name);
   const newUser = new User({
     name,
     email,
