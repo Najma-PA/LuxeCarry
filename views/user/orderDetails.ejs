@@ -496,12 +496,42 @@ const diffDays = deliveredDate
                     <label class="form-label">
                         Cancellation Reason (Optional)
                     </label>
-
+                    <select name="reason" id="cancelReasonSelect" class="form-select">
+                        <option value="">
+                            Select Reason (Optional)
+                        </option>
+                        <option value="Changed My Mind">
+                            Changed My Mind
+                        </option>
+                        <option value="Ordered By Mistake">
+                            Ordered By Mistake
+                        </option>
+                        <option value="Found a better alternative">
+                            Found a better alternative
+                        </option>
+                        <option value="Found a better prce elsewhere">
+                            Found a better price elsewhere
+                        </option>
+                        <option value="Delivery time is too long">
+                            Delivery time is too long
+                        </option>
+                        <option value="No longer required">
+                            No longer required
+                        </option>
+                        <option value="Payment issue">
+                            Payment issue
+                        </option>
+                        <option value="Other">
+                            Other
+                        </option>
+                            
+                    </select>
                     <textarea
-                        name="reason"
-                        class="form-control"
+                        name="customReason"
+                        id="cancelCustomReasonBox"
+                        class="form-control mt-3 d-none"
                         rows="4"
-                        placeholder="Enter reason..."
+                        placeholder="Enter custom reason..."
                     ></textarea>
 
                 </div>
@@ -652,11 +682,33 @@ document.addEventListener('DOMContentLoaded', () => {
         reasonSelect.addEventListener('change', function () {
             if (this.value === 'Other') {
                 customReasonBox.classList.remove('d-none');
-               // customReasonBox.required = true;
+               
             } else {
                 customReasonBox.classList.add('d-none');
                 customReasonBox.required = false;
                 customReasonBox.value = '';
+            }
+        });
+    }
+        // Cancel reason
+    const cancelReasonSelect =
+        document.getElementById('cancelReasonSelect');
+
+    const cancelCustomReasonBox =
+        document.getElementById('cancelCustomReasonBox');
+
+    if (cancelReasonSelect && cancelCustomReasonBox) {
+
+        cancelReasonSelect.addEventListener('change', function () {
+
+            if (this.value === 'Other') {
+
+                cancelCustomReasonBox.classList.remove('d-none');
+
+            } else {
+
+                cancelCustomReasonBox.classList.add('d-none');
+                cancelCustomReasonBox.value = '';
             }
         });
     }
@@ -668,8 +720,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const submitBtn = cancelForm.querySelector('button[type="submit"]');
             if (submitBtn) submitBtn.disabled = true;
+             const reason =
+            document.getElementById('cancelReasonSelect')?.value || '';
+            
+        const customReason =
+            document.getElementById('cancelCustomReasonBox')?.value || '';
 
-            const reason = cancelForm.querySelector('textarea[name="reason"]').value;
+            //const reason = cancelForm.querySelector('textarea[name="reason"]').value;
 
             try {
                 const response = await fetch(cancelForm.action, {
@@ -677,7 +734,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ reason })
+                    body: JSON.stringify({ reason,customReason })
                 });
 
                 const data = await response.json();
