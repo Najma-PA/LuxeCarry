@@ -375,8 +375,25 @@ exports.loadEditProfile = async (req, res) => {
 exports.updateProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
-    const { name, email } = req.body;
+    let { name, email } = req.body;
+    name = name?.trim();
+    email = email?.trim();
 
+    const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
+    const existingUser = await userService.findUserByEmail(email);
+    if (!name) {
+      return res.render('user/editProfile', {
+        user: { ...user.toObject(), name, email },
+        error: 'Name is required',
+      });
+    }
+
+    if (!nameRegex.test(name)) {
+      return res.render('user/editProfile', {
+        user: { ...user.toObject(), name, email },
+        error: 'Name can contain only letters and spaces',
+      });
+    }
     const user = await userService.findUserById(userId);
 
     if (email === user.email) {
@@ -384,8 +401,6 @@ exports.updateProfile = async (req, res) => {
       req.session.user.name = name;
       return res.redirect('/user/profile');
     }
-
-    const existingUser = await userService.findUserByEmail(email);
 
     if (existingUser) {
       user.name = name;
