@@ -12,8 +12,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     };
   }
 
-  // ITEM-WISE INVOICE ITEMS
-
   const invoiceItems = order.items.filter(
     (item) =>
       ['Confirmed', 'Shipped', 'Out for Delivery', 'Delivered'].includes(item.status) &&
@@ -27,8 +25,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     };
   }
 
-  // PDF
-
   const doc = new PDFDocument({
     margin: 50,
     size: 'A4',
@@ -41,8 +37,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   res.setHeader('Content-Type', 'application/pdf');
 
   doc.pipe(res);
-
-  // HEADER
 
   const logoPath = path.join(__dirname, '../../../public/images/logo.png');
 
@@ -75,15 +69,11 @@ exports.generateInvoice = async (orderId, itemId, res) => {
 
   doc.moveDown(2);
 
-  // ORDER DETAILS
-
   const detailsTop = doc.y + 20;
 
   const invoiceNumber = `INV-${itemId.toString().slice(-6).toUpperCase()}`;
 
   doc.fontSize(12).font('Helvetica').fillColor('#333');
-
-  // LEFT COLUMN
 
   doc.text(`Invoice Date: ${new Date().toLocaleDateString()}`, 70, detailsTop);
 
@@ -92,8 +82,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.text(`Order ID: ${order.orderId || order._id}`, 70, detailsTop + 44);
 
   doc.text(`Order Date: ${new Date(order.createdAt).toDateString()}`, 70, detailsTop + 68);
-
-  // SHIPPING ADDRESS
 
   const addressTop = detailsTop;
 
@@ -128,8 +116,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     width: 200,
   });
 
-  // PRODUCTS TABLE
-
   doc.y = addressTop + 170;
 
   const tableTop = doc.y;
@@ -142,8 +128,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   const discountX = tableLeft + 330;
   const finalX = tableLeft + 430;
 
-  // TABLE HEADER
-
   doc.roundedRect(tableLeft, tableTop, 500, 35, 6).fill('#111');
 
   doc.fillColor('#fff').font('Helvetica-Bold').fontSize(11);
@@ -153,23 +137,23 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   });
 
   doc.text('Qty', qtyX, tableTop + 11, {
-    width: 30,
+    width: 20,
     align: 'center',
   });
 
-  doc.text('Original', originalX, tableTop + 11, {
+  doc.text('Unit Price', originalX, tableTop + 11, {
     width: 70,
-    align: 'right',
+    align: 'leftt',
   });
 
-  doc.text('Discount', discountX, tableTop + 11, {
+  doc.text('Unit Discount', discountX, tableTop + 11, {
     width: 70,
-    align: 'right',
+    align: 'left',
   });
 
   doc.text('Total', finalX, tableTop + 11, {
-    width: 70,
-    align: 'right',
+    width: 60,
+    align: 'left',
   });
 
   doc.fillColor('#000');
@@ -177,19 +161,13 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   let position = tableTop + 35;
 
   invoiceItems.forEach((item, index) => {
-    // ZEBRA ROWS
-
     if (index % 2 === 0) {
       doc.rect(tableLeft, position, 500, 45).fill('#f8f8f8');
     }
 
-    // ROW BORDER
-
     doc.rect(tableLeft, position, 500, 45).stroke('#e5e5e5');
 
     doc.fillColor('#111').font('Helvetica').fontSize(10);
-
-    // PRODUCT NAME
 
     const pName = item.productName || item.product?.name || 'Product';
 
@@ -201,90 +179,52 @@ exports.generateInvoice = async (orderId, itemId, res) => {
       width: 150,
     });
 
-    // QTY
-
-    doc.text(item.quantity.toString(), qtyX, position + 15, {
-      width: 30,
+    doc.text(` x ${item.quantity.toString()}`, qtyX, position + 15, {
+      width: 20,
       align: 'center',
     });
 
-    // ORIGINAL PRICE
-
     doc.text(`Rs. ${(item.originalPrice || 0).toLocaleString()}`, originalX, position + 15, {
       width: 70,
-      align: 'right',
+      align: 'left',
     });
-
-    // DISCOUNT
 
     doc.text(`- Rs. ${(item.productDiscount || 0).toLocaleString()}`, discountX, position + 15, {
       width: 70,
-      align: 'right',
+      align: 'left',
     });
 
     // TOTAL
 
     doc.text(`Rs. ${(item.totalPrice || 0).toLocaleString()}`, finalX, position + 15, {
-      width: 70,
-      align: 'right',
+      width: 60,
+      align: 'left',
     });
 
     position += 45;
   });
 
-  // TOTALS
-
   position += 35;
 
   doc.font('Helvetica').fontSize(12).fillColor('#111');
+  const invoiceItem = invoiceItems[0];
 
-  const originalSubtotal = invoiceItems.reduce(
-    (sum, item) => sum + (item.originalPrice || 0) * item.quantity,
-    0
-  );
+  const totalPrice = invoiceItem.totalPrice || 0;
+  const couponDiscount = invoiceItem.couponDiscount || 0;
+  const grandTotal = invoiceItem.finalPayable || totalPrice;
 
-  const totalDiscount = invoiceItems.reduce(
-    (sum, item) => sum + (item.productDiscount || 0) * item.quantity,
-    0
-  );
+  doc.text('Total', 330, position);
 
-  const totalCouponDiscount = invoiceItems.reduce(
-    (sum, item) => sum + (item.couponDiscount || 0),
-    0
-  );
-
-  const finalPayable = invoiceItems.reduce(
-    (sum, item) => sum + (item.finalPayable || item.totalPrice || 0),
-    0
-  );
-
-  // SUBTOTAL
-
-  doc.text('Subtotal', 330, position);
-
-  doc.text(`Rs. ${originalSubtotal.toLocaleString()}`, 430, position, {
+  doc.text(`Rs. ${totalPrice.toLocaleString()}`, 430, position, {
     width: 110,
     align: 'right',
   });
-
   position += 22;
 
-  // DISCOUNT
-
-  doc.text('Product Discount', 330, position);
-
-  doc.text(`- Rs. ${totalDiscount.toLocaleString()}`, 430, position, {
-    width: 110,
-    align: 'right',
-  });
-
-  position += 22;
-
-  // COUPON DISCOUNT
-  if (totalCouponDiscount > 0) {
+  if (couponDiscount > 0) {
     doc.text('Coupon Discount', 330, position);
 
-    doc.text(`- Rs. ${totalCouponDiscount.toLocaleString()}`, 430, position, {
+    doc.text(`- Rs. ${couponDiscount.toLocaleString()}`, 430, position, {
       width: 110,
       align: 'right',
     });
@@ -292,23 +232,17 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     position += 22;
   }
 
-  // Add padding before grand total
   position += 13;
-
-  // GRAND TOTAL BOX
-
   doc.roundedRect(300, position - 8, 240, 40, 6).fill('#111');
 
   doc.fillColor('#fff').font('Helvetica-Bold').fontSize(16);
 
   doc.text('Grand Total', 315, position + 5);
 
-  doc.text(`Rs. ${finalPayable.toLocaleString()}`, 415, position + 5, {
+  doc.text(`Rs. ${grandTotal.toLocaleString()}`, 415, position + 5, {
     width: 115,
     align: 'right',
   });
-
-  // PAYMENT DETAILS
 
   position += 70;
 
@@ -322,8 +256,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
     position + 18
   );
 
-  // FOOTER
-
   position += 70;
 
   doc
@@ -334,8 +266,6 @@ exports.generateInvoice = async (orderId, itemId, res) => {
       width: 500,
       align: 'center',
     });
-
-  // END PDF
 
   doc.end();
 

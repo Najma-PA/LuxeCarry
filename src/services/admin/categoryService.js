@@ -111,7 +111,6 @@ exports.updateCategory = async (id, data, file) => {
     errors.offer = 'Offer must be between 0 and 99';
   }
 
-  // CHECK DUPLICATE (exclude current category)
   if (data.name && data.name.trim() !== '') {
     const existing = await Category.findOne({
       _id: { $ne: id },

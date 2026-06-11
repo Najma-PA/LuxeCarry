@@ -15,7 +15,7 @@ const { isAdminAuth, redirectIfAdminLoggedIn } = require('../middleware/adminAut
 
 const noCache = require('../middleware/noCache');
 
-/*AUTH*/
+//auth
 
 router.get('/login', noCache, redirectIfAdminLoggedIn, adminController.showAdminLogin);
 
@@ -23,11 +23,11 @@ router.post('/login', noCache, redirectIfAdminLoggedIn, adminController.adminLog
 
 router.post('/logout', noCache, isAdminAuth, adminController.adminLogout);
 
-/*DASHBOARD */
+//dashboard
 
 router.get('/dashboard', noCache, isAdminAuth, adminController.adminDashboard);
 
-/* USER MANAGEMENT */
+//user
 
 router.get('/users', noCache, isAdminAuth, adminController.loadUsers);
 
@@ -96,7 +96,7 @@ router.post(
 router.patch('/banners/toggle/:id', noCache, isAdminAuth, bannerController.toggleStatus);
 router.delete('/banners/:id', noCache, isAdminAuth, bannerController.deleteBanner);
 
-/* ORDER MANAGEMENT */
+//order
 router.get('/orders', noCache, isAdminAuth, orderController.getOrders);
 router.get('/orders/:orderId', noCache, isAdminAuth, orderController.getOrderDetails);
 router.post(
@@ -132,7 +132,7 @@ router.post(
   orderController.rejectOrderRequest
 );
 
-/* COUPON MANAGEMENT */
+//coupon
 
 router.get('/coupons', noCache, isAdminAuth, couponController.getCouponsPage);
 
@@ -144,7 +144,7 @@ router.patch('/coupons/:id/toggle', noCache, isAdminAuth, couponController.toggl
 
 router.delete('/coupons/:id', noCache, isAdminAuth, couponController.deleteCoupon);
 
-// SALES REPORT
+//salesreport
 
 router.get('/reports', noCache, isAdminAuth, adminController.getSalesReportPage);
 

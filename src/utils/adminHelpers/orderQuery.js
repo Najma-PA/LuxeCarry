@@ -99,7 +99,7 @@ exports.buildOrderQuery = async ({
     }
   }
 
-  // SEARCH FILTER
+  // SEARCH
   if (search) {
     let trimmedSearch = search.trim();
 

@@ -10,14 +10,6 @@ exports.registerUser = async ({ name, email, password, referredBy }) => {
   if (exists) throw new Error('Email already registered');
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // const referralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-  /* let referralCode;
-  let existReferral;
-  do {
-    referralCode = name.substring(0, 4).toUpperCase() + Math.floor(1000 + Math.random() * 9000);
-    existReferral = await User.findOne({ referralCode });
-  } while (existReferral);
-*/
   const referralCode = await generateReferralCode(name);
   const newUser = new User({
     name,

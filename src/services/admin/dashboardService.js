@@ -138,7 +138,7 @@ exports.getdashboardData = async (filter = 'This Year') => {
       },
     };
   } else {
-    // This Year / All Time
+    // This Year
     groupId = {
       day: {
         $dateToString: {

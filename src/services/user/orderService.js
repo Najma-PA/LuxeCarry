@@ -82,7 +82,7 @@ exports.getOrderedProductDetails = async (orderId, itemId, userId) => {
   };
 };
 
-exports.cancelOrder = async (orderId, itemId, userId, reason) => {
+exports.cancelOrder = async (orderId, itemId, userId, reason, customReason) => {
   const order = await Order.findOne({
     _id: orderId,
     userId,
@@ -120,8 +120,12 @@ exports.cancelOrder = async (orderId, itemId, userId, reason) => {
   item.previousStatus = item.status;
 
   item.status = 'Cancelled';
-
-  item.cancelReason = reason?.trim() || 'Cancelled by customer';
+  const finalReason =
+    reason === 'Other'
+      ? customReason?.trim() || 'Cancelled by customer'
+      : reason?.trim() || 'Cancelled by customer';
+  item.cancelReason = finalReason;
+  //item.cancelReason = reason?.trim() || 'Cancelled by customer';
 
   item.cancelledAt = new Date();
 
