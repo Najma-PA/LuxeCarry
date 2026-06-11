@@ -254,7 +254,43 @@
   .stock-status.in-stock { color: #10b981; }
   .stock-status.out-stock { color: #ef4444; }
   .stock-status.low-stock { color: #f59e0b; }
-  
+  /* Reviews Section */
+
+.review-card {
+  background: #fff;
+  padding: 24px;
+  border-radius: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.rating-summary {
+  background: #fff;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.04);
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.rating-row .progress {
+  height: 8px;
+  border-radius: 10px;
+  background: #eee;
+}
+
+.rating-row .progress-bar {
+  background-color: #b78846;
+}
+
+.text-warning {
+  color: #b78846 !important;
+}
 
 </style>
 </head>
@@ -385,7 +421,125 @@
   </div>
 
 </div>
+<!-- CUSTOMER REVIEWS -->
+<div class="container my-5">
+  <div class="text-center mb-5">
+    <h2 class="heading-serif fw-bold">Customer Reviews</h2>
+  </div>
 
+  <div class="row g-4">
+
+    <!-- Reviews List -->
+    <div class="col-lg-8">
+
+      <div class="review-card">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="text-warning mb-2">★★★★★</div>
+            <h6 class="fw-bold mb-1">Sarah M.</h6>
+          </div>
+          <small class="text-muted">Jan 12, 2026</small>
+        </div>
+
+        <h6 class="fw-bold mt-3">Excellent Quality</h6>
+        <p class="text-muted mb-0">
+          Absolutely love this handbag. The leather feels premium,
+          the stitching is perfect, and it looks even better in person.
+          Highly recommended.
+        </p>
+      </div>
+
+      <div class="review-card">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="text-warning mb-2">★★★★★</div>
+            <h6 class="fw-bold mb-1">Emily R.</h6>
+          </div>
+          <small class="text-muted">Dec 28, 2025</small>
+        </div>
+
+        <h6 class="fw-bold mt-3">Worth Every Penny</h6>
+        <p class="text-muted mb-0">
+          Elegant design and excellent craftsmanship. I've received
+          several compliments since I started using it.
+        </p>
+      </div>
+
+      <div class="review-card">
+        <div class="d-flex justify-content-between">
+          <div>
+            <div class="text-warning mb-2">★★★★☆</div>
+            <h6 class="fw-bold mb-1">Jessica T.</h6>
+          </div>
+          <small class="text-muted">Nov 15, 2025</small>
+        </div>
+
+        <h6 class="fw-bold mt-3">Beautiful Design</h6>
+        <p class="text-muted mb-0">
+          Stylish and practical. The storage space is perfect for
+          daily essentials and the quality is impressive.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Rating Summary -->
+    <div class="col-lg-4">
+      <div class="rating-summary">
+        <h2 class="fw-bold mb-1">4.8</h2>
+
+        <div class="text-warning mb-2">
+          ★★★★★
+        </div>
+
+        <small class="text-muted d-block mb-4">
+          Based on 124 reviews
+        </small>
+
+        <div class="rating-row">
+          <span>5</span>
+          <div class="progress flex-grow-1">
+            <div class="progress-bar" style="width:85%"></div>
+          </div>
+          <span>85%</span>
+        </div>
+
+        <div class="rating-row">
+          <span>4</span>
+          <div class="progress flex-grow-1">
+            <div class="progress-bar" style="width:10%"></div>
+          </div>
+          <span>10%</span>
+        </div>
+
+        <div class="rating-row">
+          <span>3</span>
+          <div class="progress flex-grow-1">
+            <div class="progress-bar" style="width:3%"></div>
+          </div>
+          <span>3%</span>
+        </div>
+
+        <div class="rating-row">
+          <span>2</span>
+          <div class="progress flex-grow-1">
+            <div class="progress-bar" style="width:1%"></div>
+          </div>
+          <span>1%</span>
+        </div>
+
+        <div class="rating-row">
+          <span>1</span>
+          <div class="progress flex-grow-1">
+            <div class="progress-bar" style="width:1%"></div>
+          </div>
+          <span>1%</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 
   <!-- YOU MAY ALSO LIKE -->
