@@ -380,6 +380,8 @@ exports.updateProfile = async (req, res) => {
     email = email?.trim();
 
     const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
+
+    const user = await userService.findUserById(userId);
     const existingUser = await userService.findUserByEmail(email);
     if (!name) {
       return res.render('user/editProfile', {
@@ -394,7 +396,6 @@ exports.updateProfile = async (req, res) => {
         error: 'Name can contain only letters and spaces',
       });
     }
-    const user = await userService.findUserById(userId);
 
     if (email === user.email) {
       await userService.updateUser(userId, { name });

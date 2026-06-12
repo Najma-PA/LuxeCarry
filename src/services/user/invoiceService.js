@@ -251,7 +251,7 @@ exports.generateInvoice = async (orderId, itemId, res) => {
   doc.text(`Payment Method: ${order.paymentMethod}`, 50, position);
 
   doc.text(
-    `Payment Status: ${order.paymentMethod === 'COD' ? 'Pending' : 'Paid'}`,
+    `Payment Status: ${order.paymentStatus === 'Paid' ? 'Paid' : 'Pending'}`,
     50,
     position + 18
   );
