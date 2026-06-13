@@ -1,6 +1,7 @@
 const orderService = require('../../services/admin/orderService');
 const walletController = require('../user/walletController');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
+const { isValidObjectId } = require('../../utils/userHelpers/objectIdValidation');
 
 exports.getOrders = async (req, res, next) => {
   try {
@@ -33,7 +34,7 @@ exports.getOrderDetails = async (req, res, next) => {
   try {
     const { orderId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!isValidObjectId(orderId)) {
       req.flash('error', 'Invalid Order ID');
       return res.redirect('/admin/orders');
     }
@@ -60,7 +61,7 @@ exports.updateOrderStatus = async (req, res, next) => {
     const { orderId } = req.params;
     const { orderStatus } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!isValidObjectId(orderId)) {
       req.flash('error', 'Invalid Order ID');
       return res.redirect('/admin/orders');
     }
@@ -79,7 +80,7 @@ exports.updateOrderPayment = async (req, res, next) => {
     const { orderId } = req.params;
     const { paymentStatus } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!isValidObjectId(orderId)) {
       req.flash('error', 'Invalid Order ID');
       return res.redirect('/admin/orders');
     }
@@ -97,7 +98,7 @@ exports.updateItemStatus = async (req, res, next) => {
     const { orderId, itemId } = req.params;
     const { status } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/admin/orders');
     }
@@ -115,7 +116,7 @@ exports.updateItemRefund = async (req, res, next) => {
     const { orderId, itemId } = req.params;
     const { refundAmount, refundStatus } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/admin/orders');
     }
@@ -133,7 +134,7 @@ exports.approveOrderRequest = async (req, res, next) => {
     const { orderId, itemId } = req.params;
     const { adminResponse } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/admin/orders');
     }
@@ -170,7 +171,7 @@ exports.rejectOrderRequest = async (req, res, next) => {
     const { orderId, itemId } = req.params;
     const { adminResponse } = req.body;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/admin/orders');
     }

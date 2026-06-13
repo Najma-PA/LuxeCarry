@@ -4,7 +4,8 @@ const couponService = require('../../services/user/couponService');
 const razorpayService = require('../../services/payment/razorpayService');
 const walletService = require('../../services/user/walletService');
 const crypto = require('crypto');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
+const { isValidObjectId } = require('../../utils/userHelpers/objectIdValidation');
 
 exports.getCheckoutPage = async (req, res, next) => {
   try {
@@ -56,7 +57,7 @@ exports.placeOrder = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'Please select a shipping address' });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(addressId)) {
+    if (!isValidObjectId(addressId)) {
       return res.status(400).json({ success: false, message: 'Invalid shipping address' });
     }
     if (paymentMethod === 'RAZORPAY') {

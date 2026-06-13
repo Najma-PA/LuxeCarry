@@ -122,10 +122,10 @@ router.post('/verifyOtp', noCache, userController.verifyOTP);
 router.post('/resendOtp', noCache, userController.resendOTP);
 
 // FORGOT PASSWORD
-router.get('/forgotPassword', userController.showForgotPassword);
-router.post('/forgotPassword', userController.sendOTP);
-router.get('/resetPassword', userController.showResetPassword);
-router.post('/resetPassword', userController.resetPassword);
+router.get('/forgotPassword', noCache, redirectIfUserLoggedIn, userController.showForgotPassword);
+router.post('/forgotPassword', noCache, redirectIfUserLoggedIn, userController.sendOTP);
+router.get('/resetPassword', noCache, redirectIfUserLoggedIn, userController.showResetPassword);
+router.post('/resetPassword', noCache, redirectIfUserLoggedIn, userController.resetPassword);
 
 // PROFILE
 router.get('/profile', isUserAuth, userController.profilePage);

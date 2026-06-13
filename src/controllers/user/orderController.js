@@ -2,13 +2,14 @@ const orderService = require('../../services/user/orderService');
 const invoiceService = require('../../services/user/invoiceService');
 const walletController = require('./walletController');
 const Order = require('../../models/orderModel');
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
+const { isValidObjectId } = require('../../utils/userHelpers/objectIdValidation');
 
 exports.getOrderSuccessPage = async (req, res, next) => {
   try {
     const orderId = req.params.orderId;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId)) {
+    if (!isValidObjectId(orderId)) {
       req.flash('error', 'Invalid order ID');
       return res.redirect('/user/home');
     }
@@ -65,7 +66,7 @@ exports.getOrderedProductDetails = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/user/orders');
     }
@@ -94,7 +95,7 @@ exports.cancelOrder = async (req, res, next) => {
     const { reason, customReason } = req.body;
     const userId = req.user?._id || req.session.user?.id;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       return res.status(400).json({ success: false, message: 'Invalid Order or Item ID' });
     }
 
@@ -136,7 +137,7 @@ exports.returnOrder = async (req, res, next) => {
     const { reason, customReason } = req.body;
     const userId = req.user?._id || req.session.user?.id;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       return res.status(400).json({ success: false, message: 'Invalid Order or Item ID' });
     }
 
@@ -162,7 +163,7 @@ exports.downloadInvoice = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(itemId)) {
+    if (!isValidObjectId(orderId, itemId)) {
       return res.status(400).send('Invalid Order or Item ID');
     }
 

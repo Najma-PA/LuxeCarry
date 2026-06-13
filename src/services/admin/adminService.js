@@ -26,7 +26,11 @@ exports.getUsers = async ({ page, limit, search, status }) => {
     totalPages: Math.ceil(totalUsers / limit),
   };
 };
-
+/**
+ *this method is to use blockuer
+ * @param {*} userId
+ * @returns
+ */
 exports.toggleUserBlock = async (userId) => {
   const user = await User.findById(userId);
 
