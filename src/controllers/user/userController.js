@@ -292,11 +292,17 @@ exports.registerUser = async (req, res) => {
 
   // password validation
   if (!password) {
+    errors.password = 'Password is required';
+  } else if (!passwordRegex.test(password)) {
+    errors.password =
+      'Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one special character';
+  }
+  /*if (!password) {
     errors.password = 'Password required';
   } else if (!passwordRegex.test(password)) {
     errors.password = 'week password';
   }
-
+*/
   //confirm password
   if (!confirmPassword) {
     errors.confirmPassword = 'confirm your password';

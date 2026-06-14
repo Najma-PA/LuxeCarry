@@ -46,7 +46,7 @@ exports.exportSalesExcel = async (req, res) => {
 
     worksheet.getCell('A2').value = `Period: ${periodText}`;
 
-    worksheet.getCell('A3').value = `Generated On: ${new Date().toLocaleString('en-US')}`;
+    worksheet.getCell('A3').value = `Generated On: ${new Date().toLocaleDateString('en-IN')}`;
 
     worksheet.getCell('A5').value = 'Summary';
 

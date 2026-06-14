@@ -45,7 +45,7 @@ exports.exportSalesPDF = async (req, res) => {
       .fillColor('#000000')
       .fontSize(11)
       .font('Helvetica')
-      .text(`Generated On: ${new Date().toLocaleString('en-US')}`, 40, 90);
+      .text(`Generated On: ${new Date().toLocaleDateString('en-IN')}`, 40, 90);
 
     doc.text(`Report Period: ${periodText}`, 40, 105);
 
