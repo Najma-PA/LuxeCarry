@@ -277,7 +277,6 @@ exports.registerUser = async (req, res) => {
   } else if (!nameRegex.test(name)) {
     errors.name = 'Only letters and spaces allowed';
   }
-
   //email validation
   if (!email) {
     errors.email = 'Email is required';
@@ -297,12 +296,7 @@ exports.registerUser = async (req, res) => {
     errors.password =
       'Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, and one special character';
   }
-  /*if (!password) {
-    errors.password = 'Password required';
-  } else if (!passwordRegex.test(password)) {
-    errors.password = 'week password';
-  }
-*/
+
   //confirm password
   if (!confirmPassword) {
     errors.confirmPassword = 'confirm your password';
@@ -386,7 +380,7 @@ exports.updateProfile = async (req, res) => {
     email = email?.trim();
 
     const nameRegex = /^[A-Za-z]+(?:\s[A-Za-z]+)*$/;
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const user = await userService.findUserById(userId);
     const existingUser = await userService.findUserByEmail(email);
     if (!name) {
@@ -400,6 +394,18 @@ exports.updateProfile = async (req, res) => {
       return res.render('user/editProfile', {
         user: { ...user.toObject(), name, email },
         error: 'Name can contain only letters and spaces',
+      });
+    }
+
+    if (!email) {
+      return res.render('user/editProfile', {
+        user: { ...user.toObject(), name, email },
+        error: 'Email is required',
+      });
+    }
+    if (!emailRegex.test(email)) {
+      return res.render('user/editProfile', {
+        user: { ...user.toObject(), name, email },
       });
     }
 
