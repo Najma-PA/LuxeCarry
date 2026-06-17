@@ -1471,3 +1471,37 @@ body {
   font-size: 13px;
   font-weight: 600;
 }
+/*category img preview*/
+.upload-area {
+  width: 240px;
+  aspect-ratio: 3/3; /* 2:3 portrait */
+  border: 2px dashed #d0d0d0;
+  border-radius: 12px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+  overflow: hidden;
+  background: #fafafa;
+}
+
+#previewImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+}
+
+#uploadPlaceholder {
+  padding: 20px;
+  z-index: 1;
+}
+
+.upload-icon {
+  font-size: 32px;
+  margin-bottom: 10px;
+}

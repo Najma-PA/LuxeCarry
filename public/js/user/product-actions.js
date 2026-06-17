@@ -1,5 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
-  document.addEventListener('click', async (e) => {
+document.addEventListener('click', async (e) => {
     const wishlistToggle = e.target.closest('.wishlist-toggle');
 
     if (wishlistToggle) {
@@ -57,15 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.add('fa-solid');
             // icon.className = 'fa-solid fa-heart';
             icon.style.color = '#b36b00';
+            element.classList.add('active');
           } else {
             icon.classList.remove('fa-solid');
             icon.classList.add('fa-regular'); // Correctly set back to fa-regular when removed
             //icon.className = 'fa-regular fa-heart';
             icon.style.color = '#a0aec0';
+            element.classList.remove('active');
           }
         } else {
           console.warn('Could not find .fa-heart inside .wishlist-toggle');
         }
+
+        updateWishlistBadge(data.action);
       } else {
         showToast(data.message || 'Error updating wishlist', 'error');
       }
@@ -87,4 +90,23 @@ document.addEventListener('DOMContentLoaded', () => {
       },
     }).showToast();
   }
-});
+
+  function updateWishlistBadge(action) {
+    const badge = document.getElementById('wishlist-count-badge');
+    if (badge) {
+      let currentCount = parseInt(badge.innerText) || 0;
+      if (action === 'added') {
+        currentCount++;
+      } else if (action === 'removed') {
+        currentCount--;
+      }
+      
+      if (currentCount > 0) {
+        badge.innerText = currentCount;
+        badge.style.display = 'flex';
+      } else {
+        badge.innerText = '';
+        badge.style.display = 'none';
+      }
+    }
+  }

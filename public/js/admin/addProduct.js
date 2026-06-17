@@ -29,7 +29,8 @@ function addVariant() {
   const row = `
         <tr class="variant-row" data-index="${vIdx}">
             <td>
-                <input name="variantType[]" value="Color" class="form-control form-control-sm border-0 bg-light">
+                <span class="badge bg-secondary">Color</span>
+                <input type="hidden" name="variantType[]" value="Color">
                 <div class="error-variant text-danger" style="font-size: 10px; display:none;"></div>
             </td>
             <td><input name="variantValue[]" class="form-control form-control-sm" placeholder="e.g. Black"></td>

@@ -203,7 +203,8 @@ function addVariant() {
     <div class="row mb-3 align-items-center variant-row" data-index="${vIdx}">
       <input type="hidden" name="variantId[]" value="Color">
       <div class="col-md-2">
-        <input name="variantType[]" class="form-control form-control-sm" value="Color">
+        <span class="badge bg-secondary">Color</span>
+        <input type="hidden" name="variantType[]" value="Color">
         <div class="error-variant text-danger" style="font-size: 10px; display:none;"></div>
       </div>
       <div class="col-md-3">
