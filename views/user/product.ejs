@@ -10,6 +10,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 <!-- Modern Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <link rel="stylesheet" href="/css/style.css">
 
 <style>
@@ -245,6 +247,13 @@
     color: #ef4444;
     border-color: #ef4444;
   }
+  .btn-heart.active {
+    color: #b36b00;
+    border-color: #b36b00;
+  }
+  .btn-heart.active i {
+    color: #b36b00;
+  }
 
   .stock-status {
     font-size: 12px;
@@ -411,8 +420,8 @@
           <button type="button" onclick="handleBuyNow()" class="btn-buy-now">BUY NOW</button>
           <button type="button" onclick="handleAddToCart()" class="btn-add-cart">ADD TO CART</button>
           
-          <a href="javascript:void(0)" onclick="toggleWishlist('<%= product._id %>')" class="btn-heart text-decoration-none">
-            <i class="fa-regular fa-heart"></i>
+          <a href="javascript:void(0)" class="btn-heart wishlist-toggle text-decoration-none <%= isWishlisted ? 'active' : '' %>" data-id="<%= product._id %>">
+            <i class="<%= isWishlisted ? 'fa-solid' : 'fa-regular' %> fa-heart"></i>
           </a>
         </div>
       </form>
@@ -588,6 +597,7 @@
   <% } %>
 
 <%- include('../partials/footer') %>
+<script src="/js/user/product-actions.js"></script>
 
 <script>
   
@@ -807,53 +817,6 @@ function disableOutOfStockVariants() {
     }
   }
 
-
-
-  async function toggleWishlist(productId) {
-    try {
-      const res = await fetch('/user/wishlist/toggle', {
-        method: 'PATCH',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ productId })
-      });
-
-      if (res.status === 401) {
-        window.location.href = `/user/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
-       
-        return;
-      }
-
-      const data = await res.json();
-      if (data.success) {
-          Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: data.message,
-            showConfirmButton: false,
-            timer: 3000,
-            background: '#ffffff',
-            color: '#1a1a1a',
-            iconColor: '#c26a00' 
-          });
-      } else {
-        if (data.message === 'Please log in to continue.') {
-          window.location.href = `/user/login?redirect=${encodeURIComponent(window.location.pathname +window.location.search)}`;
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: data.message || 'Login required'
-          });
-        }
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   function updateQty(delta) {
     quantity += delta;

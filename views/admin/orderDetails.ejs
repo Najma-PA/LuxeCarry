@@ -216,7 +216,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             <%
                             const isLockedStatus =
                                 item.status ==='Delivered'||
-                                item.status === 'Cancelled' ||
+                                item.status ==='Cancelled'
                                 item.status === 'Returned';
                             %>
 
@@ -226,7 +226,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             <form
                                 action="/admin/orders/<%= order._id %>/items/<%= item._id %>/status"
                                 method="POST"
-                                class="d-flex gap-1 align-items-center"
+                                class="d-flex gap-1 align-items-center status-update-form"
                                 >
 
                                 <select
@@ -237,6 +237,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     <% [
                                         'Pending',
                                         'Confirmed',
+                                        'Cancelled',
                                         'Shipped',
                                         'Out for Delivery',
                                         'Delivered'
@@ -680,6 +681,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
         });
 
+    });
+
+    const statusForms = document.querySelectorAll('.status-update-form');
+    statusForms.forEach(form => {
+        form.addEventListener('submit', async function(e) {
+            const select = form.querySelector('select[name="status"]');
+            if (select && select.value === 'Cancelled') {
+                e.preventDefault();
+                const { value: cancelReason } = await Swal.fire({
+                    title: 'Cancel Item',
+                    input: 'textarea',
+                    inputLabel: 'Reason for Cancellation',
+                    inputPlaceholder: 'Enter cancellation reason here...',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Cancel Item',
+                    inputValidator: (value) => {
+                        if (!value || !value.trim()) {
+                            return 'You need to write something!';
+                        }
+                    }
+                });
+
+                if (cancelReason) {
+                    const hiddenInput = document.createElement('input');
+                    hiddenInput.type = 'hidden';
+                    hiddenInput.name = 'cancelReason';
+                    hiddenInput.value = cancelReason.trim();
+                    form.appendChild(hiddenInput);
+                    form.submit();
+                }
+            }
+        });
     });
 
 });

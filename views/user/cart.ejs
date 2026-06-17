@@ -278,6 +278,19 @@ document.addEventListener('DOMContentLoaded', () => {
         );
 
         qtyEl.innerText = data.newQty;
+        
+        const msgBox= document.getElementById(`availability-msg-${itemId}`);
+        if(msgBox){
+          msgBox.innerHTML='';
+        }
+        const row=document.getElementById(`item-row-${itemId}`);
+        if(row){
+          row.classList.remove('opacity-75');
+        }
+        if(data.newQty<=data.availableStock){
+          updateCheckoutState();
+        }
+       
 
         if (data.newQty >= data.availableStock || data.newQty >= 5) {
           plusBtn.disabled = true;
@@ -300,6 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+
   //REMOVE ITEM
 
   async function removeItem(itemId) {
@@ -313,7 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!data.success) return;
 
       document.getElementById(`item-row-${itemId}`)?.remove();
-
+      updateCheckoutState();
       await syncCartUI();
     } catch (err) {
       console.error(err);
@@ -333,12 +347,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!msgBox) return;
 
       msgBox.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> ${err.message}`;
-
+     
       if (row) row.classList.add('opacity-75');
 
       hasError = true;
     });
-
+    updateCheckoutState();
     // Disable checkout
 
     if (checkoutBtn) {
@@ -353,6 +367,25 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
   }
+
+
+  function updateCheckoutState() {
+  const hasErrors = [...document.querySelectorAll('[id^="availability-msg-"]')]
+    .some(el => el.textContent.trim() !== '');
+
+  const checkoutBtn = document.getElementById('proceed-checkout-btn');
+
+  if (!checkoutBtn) return;
+
+  checkoutBtn.disabled = hasErrors;
+
+  if (hasErrors) {
+    checkoutBtn.classList.add('disabled');
+  } else {
+    checkoutBtn.classList.remove('disabled');
+  }
+}
+
 
   //CLEAR OLD ERRORS
 
@@ -567,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // validateCartState();
+  //validateCartState();
 
   syncCartUI();
 

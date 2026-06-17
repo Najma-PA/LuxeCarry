@@ -52,8 +52,11 @@
         </form>
 
         <!-- Wishlist -->
-        <a href="/user/wishlist" class="nav-icon" title="Wishlist">
+        <a href="/user/wishlist" class="nav-icon position-relative" title="Wishlist">
           <i class="fa-regular fa-heart"></i>
+          <span id="wishlist-count-badge" class="cart-badge" style="<%= locals.wishlistCount > 0 ? 'display: flex;' : 'display: none;' %>">
+            <%= (locals.wishlistCount > 0) ? locals.wishlistCount : '' %>
+          </span>
         </a>
 
         <!-- Cart -->

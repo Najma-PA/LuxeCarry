@@ -61,8 +61,34 @@
           <textarea name="description" class="form-control-custom" rows="4" id="catDesc"></textarea>
           <div id="descriptionError" class="text-danger small mt-1 d-none"></div>
         </div>
+        <!-- upload -->
+         <div class="mb-3">
+  <label class="form-label-custom">Category Image</label>
 
-        <!-- Upload -->
+  <div class="upload-area" onclick="document.getElementById('catImage').click()">
+
+    <div class="text-center" id="uploadPlaceholder">
+      <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+      <p class="mb-1">Click to upload or drag and drop</p>
+      <small class="text-muted">PNG, JPG (Max. 2MB)</small>
+    </div>
+
+    <img
+      id="previewImg"
+      class="d-none"
+      alt="Preview"
+    >
+
+    <input
+      type="file"
+      name="image"
+      hidden
+      id="catImage"
+      accept="image/*"
+    >
+  </div>
+</div>
+        <!-- Upload
         <div class="mb-3">
           <label class="form-label-custom">Category Image</label>
 
@@ -77,14 +103,14 @@
             <input type="file" name="image" hidden id="catImage" accept="image/*">
 
           </div>
-
-          <!-- Preview -->
+  
+          
           <div class="mt-2 d-none" id="previewContainer">
             <img id="previewImg" class="preview-img">
             <button type="button" class="btn btn-sm btn-outline-danger mt-2" onclick="removeImage()">Remove</button>
           </div>
         </div>
-
+         -->
         <!-- Offer -->
         <div class="mb-4">
           <label class="form-label-custom">Category Offer (%)</label>
@@ -187,7 +213,7 @@ document.getElementById('catImage').addEventListener('change', function(e) {
 // Initialize Cropper when modal opens
 document.getElementById('cropperModal').addEventListener('shown.bs.modal', function () {
   cropper = new Cropper(cropperImage, {
-    aspectRatio: 1, // Square for categories
+    aspectRatio: 3/3, // Square for categories
     viewMode: 2,
     autoCropArea: 1,
   });
@@ -211,11 +237,16 @@ document.getElementById('cropButton').addEventListener('click', function() {
   canvas.toBlob((blob) => {
     croppedBlob = blob;
     const url = URL.createObjectURL(blob);
+    const previewImg= document.getElementById('previewImg');
+    previewImg.src=url;
+    previewImg.classList.remove('d-none');
     
+    document.getElementById('uploadPlaceholder').style.display='none';
+    /*
     document.getElementById('previewImg').src = url;
     document.getElementById('previewContainer').classList.remove('d-none');
     document.getElementById('uploadPlaceholder').style.display = 'none';
-    
+    */
     cropperModal.hide();
   }, 'image/jpeg', 0.9);
 });
@@ -223,10 +254,22 @@ document.getElementById('cropButton').addEventListener('click', function() {
 function removeImage() {
   document.getElementById('catImage').value = '';
   croppedBlob = null;
+
+  const previewImg = document.getElementById('previewImg');
+
+  previewImg.src = '';
+  previewImg.classList.add('d-none');
+
+  document.getElementById('uploadPlaceholder').style.display = 'block';
+}
+/*
+function removeImage() {
+  document.getElementById('catImage').value = '';
+  croppedBlob = null;
   document.getElementById('previewContainer').classList.add('d-none');
   document.getElementById('uploadPlaceholder').style.display = 'block';
 }
-
+*/
 // Submit
 document.getElementById('addCategoryForm').onsubmit = async function(e) {
   e.preventDefault();

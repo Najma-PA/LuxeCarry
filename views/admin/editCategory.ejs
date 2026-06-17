@@ -60,8 +60,30 @@
           <label class="form-label-custom">Description</label>
           <textarea name="description" class="form-control-custom" rows="4" id="catDesc"><%= category.description %></textarea>
         </div>
+        <div class="mb-3">
+  <label class="form-label-custom">Category Image</label>
 
-        <!-- Upload -->
+  <div class="upload-area" onclick="document.getElementById('catImage').click()">
+
+    <!-- Placeholder -->
+    <div class="text-center" id="uploadPlaceholder">
+      <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+      <p class="mb-1">Click to upload or drag and drop</p>
+      <small class="text-muted">PNG, JPG (Max. 2MB)</small>
+    </div>
+
+    <!-- Preview -->
+    <img
+      id="previewImg"
+      src="<%= category.image?.url || '' %>"
+      class="<%= category.image?.url ? '' : 'd-none' %>"
+      alt="Preview"
+    >
+
+    <input type="file" name="image" hidden id="catImage" accept="image/*">
+  </div>
+</div>
+        <!-- Upload 
         <div class="mb-3">
           <label class="form-label-custom">Category Image</label>
 
@@ -73,7 +95,7 @@
               <small class="text-muted">PNG, JPG (Max. 2MB)</small>
             </div>
 
-            <input type="file" name="image" hidden id="catImage">
+            <input type="file" name="image" hidden id="catImage" accept="image/*">
 
           </div>
 
@@ -82,7 +104,7 @@
               <img src="<%= category.image.url %>" class="preview-img">
             </div>
           <% } %>
-        </div>
+        </div>-->
 
         <!-- Offer -->
         <div class="mb-4">
@@ -212,16 +234,24 @@ document.getElementById('cropButton').addEventListener('click', function() {
   canvas.toBlob((blob) => {
     croppedBlob = blob;
     const url = URL.createObjectURL(blob);
+      const previewImg = document.getElementById('previewImg');
+    const placeholder = document.getElementById('uploadPlaceholder');
+
+    previewImg.src = url;
+    previewImg.classList.remove('d-none');
+
+    placeholder.style.display = 'none';
+
     
     // Update preview
-    const currentWrapper = document.getElementById('currentImage');
+    /*const currentWrapper = document.getElementById('currentImage');
     if (currentWrapper) {
       currentWrapper.querySelector('img').src = url;
     } else {
       // If no current image, we need a way to show preview
       // (Simplified for this update)
     }
-    
+    */
     cropperModal.hide();
   }, 'image/jpeg', 0.9);
 });
@@ -291,6 +321,14 @@ document.getElementById('editCategoryForm').onsubmit = async function(e) {
     btnSpinner.classList.add('d-none');
   }
 };
+window.addEventListener('DOMContentLoaded', () => {
+  const preview = document.getElementById('previewImg');
+
+  if (preview.getAttribute('src')) {
+    preview.classList.remove('d-none');
+    document.getElementById('uploadPlaceholder').style.display = 'none';
+  }
+});
 </script>
 
 </body>

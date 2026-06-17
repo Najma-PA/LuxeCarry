@@ -280,6 +280,7 @@ document.addEventListener('DOMContentLoaded', () => {
             el.style.transform = 'scale(0.9)';
             setTimeout(() => {
                 el.remove();
+                updateWishlistBadge(-1);
                 if (document.querySelectorAll('.wishlist-card').length === 0) {
                     location.reload(); 
                 }
@@ -292,6 +293,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (badge) {
             badge.innerText = count;
             badge.style.display = count > 0 ? 'flex' : 'none';
+        }
+    }
+
+    function updateWishlistBadge(delta) {
+        const badge = document.getElementById('wishlist-count-badge');
+        if (badge) {
+            let currentCount = parseInt(badge.innerText) || 0;
+            currentCount += delta;
+            if (currentCount > 0) {
+                badge.innerText = currentCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.innerText = '';
+                badge.style.display = 'none';
+            }
         }
     }
 
