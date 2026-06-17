@@ -96,14 +96,14 @@ exports.updateOrderPayment = async (req, res, next) => {
 exports.updateItemStatus = async (req, res, next) => {
   try {
     const { orderId, itemId } = req.params;
-    const { status } = req.body;
+    const { status, cancelReason } = req.body;
 
     if (!isValidObjectId(orderId, itemId)) {
       req.flash('error', 'Invalid Order or Item ID');
       return res.redirect('/admin/orders');
     }
 
-    await orderService.updateItemStatus(orderId, itemId, status);
+    await orderService.updateItemStatus(orderId, itemId, status, cancelReason);
     req.flash('success', 'Item status updated successfully');
     res.redirect(`/admin/orders/${orderId}`);
   } catch (error) {

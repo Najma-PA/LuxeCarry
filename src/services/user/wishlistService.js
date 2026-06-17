@@ -44,8 +44,14 @@ const removeFromWishlist = async (userId, productId) => {
   return await Wishlist.updateOne({ user: userId }, { $pull: { items: { product: productId } } });
 };
 
+const getWishlistCount = async (userId) => {
+  const wishlist = await Wishlist.findOne({ user: userId });
+  return wishlist ? wishlist.items.length : 0;
+};
+
 module.exports = {
   getWishlist,
   toggleWishlist,
   removeFromWishlist,
+  getWishlistCount,
 };

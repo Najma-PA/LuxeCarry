@@ -1,6 +1,7 @@
 const productService = require('../../services/user/userProductServices');
 const Category = require('../../models/categoryModel');
 const Product = require('../../models/productModel');
+const Wishlist = require('../../models/wishlistModel');
 
 //LOAD SHOP PAGE
 exports.loadShop = async (req, res) => {
@@ -90,9 +91,20 @@ exports.loadProductDetails = async (req, res) => {
       isActive: true,
     }).limit(4);
 
+    let isWishlisted = false;
+    if (req.session && req.session.user && req.session.user.id) {
+      const wishlist = await Wishlist.findOne({ user: req.session.user.id });
+      if (wishlist && wishlist.items) {
+        isWishlisted = wishlist.items.some(
+          (item) => item.product.toString() === product._id.toString()
+        );
+      }
+    }
+
     res.render('user/product', {
       product,
       relatedProducts,
+      isWishlisted,
     });
   } catch (err) {
     console.error(err);

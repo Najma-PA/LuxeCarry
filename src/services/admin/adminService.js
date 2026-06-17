@@ -27,7 +27,7 @@ exports.getUsers = async ({ page, limit, search, status }) => {
   };
 };
 /**
- *this method is to use blockuer
+ *this method is to block user
  * @param {*} userId
  * @returns
  */

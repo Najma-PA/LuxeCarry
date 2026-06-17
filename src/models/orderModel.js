@@ -118,6 +118,10 @@ const orderSchema = new mongoose.Schema(
           type: Date,
         },
 
+        cancelledBy: {
+          type: String,
+        },
+
         returnReason: {
           type: String,
           default: '',

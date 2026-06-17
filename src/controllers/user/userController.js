@@ -175,7 +175,7 @@ exports.verifyOTP = async (req, res) => {
 
     return res.redirect('/user/resetPassword');
   } else {
-    return res.render('user/verifyOtp', {
+    return res.status(400).render('user/verifyOtp', {
       error: 'Invalid OTP',
       message: null,
       otpExpire: req.session.otpExpire || 0,

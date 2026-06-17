@@ -1,5 +1,6 @@
 const Order = require('../../models/orderModel');
 const User = require('../../models/userModel');
+const walletController = require('../../controllers/user/walletController');
 
 const { calculateOrderStatus } = require('../../utils/adminHelpers/orderStatus');
 
@@ -87,8 +88,8 @@ exports.updateOrderPayment = async (orderId, paymentStatus) => {
   return order;
 };
 
-exports.updateItemStatus = async (orderId, itemId, status) => {
-  const order = await Order.findById(orderId);
+exports.updateItemStatus = async (orderId, itemId, status, cancelReason = '') => {
+  const order = await Order.findById(orderId).populate('items.product');
 
   if (!order) {
     throw new Error('Order not found');
@@ -106,21 +107,28 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
     return order;
   }
 
+  if (status === 'Cancelled') {
+    if (oldStatus !== 'Pending' && oldStatus !== 'Confirmed') {
+      throw new Error('Cancellation is only allowed for Pending or Confirmed items');
+    }
+  }
+
   validateStatusTransition(oldStatus, status);
 
   item.status = status;
 
   if (status === 'Cancelled') {
     item.cancelledAt = new Date();
-
-    item.cancelReason = 'Cancelled by Administrator';
+    item.cancelledBy = 'Admin';
+    item.cancelReason = cancelReason || 'Cancelled by Administrator';
     await restoreStock(item);
-  } else if (status === 'Returned') {
+  } else if (status === 'Delivered') {
+    /* else if (status === 'Returned') {
     item.returnedAt = new Date();
 
     item.returnReason = 'Returned by Administrator';
     await restoreStock(item);
-  } else if (status === 'Delivered') {
+  }*/
     item.deliveredAt = new Date();
     if (order.paymentMethod?.trim().toUpperCase() === 'COD') {
       order.paymentStatus = 'Paid';
@@ -128,8 +136,21 @@ exports.updateItemStatus = async (orderId, itemId, status) => {
   }
 
   if ((status === 'Cancelled' || status === 'Returned') && order.paymentStatus === 'Paid') {
-    item.refundAmount = item.finalPayable || item.totalPrice || item.finalPrice * item.quantity;
-    item.refundStatus = 'Pending';
+    if (!item.refundProcessed) {
+      item.refundAmount = item.finalPayable || item.totalPrice || item.finalPrice * item.quantity;
+      item.refundStatus = 'Processed';
+
+      const walletTransaction = await walletController.creditWallet({
+        userId: order.userId,
+        amount: item.refundAmount,
+        transactionType: status === 'Cancelled' ? 'ORDER_REFUND' : 'RETURN_REFUND',
+        description: `Refund for ${status === 'Cancelled' ? 'cancelled' : 'returned'} ${item.product?.name || 'product'}`,
+        orderId: order._id,
+      });
+
+      item.refundProcessed = true;
+      item.walletTransactionId = walletTransaction.transaction._id;
+    }
   }
   order.orderStatus = calculateOrderStatus(order.items);
   await order.save();
