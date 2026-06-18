@@ -54,7 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
       setError('phoneError', 'Invalid mobile number');
       return false;
     }
-
+    if (/^[6-9]0{9}$/.test(value)) {
+      setError('phoneError', 'Invalid mobile number');
+      return false;
+    }
     clearError('phoneError');
     return true;
   };
@@ -71,11 +74,25 @@ document.addEventListener('DOMContentLoaded', () => {
       setError('streetError', 'Address must be between 5 and 200 characters');
       return false;
     }
+    // Allow only valid address characters
+    if (!/^[A-Za-z0-9\s,./#-]+$/.test(value)) {
+      setError('streetError', 'Address contains invalid characters');
+      return false;
+    }
 
+    if (/^\d+$/.test(value)) {
+      setError('streetError', 'Address cannot contain only numbers');
+      return false;
+    }
+
+    if (/^(\d)\1+$/.test(value)) {
+      setError('streetError', 'Invalid address');
+      return false;
+    }
     clearError('streetError');
     return true;
   };
-
+  /*
   const validateCity = () => {
     const value = city.value.trim();
 
@@ -106,7 +123,7 @@ document.addEventListener('DOMContentLoaded', () => {
     clearError('stateError');
     return true;
   };
-
+*/
   const validatePincode = () => {
     const value = pincode.value.trim();
     if (!value) {
@@ -129,6 +146,57 @@ document.addEventListener('DOMContentLoaded', () => {
   pincode.addEventListener('input', () => {
     pincode.value = pincode.value.replace(/\D/g, '').slice(0, 6);
   });
+
+  pincode.addEventListener('blur', async () => {
+    const value = pincode.value.trim();
+
+    if (!/^[1-9][0-9]{5}$/.test(value)) {
+      city.value = '';
+      state.value = '';
+      return;
+    }
+
+    try {
+      const response = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+
+      const data = await response.json();
+
+      if (data[0].Status === 'Success' && data[0].PostOffice?.length) {
+        const postOffice = data[0].PostOffice[0];
+
+        city.value = postOffice.District;
+        state.value = postOffice.State;
+
+        clearError('pincodeError');
+      } else {
+        setError('pincodeError', 'Invalid pincode');
+      }
+    } catch (error) {
+      city.value = '';
+      state.value = '';
+      console.error(error);
+      setError('pincodeError', 'Unable to verify pincode');
+    }
+  });
+  const validateCity = () => {
+    if (!city.value.trim()) {
+      setError('cityError', 'Please enter a valid pincode');
+      return false;
+    }
+
+    clearError('cityError');
+    return true;
+  };
+
+  const validateState = () => {
+    if (!state.value.trim()) {
+      setError('stateError', 'Please enter a valid pincode');
+      return false;
+    }
+
+    clearError('stateError');
+    return true;
+  };
   form.addEventListener('submit', (e) => {
     const nameValid = validateName();
     const phoneValid = validatePhone();

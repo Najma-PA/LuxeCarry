@@ -600,7 +600,7 @@ exports.addAddress = async (req, res) => {
     const user = req.session.user;
     const redirect = req.query.redirect || '';
 
-    const errors = addressService.validateAddressData(req.body);
+    const errors = await addressService.validateAddressData(req.body);
 
     if (Object.keys(errors).length > 0) {
       return res.render('user/addAddress', {
@@ -654,7 +654,7 @@ exports.updateAddress = async (req, res) => {
     const redirect = req.query.redirect || '';
 
     //validaation
-    const errors = addressService.validateAddressData(req.body);
+    const errors = await addressService.validateAddressData(req.body);
 
     const address = await Address.findById(req.params.id);
 

@@ -1,5 +1,16 @@
 const Address = require('../../models/addressModel');
-exports.validateAddressData = (data) => {
+const axios = require('axios');
+
+const validateIndianPincode = async (pincode) => {
+  try {
+    const response = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`);
+
+    return response.data[0].Status === 'Success' && response.data[0].PostOffice?.length > 0;
+  } catch (error) {
+    return false;
+  }
+};
+exports.validateAddressData = async (data) => {
   const errors = {};
 
   const name = data.name?.trim();
@@ -23,12 +34,20 @@ exports.validateAddressData = (data) => {
     errors.phone = 'Enter a valid 10-digit mobile number';
   } else if (/^(\d)\1{9}$/.test(phone)) {
     errors.phone = 'Invalid mobile number';
+  } else if (/^[6-9]0{9}$/.test(phone)) {
+    errors.phone = 'Invalid mobile number';
   }
 
   if (!street) {
     errors.street = 'Address is required';
   } else if (street.length < 5 || street.length > 200) {
     errors.street = 'Address must be between 5 and 200 characters';
+  } else if (!/^[A-Za-z0-9\s,./#-]+$/.test(street)) {
+    errors.street = 'Address contains invalid characters';
+  } else if (/^\d+$/.test(street)) {
+    errors.street = 'Address cannot contain only numbers';
+  } else if (/^(\d)\1+$/.test(street)) {
+    errors.street = 'Invalid address';
   }
 
   if (!city) {
@@ -51,8 +70,13 @@ exports.validateAddressData = (data) => {
     errors.pincode = 'Pincode is required';
   } else if (!/^[1-9][0-9]{5}$/.test(pincode)) {
     errors.pincode = 'Enter a valid 6-digit pincode';
-  }
+  } else {
+    const isValidPincode = await validateIndianPincode(pincode);
 
+    if (!isValidPincode) {
+      errors.pincode = 'Invalid pincode';
+    }
+  }
   return errors;
 };
 /*
