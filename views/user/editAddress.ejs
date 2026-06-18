@@ -61,10 +61,19 @@
         </div>
 
         <div class="row mb-3">
+              <div class="col-md-4">
+            <label class="form-label">Pincode</label>
+            <input type="text" class="form-control" id="pincode" name="pincode" value="<%= address.pincode %>" >
+            
+              <small class="text-danger" id="pincodeError">
+                <%= errors.pincode || '' %>
+              </small>
+          
+          </div>
 
           <div class="col-md-4">
             <label class="form-label">City</label>
-            <input type="text" class="form-control" id="city" name="city" value="<%= address.city %>">
+            <input type="text" class="form-control" id="city" name="city" value="<%= address.city %>" readonly>
             
               <small class="text-danger" id="cityError">
                 <%= errors.city ||'' %>
@@ -74,7 +83,7 @@
 
           <div class="col-md-4">
             <label class="form-label">State</label>
-            <input type="text" class="form-control" id="state" name="state" value="<%= address.state %>">
+            <input type="text" class="form-control" id="state" name="state" value="<%= address.state %>" readonly>
             
               <small class="text-danger" id="stateError">
                 <%= errors.state || '' %>
@@ -82,15 +91,7 @@
            
           </div>
 
-          <div class="col-md-4">
-            <label class="form-label">Pincode</label>
-            <input type="text" class="form-control" id="pincode" name="pincode" value="<%= address.pincode %>" >
-            
-              <small class="text-danger" id="pincodeError">
-                <%= errors.pincode || '' %>
-              </small>
-          
-          </div>
+      
 
         </div>
 

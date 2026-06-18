@@ -73,32 +73,6 @@
 
           <div class="row mb-3">
             <div class="col-md-4">
-              <label class="form-label">City</label>
-              <input
-                type="text"
-                class="form-control"
-                id="city"
-                name="city"
-                value="<%= formData?.city || '' %>"
-              />
-
-              <small class="text-danger" id="cityError"> <%= errors.city ||'' %> </small>
-            </div>
-
-            <div class="col-md-4">
-              <label class="form-label">State</label>
-              <input
-                type="text"
-                class="form-control"
-                id="state"
-                name="state"
-                value="<%= formData?.state || '' %>"
-              />
-
-              <small class="text-danger" id="stateError"> <%= errors.state || '' %> </small>
-            </div>
-
-            <div class="col-md-4">
               <label class="form-label">Pincode</label>
               <input
                 type="text"
@@ -109,16 +83,43 @@
               />
 
               <small class="text-danger" id="pincodeError"> <%= errors.pincode %> </small>
-              
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">City</label>
+              <input
+                type="text"
+                class="form-control"
+                id="city"
+                name="city"
+                value="<%= formData?.city || '' %>"
+                readonly
+              />
+
+              <small class="text-danger" id="cityError"> <%= errors.city ||'' %> </small>
+            </div>
+             <div class="col-md-4">
+              <label class="form-label">State</label>
+              <input
+                type="text"
+                class="form-control"
+                id="state"
+                name="state"
+                value="<%= formData?.state || '' %>"
+                readonly
+              />
+
+              <small class="text-danger" id="stateError"> <%= errors.state || '' %> </small>
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label">Country</label>
+           
+            <div class="col-md-4">
+              <label class="form-label">Country</label>
 
-            <input type="text" name="country" value="India" readonly />
-          </div>
-
+              <input type="text" name="country" value="India" readonly />
+            </div>
+          
           <div class="form-check mb-4">
             <input class="form-check-input" type="checkbox" name="defaultAddress" />
             <label class="form-check-label"> Set as default address </label>
