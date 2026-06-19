@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <link rel="stylesheet" href="/css/forgotpswd.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -111,14 +112,60 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const otpForm = document.getElementById('otpForm');
   if (otpForm) {
-    otpForm.addEventListener('submit', function (e) {
+    otpForm.addEventListener('submit', async function (e) {
+      e.preventDefault();
       const fullOtpInput = document.getElementById('fullOtp');
       let otpValue = '';
       inputs.forEach(input => {
         otpValue += input.value;
       });
       fullOtpInput.value = otpValue;
+
+      try {
+        const response = await fetch('/user/verifyOtp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ otp: otpValue })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+          if (result.action === 'signup') {
+            Swal.fire({
+              icon: 'success',
+              title: 'Signup Successful',
+              text: 'Redirecting to login...',
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => {
+              window.location.href = result.redirectUrl;
+            });
+          } else {
+            window.location.href = result.redirectUrl;
+          }
+        } else {
+          showError(result.error || 'Invalid OTP');
+        }
+      } catch (err) {
+        console.error(err);
+        showError('Something went wrong. Please try again.');
+      }
     });
+
+    function showError(msg) {
+      let errorDiv = document.querySelector('.alert-danger');
+      if (!errorDiv) {
+        errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger text-center';
+        const form = document.getElementById('otpForm');
+        form.parentNode.insertBefore(errorDiv, form);
+      }
+      errorDiv.textContent = msg;
+    }
   }
 
  const expireTime = Number("<%= typeof otpExpire !== 'undefined' ? otpExpire : 0 %>");

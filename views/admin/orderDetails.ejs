@@ -65,6 +65,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </div>
 
         </div>
+        <div  class="table-responsive">
 
         <table class="table admin-order-table align-middle mb-0">
 
@@ -74,9 +75,9 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
                     <th style="width: 35%;">PRODUCT</th>
                     <th style="width: 8%;">QTY</th>
-                    <th style="width: 18%;">PRICE </th>
-                    <th style="width: 12%;">COUPON</th>
-                    <th style="width: 30%;">STATUS & ACTIONS</th>
+                    <th style="width: 10%;">PRICE </th>
+                    <th style="width: 10%;">COUPON</th>
+                    <th style="width: 35%;">STATUS & ACTIONS</th>
 
                 </tr>
 
@@ -216,7 +217,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                             <%
                             const isLockedStatus =
                                 item.status ==='Delivered'||
-                                item.status ==='Cancelled'
+                                item.status ==='Cancelled'||
                                 item.status === 'Returned';
                             %>
 
@@ -237,7 +238,6 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     <% [
                                         'Pending',
                                         'Confirmed',
-                                        'Cancelled',
                                         'Shipped',
                                         'Out for Delivery',
                                         'Delivered'
@@ -263,6 +263,11 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
                                     Update
 
                                 </button>
+                                <% if (item.status === 'Pending' || item.status === 'Confirmed') { %>
+                                <button type="button" class="btn btn-sm btn-danger ms-1" onclick="openCancelAdminModal('<%= order._id %>', '<%= item._id %>')">
+                                    Cancel
+                                </button>
+                                <% } %>
 
                             </form>
 
@@ -554,6 +559,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
             </tbody>
 
         </table>
+        </div>
 
        
     </div>
@@ -683,44 +689,92 @@ document.addEventListener('DOMContentLoaded', () => {
 
     });
 
-    const statusForms = document.querySelectorAll('.status-update-form');
-    statusForms.forEach(form => {
-        form.addEventListener('submit', async function(e) {
-            const select = form.querySelector('select[name="status"]');
-            if (select && select.value === 'Cancelled') {
-                e.preventDefault();
-                const { value: cancelReason } = await Swal.fire({
-                    title: 'Cancel Item',
-                    input: 'textarea',
-                    inputLabel: 'Reason for Cancellation',
-                    inputPlaceholder: 'Enter cancellation reason here...',
-                    showCancelButton: true,
-                    confirmButtonColor: '#d33',
-                    cancelButtonColor: '#3085d6',
-                    confirmButtonText: 'Cancel Item',
-                    inputValidator: (value) => {
-                        if (!value || !value.trim()) {
-                            return 'You need to write something!';
-                        }
-                    }
-                });
-
-                if (cancelReason) {
-                    const hiddenInput = document.createElement('input');
-                    hiddenInput.type = 'hidden';
-                    hiddenInput.name = 'cancelReason';
-                    hiddenInput.value = cancelReason.trim();
-                    form.appendChild(hiddenInput);
-                    form.submit();
-                }
-            }
-        });
-    });
-
 });
 
+function toggleAdminCancelTextarea() {
+    const select = document.getElementById('adminCancelReasonSelect');
+    const textareaGroup = document.getElementById('adminCancelTextareaGroup');
+    const textarea = document.getElementById('adminCancelReasonText');
+    if (select.value === 'Other') {
+        textareaGroup.style.display = 'block';
+        textarea.required = true;
+    } else {
+        textareaGroup.style.display = 'none';
+        textarea.required = false;
+        textarea.value = '';
+    }
+}
 
+function openCancelAdminModal(orderId, itemId) {
+    const form = document.getElementById('cancelAdminItemForm');
+    form.action = `/admin/orders/${orderId}/items/${itemId}/status`;
+    const modal = new bootstrap.Modal(document.getElementById('cancelAdminItemModal'));
+    modal.show();
+}
+
+document.getElementById('cancelAdminItemForm')?.addEventListener('submit', function(e) {
+    const selectValue = document.getElementById('adminCancelReasonSelect').value;
+    const textValue = document.getElementById('adminCancelReasonText').value;
+    const finalReason = selectValue === 'Other' ? textValue : selectValue;
+    document.getElementById('finalAdminCancelReason').value = finalReason;
+    
+    e.preventDefault();
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This item will be cancelled and stock will be restored.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, cancel it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            this.submit();
+        }
+    });
+});
 </script>
+
+<!-- Admin Cancellation Modal -->
+<div class="modal fade" id="cancelAdminItemModal" tabindex="-1" aria-labelledby="cancelAdminItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="cancelAdminItemModalLabel">Cancel Order Item</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="cancelAdminItemForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="adminCancelReasonSelect" class="form-label">Cancellation Reason <span class="text-danger">*</span></label>
+                        <select class="form-select" id="adminCancelReasonSelect" name="cancelReasonSelect" required onchange="toggleAdminCancelTextarea()">
+                            <option value="">Select a reason</option>
+                            <option value="Product Out of Stock">Product Out of Stock</option>
+                            <option value="Damaged Inventory">Damaged Inventory</option>
+                            <option value="Pricing Error">Pricing Error</option>
+                            <option value="Supplier Issue">Supplier Issue</option>
+                            <option value="Duplicate Order">Duplicate Order</option>
+                            <option value="Fraudulent Order">Fraudulent Order</option>
+                            <option value="Customer Requested Cancellation">Customer Requested Cancellation</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="adminCancelTextareaGroup" style="display: none;">
+                        <label for="adminCancelReasonText" class="form-label">Please specify <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="adminCancelReasonText" name="cancelReasonText" rows="3"></textarea>
+                    </div>
+                    <input type="hidden" name="status" value="Cancelled">
+                    <input type="hidden" id="finalAdminCancelReason" name="cancelReason">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-danger">Confirm Cancellation</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

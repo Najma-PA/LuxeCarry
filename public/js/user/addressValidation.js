@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const city = document.getElementById('city');
   const state = document.getElementById('state');
   const pincode = document.getElementById('pincode');
-
+  let pincodeVerified = false;
   const setError = (id, message) => {
     const element = document.getElementById(id);
     if (element) element.textContent = message;
@@ -134,7 +134,10 @@ document.addEventListener('DOMContentLoaded', () => {
       setError('pincodeError', 'Enter a valid 6-digit pincode');
       return false;
     }
-
+    if (!pincodeVerified) {
+      setError('pincodeError', 'Please verify a valid pincode');
+      return false;
+    }
     clearError('pincodeError');
     return true;
   };
@@ -143,14 +146,11 @@ document.addEventListener('DOMContentLoaded', () => {
     phone.value = phone.value.replace(/\D/g, '').slice(0, 10);
   });
 
-  pincode.addEventListener('input', () => {
-    pincode.value = pincode.value.replace(/\D/g, '').slice(0, 6);
-  });
-
   pincode.addEventListener('blur', async () => {
     const value = pincode.value.trim();
 
     if (!/^[1-9][0-9]{5}$/.test(value)) {
+      pincodeVerified = false;
       city.value = '';
       state.value = '';
       return;
@@ -162,20 +162,31 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (data[0].Status === 'Success' && data[0].PostOffice?.length) {
+        pincodeVerified = true;
         const postOffice = data[0].PostOffice[0];
 
         city.value = postOffice.District;
         state.value = postOffice.State;
 
         clearError('pincodeError');
+        clearError('cityError');
+        clearError('stateError');
       } else {
+        pincodeVerified = false;
+        city.value = '';
+        state.value = '';
         setError('pincodeError', 'Invalid pincode');
+        setError('cityError', 'Please enter a valid pincode');
+        setError('stateError', 'Please enter a valid pincode');
       }
     } catch (error) {
+      pincodeVerified = false;
       city.value = '';
       state.value = '';
       console.error(error);
       setError('pincodeError', 'Unable to verify pincode');
+      setError('cityError', 'Please enter a valid pincode');
+      setError('stateError', 'Please enter a valid pincode');
     }
   });
   const validateCity = () => {
@@ -197,6 +208,37 @@ document.addEventListener('DOMContentLoaded', () => {
     clearError('stateError');
     return true;
   };
+  name.addEventListener('input', () => {
+    clearError('nameError');
+  });
+
+  phone.addEventListener('input', () => {
+    clearError('phoneError');
+  });
+
+  street.addEventListener('input', () => {
+    clearError('streetError');
+  });
+  /*
+city.addEventListener('input', () => {
+  clearError('cityError');
+});
+
+state.addEventListener('input', () => {
+  clearError('stateError');
+});
+*/
+  pincode.addEventListener('input', () => {
+    pincodeVerified = false;
+    pincode.value = pincode.value.replace(/\D/g, '').slice(0, 6);
+
+    clearError('pincodeError');
+    clearError('cityError');
+    clearError('stateError');
+
+    city.value = '';
+    state.value = '';
+  });
   form.addEventListener('submit', (e) => {
     const nameValid = validateName();
     const phoneValid = validatePhone();

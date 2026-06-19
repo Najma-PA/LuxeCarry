@@ -129,8 +129,10 @@ exports.showVerifyOTP = (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
   const { otp } = req.body;
+  const isAjax = req.headers.accept && req.headers.accept.includes('application/json');
 
   if (!otp || otp.length !== 6) {
+    if (isAjax) return res.status(400).json({ success: false, error: 'Please enter valid OTP' });
     return res.render('user/verifyOtp', {
       error: 'Please enter valid OTP',
       message: null,
@@ -139,6 +141,7 @@ exports.verifyOTP = async (req, res) => {
   }
 
   if (Date.now() > req.session.otpExpire) {
+    if (isAjax) return res.status(400).json({ success: false, error: 'OTP expired' });
     return res.render('user/verifyOtp', {
       error: 'OTP expired',
       message: null,
@@ -159,6 +162,7 @@ exports.verifyOTP = async (req, res) => {
     req.session.tempName = null;
     req.session.otpExpire = null;
 
+    if (isAjax) return res.json({ success: true, action: 'email_update', redirectUrl: '/user/profile' });
     return res.redirect('/user/profile');
   } else if (req.session.signupOTP && otp == req.session.signupOTP) {
     await userService.registerUser(req.session.signupData);
@@ -167,14 +171,17 @@ exports.verifyOTP = async (req, res) => {
     req.session.signupData = null;
     req.session.otpExpire = null;
 
+    if (isAjax) return res.json({ success: true, action: 'signup', redirectUrl: '/user/login' });
     return res.redirect('/user/login');
   } else if (req.session.resetOTP && otp == req.session.resetOTP) {
     req.session.verified = true;
     req.session.resetOTP = null;
     req.session.otpExpire = null;
 
+    if (isAjax) return res.json({ success: true, action: 'reset_password', redirectUrl: '/user/resetPassword' });
     return res.redirect('/user/resetPassword');
   } else {
+    if (isAjax) return res.status(400).json({ success: false, error: 'Invalid OTP' });
     return res.status(400).render('user/verifyOtp', {
       error: 'Invalid OTP',
       message: null,

@@ -183,19 +183,29 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
 
     <% if(item.cancelReason){ %>
         <div class="mt-2">
-            Reason: <%= item.cancelReason %>
+            Reason:<br>
+            <%= item.cancelReason %>
+        </div>
+    <% } %>
+
+    <% if(item.cancelledBy){ %>
+        <div class="mt-2">
+            Cancelled By:<br>
+            <%= item.cancelledBy === 'Admin' ? 'Administrator' : item.cancelledBy %>
         </div>
     <% } %>
 
     <% if(item.cancelledAt){ %>
-        <div class="mt-1 small">
-            Date: <%= new Date(item.cancelledAt).toLocaleDateString() %>
+        <div class="mt-2 small">
+            Cancelled On:<br>
+            <%= new Date(item.cancelledAt).toLocaleDateString() %>
         </div>
     <% } %>
 
     <% if(item.refundStatus === 'Processed'){ %>
         <div class="mt-2 text-success fw-bold">
-            Refund credited to your wallet: ₹<%= item.refundAmount?.toLocaleString() || '0' %>
+            Refund:<br>
+            ₹<%= item.refundAmount?.toLocaleString() || '0' %> credited to wallet
         </div>
     <% } %>
 
