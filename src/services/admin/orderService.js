@@ -123,17 +123,17 @@ exports.updateItemStatus = async (orderId, itemId, status, cancelReason = '') =>
     item.cancelReason = cancelReason || 'Cancelled by Administrator';
     await restoreStock(item);
   } else if (status === 'Delivered') {
-    /* else if (status === 'Returned') {
-    item.returnedAt = new Date();
-
-    item.returnReason = 'Returned by Administrator';
-    await restoreStock(item);
-  }*/
     item.deliveredAt = new Date();
     if (order.paymentMethod?.trim().toUpperCase() === 'COD') {
       order.paymentStatus = 'Paid';
     }
   }
+  /* else if (status === 'Returned') {
+    item.returnedAt = new Date();
+
+    item.returnReason = 'Returned by Administrator';
+    await restoreStock(item);
+  }*/
 
   if ((status === 'Cancelled' || status === 'Returned') && order.paymentStatus === 'Paid') {
     if (!item.refundProcessed) {

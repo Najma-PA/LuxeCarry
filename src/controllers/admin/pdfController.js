@@ -94,7 +94,7 @@ exports.exportSalesPDF = async (req, res) => {
         doc.text('Products', 245, 59);
         doc.text('Payment', 365, 59);
         doc.text('Amount', 460, 59);
-        y = 50;
+        y = 85;
       }
 
       if (index % 2 === 0) {
