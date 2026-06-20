@@ -73,6 +73,7 @@
         padding: 16px;
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
         gap: 16px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
@@ -147,6 +148,11 @@
         border-radius: 16px;
         overflow: hidden;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .table-responsive-wrapper {
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
     .orders-table {
         margin: 0;
@@ -321,8 +327,9 @@
 
     <!-- Orders Table Container -->
     <div class="table-container mb-4">
-        <table class="table table-hover orders-table align-middle">
-            <thead>
+        <div class="table-responsive-wrapper">
+            <table class="table table-hover orders-table align-middle" style="min-width: 900px;">
+                <thead>
                 <tr>
                     <th style="width: 15%;">ORDER ID</th>
                     <th style="width: 30%;">CUSTOMER</th>
@@ -428,6 +435,7 @@
                 <% } %>
             </tbody>
         </table>
+        </div>
  <div class="pagination-wrapper d-flex gap-1 align-items-center" id="pagination-container">
         <%- include('../partials/admin/pagination') %>
       </div>
