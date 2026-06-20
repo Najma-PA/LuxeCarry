@@ -1,3 +1,4 @@
+require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Admin = require('./src/models/adminModel');
@@ -11,7 +12,7 @@ async function createAdmin() {
     console.log(' DB Connected');
 
     const existingAdmin = await Admin.findOne({
-      email: 'admin@gmail.com',
+      email: process.env.ADMIN_EMAIL,
     });
 
     if (existingAdmin) {
@@ -19,10 +20,10 @@ async function createAdmin() {
       process.exit();
     }
 
-    const hashedPassword = await bcrypt.hash('Admin123*', 10);
+    const hashedPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
 
     const admin = new Admin({
-      email: 'admin@gmail.com',
+      email: process.env.ADMIN_EMAIL,
       password: hashedPassword,
       role: 'admin',
     });
