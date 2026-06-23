@@ -118,9 +118,16 @@ exports.loadUsers = async (req, res) => {
         });
       });
 
+      let paginationHtml = '';
+      for (let i = 1; i <= totalPages; i++) {
+        const activeClass = page === i ? 'active' : '';
+        paginationHtml += `<a href="?page=${i}&search=${search}&status=${status}" class="page-btn pagination-link ${activeClass}" data-page="${i}">${i}</a>\n`;
+      }
+
       return res.json({
         success: true,
         tableHtml,
+        paginationHtml,
         currentPage: page,
         totalPages,
       });

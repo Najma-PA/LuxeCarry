@@ -1,5 +1,6 @@
 const Admin = require('../../models/adminModel');
 const User = require('../../models/userModel');
+const Order = require('../../models/orderModel');
 exports.getUsers = async ({ page, limit, search, status }) => {
   const query = {
     $or: [
@@ -16,10 +17,15 @@ exports.getUsers = async ({ page, limit, search, status }) => {
 
   const totalUsers = await User.countDocuments(query);
 
-  const users = await User.find(query)
+  let users = await User.find(query)
     .sort({ createdAt: -1 })
     .skip((page - 1) * limit)
-    .limit(limit);
+    .limit(limit)
+    .lean();
+
+  for (let user of users) {
+    user.ordersCount = await Order.countDocuments({ userId: user._id });
+  }
 
   return {
     users,
